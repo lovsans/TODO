@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
+    <script>
+        (function () {
+            try {
+                var s = null;
+                try { s = localStorage.getItem('todo-theme'); } catch (e) {}
+                var t = (s === 'dark' || s === 'light') ? s
+                    : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                document.documentElement.setAttribute('data-theme', t);
+                document.documentElement.style.colorScheme = t;
+                var ga = null;
+                try { ga = localStorage.getItem('todo-glyph-accent'); } catch (e) {}
+                document.documentElement.setAttribute('data-glyph-accent', ga === '1' ? '1' : '0');
+            } catch (e) {}
+        })();
+    </script>
+    <title>Ойратский алфавит — Тодо Бичиг</title>
+    <script src="js/font-data.js"></script>
+    <script src="js/barintodo-data.js"></script>
+    <link rel="stylesheet" href="css/fonts.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <a href="#main-content" class="skip-link">Перейти к содержанию</a>
+    <header class="header">
+        <div class="header-inner">
+            <a href="#" class="logo" onclick="showSection('about'); return false;">
+                <div class="logo-icon" id="logo-icon" aria-hidden="true">ᡐᡆᡑᡆ</div>
+                <div class="logo-text">
+                    <h1>Тодо Бичиг</h1>
+                    <span class="logo-sub">Интерактивный атлас ойратского алфавита</span>
+                </div>
+            </a>
+            <div class="header-controls">
+                <button type="button" class="theme-btn glyph-accent-btn" id="glyph-accent-btn" onclick="toggleGlyphAccent()"
+                        title="Бирюзовые глифы тодо (в светлой и тёмной теме)" aria-label="Переключить цвет знаков тодо на бирюзовый" aria-pressed="false">🩵</button>
+                <button type="button" class="theme-btn" id="theme-toggle-btn" onclick="toggleTheme()" title="Переключить тему" aria-label="Переключить тёмную тему">🌙</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container" id="main-content" tabindex="-1">
+        <div class="search-bar">
+            <div class="search-input-wrap">
+                <span class="search-icon" aria-hidden="true">⌕</span>
+                <input id="search-input" type="search" inputmode="search" autocomplete="off"
+                       placeholder="Поиск: кириллица, латиница или № буквы…" oninput="runSearch()" aria-label="Поиск по алфавиту">
+                <button id="search-clear" class="search-clear" onclick="clearSearch()" aria-label="Очистить" style="display:none">×</button>
+            </div>
+            <select id="search-filter" onchange="runSearch()" aria-label="Раздел"></select>
+        </div>
+        <nav class="nav-tabs" id="nav-tabs" aria-label="Разделы алфавита"></nav>
+        <div id="search-results" class="search-results" style="display:none"></div>
+        <div id="sections-container"></div>
+    </main>
+
+    <div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this) closeModal()">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1">
+            <button class="modal-back" id="modal-back" onclick="modalBack()" style="display:none" aria-label="Назад к предыдущей букве">← Назад</button>
+            <button class="modal-close" onclick="closeModal()" aria-label="Закрыть">&times;</button>
+            <h2 id="modal-title"></h2>
+            <div class="modal-forms" id="modal-forms"></div>
+            <dl class="modal-info" id="modal-info"></dl>
+            <div class="modal-switch" id="modal-switch">
+                <button class="modal-switch-btn" id="modal-prev" onclick="modalPrev()" aria-label="Предыдущая буква">← Пред.</button>
+                <button class="modal-switch-btn" id="modal-next" onclick="modalNext()" aria-label="Следующая буква">След. →</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="js/vendor/jspdf.umd.min.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/reading-data.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/lessons.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/search.js"></script>
+    <script src="js/practice.js"></script>
+    <script src="js/path.js"></script>
+    <script src="js/copybook.js"></script>
+    <script src="js/writer.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
