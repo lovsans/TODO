@@ -4,6 +4,11 @@
 
     document.addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
+            if (typeof activeHarmonySection === 'function' && activeHarmonySection()) {
+                const next = document.getElementById('harmony-next');
+                if (next && next.style.display !== 'none') harmonyNext();
+                return;
+            }
             const sc = activePracticeScope();
             if (sc) checkAnswer(sc);
         }
@@ -13,10 +18,19 @@
     // ответа теперь — «выбор из 4»; ручной ввод убран как непрактичный).
     document.addEventListener('keydown', function(e) {
         if (e.key < '1' || e.key > '9') return;
+        const tag = (document.activeElement && document.activeElement.tagName) || '';
+        if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+        if (typeof activeHarmonySection === 'function' && activeHarmonySection()) {
+            const box = document.getElementById('harmony-choices');
+            if (box) {
+                const btns = box.querySelectorAll('.choice-btn');
+                const i = parseInt(e.key, 10) - 1;
+                if (i >= 0 && i < btns.length && !btns[i].disabled) { e.preventDefault(); btns[i].click(); }
+            }
+            return;
+        }
         const sc = activePracticeScope();
         if (!sc) return;
-        const tag = (document.activeElement && document.activeElement.tagName) || '';
-        if (tag === 'INPUT' || tag === 'TEXTAREA') return;   // не мешаем поиску/вводу
         const box = document.getElementById('practice-choices__' + sc);
         if (!box) return;
         const btns = box.querySelectorAll('.choice-btn');
@@ -42,12 +56,6 @@
         el.click();                // переиспользуем существующий onclick
     });
 
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            const b = document.getElementById('cb-board');
-            if (b && b.classList.contains('zoomed')) cbToggleZoom();
-        }
-    });
 
     (function() {
         let saved = null;
@@ -62,7 +70,13 @@
     })();
     applyGlyphAccent(loadGlyphAccent());
 
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+    document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Escape') return;
+        const overlay = document.getElementById('modal-overlay');
+        if (overlay && overlay.classList.contains('active')) { closeModal(); return; }
+        const b = document.getElementById('cb-board');
+        if (b && b.classList.contains('zoomed')) cbToggleZoom();
+    });
 
     renderNavTabs();
     renderSections();

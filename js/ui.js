@@ -1,13 +1,12 @@
 /* ui.js — навигация по разделам, вкладки, модальные карточки букв. */
 
 
-
     function renderNavTabs() {
         const el = document.getElementById('nav-tabs');
         el.innerHTML = navGroups.map(g => `
             <div class="nav-group">
                 <div class="nav-group-label">${g.label}</div>
-                <div class="nav-group-items">
+                <div class="nav-group-items" aria-label="${escapeHtml(g.label)}">
                     ${g.cats.map(c => `<button class="nav-item ${c === 'about' ? 'active' : ''}" data-cat="${c}"${c === 'about' ? ' aria-current="page"' : ''} onclick="showSection('${c}')">${categoryMeta[c].label}</button>`).join('')}
                 </div>
             </div>`).join('');
@@ -47,6 +46,12 @@
                         <div class="section-title">Правила чтения</div>
                         <div class="section-info">Ключевые закономерности «ясного письма» по самоучителю А. В. Бадмаева (1971).</div>
                         ${renderRules()}
+                    </div>`;
+            }
+            if (cat === 'harmony') {
+                return `
+                    <div class="section ${i === 0 ? 'active' : ''}" id="section-${cat}">
+                        ${renderHarmony()}
                     </div>`;
             }
             if (cat === 'words') {
@@ -301,7 +306,9 @@
         exitSearch();
         document.getElementById('sections-container').style.display = '';
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-        document.getElementById('section-' + cat).classList.add('active');
+        const sec = document.getElementById('section-' + cat);
+        if (!sec) return;
+        sec.classList.add('active');
         document.querySelectorAll('.nav-item').forEach(n => {
             const on = n.getAttribute('data-cat') === cat;
             n.classList.toggle('active', on);
@@ -316,4 +323,6 @@
         if (cat === 'write_word') wwInit();
         if (cat === 'path') renderPathRoot();
         if (cat === 'direction') mountWriter();
+        if (cat === 'harmony') setupHarmony();
     }
+

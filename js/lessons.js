@@ -100,12 +100,15 @@
     // Кликабельная карточка знака: берёт готовую запись из charData по latin-id
     // и показывает её глифом TodoPozdneyev + подписью кириллицей. Клик открывает
     // карточку знака с полным примечанием (как и другие кросс-ссылки на сайте).
-    function wrGlyph(lat, hint, form) {
-        const c = charByLatin(lat);
+    function wrGlyph(lat, hint, form, idx) {
+        const c = idx != null ? charByIdx(idx) : charByLatin(lat);
         if (!c) return '';
         const glyph = trimSpine(form ? (c[form] || c.medial || c.initial || c.final || '?') : (c.medial || c.initial || c.final || '?'));
+        const open = idx != null
+            ? `gotoCharIdx(${idx})`
+            : `gotoChar('${String(lat).replace(/\\/g, '\\\\').replace(/'/g, "\\'")}')`;
         return `
-            <div class="wr-glyph-item" role="button" tabindex="0" onclick="gotoChar('${lat}')"
+            <div class="wr-glyph-item" role="button" tabindex="0" onclick="${open}"
                  aria-label="Открыть знак «${escapeHtml(c.cyrillic)}»">
                 <span class="wr-glyph-g">${glyph}</span>
                 <span class="wr-glyph-c">${escapeHtml(c.cyrillic)}</span>
@@ -120,6 +123,49 @@
     }
     function wrGlyphRow(items) {
         return `<div class="wr-glyph-row">${items.map(it => wrGlyph(it[0], it[1])).join('')}</div>`;
+    }
+
+    function wrWordGlyph(todo) {
+        const letters = wwParse(todo).map(i => composeCharByIdx[i]).filter(Boolean);
+        if (!letters.length) return '';
+        return `<div class="wr-n-word-glyph cw-assembled">${composeColorPlan(letters).html}</div>`;
+    }
+
+    function wrSyllableGlyph(lat, form) {
+        const c = charByLatin(lat);
+        if (!c) return '';
+        const glyph = trimSpine(c[form || 'initial'] || c.medial || c.initial || c.final || '');
+        return `<span class="wr-syll-glyph">${escapeHtml(glyph)}</span>`;
+    }
+
+    function wrNCard(kicker, title, todo, modern, note, tone) {
+        return `
+            <div class="wr-n-card wr-n-${tone}">
+                <div class="wr-n-kicker">${escapeHtml(kicker)}</div>
+                <div class="wr-n-title">${escapeHtml(title)}</div>
+                ${wrWordGlyph(todo)}
+                <div class="wr-n-word">«${escapeHtml(todo)}»${modern ? ` → «${escapeHtml(modern)}»` : ''}</div>
+                <div class="wr-n-note">${escapeHtml(note)}</div>
+            </div>`;
+    }
+
+    function wrRoundCard(pair, lat, note) {
+        return `
+            <div class="wr-round-card">
+                <div class="wr-round-pair">${escapeHtml(pair)}</div>
+                <div class="wr-round-arrow" aria-hidden="true">→</div>
+                ${wrSyllableGlyph(lat, 'initial')}
+                <div class="wr-round-note">${escapeHtml(note)}</div>
+            </div>`;
+    }
+
+    function wrFinalSyllCard(label, lat, note) {
+        return `
+            <div class="wr-final-card">
+                <div class="wr-final-label">${escapeHtml(label)}</div>
+                ${wrSyllableGlyph(lat, 'final')}
+                <div class="wr-final-note">${escapeHtml(note)}</div>
+            </div>`;
     }
 
     function renderWritingRules() {
@@ -171,6 +217,16 @@
                         ['udān', 'удан — знак долготы']
                     ])}
                     <p>Настоящие лигатуры в Тодо Бичиг образуют «круглые» согласные — ${wrGlyph('b1', 'б — круглая согласная')}, п, к, г — у которых нет собственной соединительной вертикальной черты. Вместо того чтобы тянуться через хребет, они попросту «вбирают» в свою дугу круглую гласную целиком: сочетания бо, бу, бө, бү пишутся одним слитным росчерком, а не буквой и гласной по отдельности.</p>
+                    <div class="wr-round-lesson">
+                        <div class="wr-mini-title">Круглая согласная + круглая гласная</div>
+                        <p>Это не две раздельные буквы подряд. Гласная входит внутрь арки согласной, и слог пишется одним цельным движением.</p>
+                        <div class="wr-round-grid">
+                            ${wrRoundCard('б + о', 'bo', 'бо: круглая «о» внутри арки «б»')}
+                            ${wrRoundCard('п + у', 'pu', 'пу: гласная втянута в форму «п»')}
+                            ${wrRoundCard('г + ө', 'gö', 'гө: мягкий ряд, но тот же принцип арки')}
+                            ${wrRoundCard('к + ү', 'kü', 'кү: «ү» не дописывается отдельно')}
+                        </div>
+                    </div>
                     <p>Слоги тоже не собираются механически из «согласный + гласный»: многие пишутся единым эталонным начертанием, которое стоит запомнить целиком. Такие слоговые связки — по сериям в разделе <a class="note-link" role="link" tabindex="0" onclick="showSection('syllables');return false;">«Слоги»</a>, например ${wrGlyph('na', 'слог «на» — начальная форма', 'initial')}.</p>`
             },
             {
@@ -180,25 +236,74 @@
                     <table class="wr-table">
                         <thead><tr><th>Позиция</th><th>Когда используется</th></tr></thead>
                         <tbody>
-                            <tr><td><strong>Начальная</strong></td><td>первая буква слова; у гласных здесь появляется верхняя «корона» — ${wrGlyph('titm', 'титм — корона')}, которой начинается буква.</td></tr>
+                            <tr><td><strong>Начальная</strong></td><td>Если слово начинается с гласной, перед ней пишут знак «титм» («корону»): ${wrGlyph('titm', 'титм — корона')}</td></tr>
                             <tr><td><strong>Срединная</strong></td><td>буква внутри слова, между двумя другими знаками.</td></tr>
                             <tr><td><strong>Конечная</strong></td><td>последняя буква слова; у ряда согласных отдельной конечной формы нет.</td></tr>
                         </tbody>
                     </table>
                     <p>Самоучитель Бадмаева прямо указывает: старокалмыцкая письменность придерживалась алфавитно-слогового метода, поэтому после многих согласных обязательно должна идти гласная, в самом конце слова указанных согласных не бывает:</p>
-                    ${wrGlyphRow([
-                        ['t', 'т'], ['c, č', 'ц/ч'], ['z, ǰ', 'з/җ'], ['x', 'х'], ['y', 'й']
-                    ])}
-                    <p>Если после буквы «н» стоит гласная, то перед «н» ставится точка. Перед согласной и в конечной форме точку не ставят ${wrGlyph('n', 'н — со знаком различения')}. Её среднее и конечное начертание схоже с буквой «а».</p>
-                    <p>После «круглых» согласных — б, п, г, к — пишется специальная конечная форма «а» ${wrGlyph('a_flipped', 'а откидная', 'final')} и «и» ${wrGlyph('i', 'и конечная', 'final')}. В остальных случаях, включая позицию после гласных, — обычные.</p>
+                    <div class="wr-glyph-row">
+                        ${wrGlyph('t', 'т', 'initial')}
+                        ${wrGlyph('c, č', 'ц/ч')}
+                        ${wrGlyph('z, ǰ', 'з/җ')}
+                        ${wrGlyph('x', 'х', 'initial')}
+                        ${wrGlyph('y', 'й')}
+                    </div>
+                    <p>После «круглых» согласных — б, п, г, к — конечные «а» и «и» получают специальные формы — изолированные. В остальных случаях, включая позицию после гласных, — обычные.</p>
+                    <div class="wr-final-lesson">
+                        <div class="wr-mini-title">Примеры из силлабария</div>
+                        <div class="wr-final-grid">
+                            ${wrFinalSyllCard('ба', 'ba', 'конечная а после б')}
+                            ${wrFinalSyllCard('би', 'bi', 'конечная и после б')}
+                            ${wrFinalSyllCard('па', 'pa', 'конечная а после п')}
+                            ${wrFinalSyllCard('пи', 'pi', 'конечная и после п')}
+                            ${wrFinalSyllCard('ка', 'ka', 'конечная а после к')}
+                            ${wrFinalSyllCard('ки', 'ki', 'конечная и после к')}
+                            ${wrFinalSyllCard('ги', 'gi', 'конечная и после г')}
+                        </div>
+                    </div>
                     <p>В Тодо Бичиг для написания каждой буквы отдельно, изолированно, пишут в их начальной форме.</p>`
+            },
+            {
+                title: 'Буква «н» и точка',
+                body: `
+                    <p>У буквы «н» важно смотреть не на саму букву, а на расположение в тексте, в зависимости от того, где она находится. В письме встречаются три практических случая:</p>
+                    <div class="wr-n-grid">
+                        ${wrNCard('1. Перед гласной', '«н» получает точку', 'онон', '', 'Дальше идёт гласная, поэтому перед «н» ставится различительная точка.', 'dot')}
+                        ${wrNCard('2. Перед согласной', 'точки нет', 'зандан', '', 'Дальше идёт согласная: знак пишется без точки и внешне сближается с «а».', 'plain')}
+                        ${wrNCard('3. В конце слова', 'конечная «н» без точки', 'морин', '', 'В конечной форме буква «н» пишется так же, как конечная буква «а»: различительная точка не ставится.', 'final')}
+                        ${wrNCard('4. Конечная «а»', 'после согласной читается как буква «а»', 'сара', 'сар', 'Конечный знак после согласной выглядит как «н», но читается как конечная буква «а».', 'final')}
+                    </div>
+                    <div class="wr-n-rule">
+                        <strong>Проверка в одно действие:</strong> после «н» гласная — ставим точку; после «н» согласная — точки нет; в конечной форме буква «н» выглядит как конечная буква «а», в конце после согласной — читаем как «а».
+                    </div>`
             },
             {
                 title: 'Особенности гласных и согласных',
                 body: `
                     <p><strong>Гласные</strong> — семь основных (а, э, и, о, у, ө, ү), плюс их долгие варианты и дифтонги с «й». Начальная форма гласной всегда получает добавочный элемент — корону ${wrGlyph('titm', 'титм — корона')}, ${wrGlyph('a', 'а — начальная', 'initial')}. Гласная «и» смягчает соседние звуки (${wrGlyph('i', 'палатализация')}); буква «у» отличается от «ү» только одной дополнительной чертой слева-внизу — это диакритический знак, который добавляется уже после того, как всё слово дописано, ${wrGlyph('uru_tatasn', 'уру татасн')}.</p>
-                    <p><strong>Согласные</strong> подчиняются сингармонизму: твёрдые х, һ, к сочетаются только с гласными заднего ряда (а, о, у) — самоучитель приводит слова «хуби», «хари», «хонин», а не «хүв», «хэр», «хөн»; их мягкие пары употребляются с гласными переднего ряда и «и».</p>
-                    <p>Особый случай — буква «н»: перед ней внутри слова ставится точка, если дальше идёт гласная, и не ставится, если дальше согласная, ${wrGlyph('n', 'н — со знаком различения')}. Есть и обратная сторона этого же правила: если конечная «н» в слове стоит после гласной, она читается как «н», а если после согласной — читается как «а» (пример из самоучителя: «сара»). Сама «ң» — отдельный знак, объединяющий «н» и «г»; в начале слова она не употребляется.</p>`
+                    <figure class="wr-vowels-chart">
+                        <picture>
+                            <source srcset="img/vowels-strokes.webp" type="image/webp">
+                            <img src="img/vowels-strokes.png" alt="Эгшг үзгүүд: начальная, срединная и конечная формы гласных с порядком штрихов" loading="lazy">
+                        </picture>
+                        <figcaption>Эгшг үзгүүд — начальная, срединная и конечная формы с порядком штрихов</figcaption>
+                    </figure>
+                    <p><strong>Согласные</strong> — как и гласные, пишутся в начальной, срединной и конечной форме. Ниже — порядок штрихов для части согласных знаков.</p>
+                    <figure class="wr-strokes-grid" aria-label="Порядок штрихов согласных">
+                        <div class="wr-strokes-grid-row">
+                            <picture>
+                                <source srcset="img/consonants-strokes-1.webp" type="image/webp">
+                                <img src="img/consonants-strokes-1.png" alt="Хадвр үзгүд: первая группа согласных с порядком штрихов" loading="lazy">
+                            </picture>
+                            <picture>
+                                <source srcset="img/consonants-strokes-2.webp" type="image/webp">
+                                <img src="img/consonants-strokes-2.png" alt="Хадвр үзгүд: вторая группа согласных с порядком штрихов" loading="lazy">
+                            </picture>
+                        </div>
+                        <figcaption>Хадвр үзгүд — порядок штрихов (две группы знаков)</figcaption>
+                    </figure>
+                    <p>Согласные подчиняются сингармонизму: твёрдые х, һ, к сочетаются только с гласными заднего ряда (а, о, у) — самоучитель приводит слова «хуби», «хари», «хонин», а не «хүв», «хәр», «хөн»; их мягкие пары употребляются с гласными переднего ряда и «и».</p>`
             },
             {
                 title: 'Использование галика',
@@ -252,6 +357,10 @@
                             <div class="wr-mistake-good"><span class="wr-mistake-tag">Верно</span><span>После гласной конечная «н» читается «н», а после согласной — «а» (пример из самоучителя: «сара»).</span></div>
                         </div>
                         <div class="wr-mistake">
+                            <div class="wr-mistake-bad"><span class="wr-mistake-tag">Неверно</span><span>Ставить точку у каждой буквы «н» или, наоборот, совсем забывать о ней.</span></div>
+                            <div class="wr-mistake-good"><span class="wr-mistake-tag">Верно</span><span>Смотреть на следующий знак: перед гласной у «н» есть точка, перед согласной точки нет.</span></div>
+                        </div>
+                        <div class="wr-mistake">
                             <div class="wr-mistake-bad"><span class="wr-mistake-tag">Неверно</span><span>Не различать «у» и «ү» — у обеих букв похожий круглый «живот».</span></div>
                             <div class="wr-mistake-good"><span class="wr-mistake-tag">Верно</span><span>У буквы «у» слева-внизу есть дополнительная черта — ${wrGlyph('uru_tatasn')}; у «ү» её нет.</span></div>
                         </div>
@@ -259,26 +368,70 @@
                             <div class="wr-mistake-bad"><span class="wr-mistake-tag">Неверно</span><span>В середине и в конце слова путать знак «г» ${wrGlyph('g1')} со знаком «к» — это документированная ошибка даже среди калмыцких имён (Пунцук вместо Пунцуг).</span></div>
                             <div class="wr-mistake-good"><span class="wr-mistake-tag">Верно</span><span>Сверяться с карточкой знака: «г» и «к» различаются графически, несмотря на внешнее сходство под влиянием русской орфографии.</span></div>
                         </div>
-                        <div class="wr-mistake">
-                            <div class="wr-mistake-bad"><span class="wr-mistake-tag">Неверно</span><span>Читать «с», «ц/ч», «з» перед «и» так же, как и перед другими гласными.</span></div>
-                            <div class="wr-mistake-good"><span class="wr-mistake-tag">Верно</span><span>Перед «и» эти буквы читаются иначе: «с» → «ш», «ц/ч» → «ч», «з» → «җ» (см. «Правила чтения»).</span></div>
-                        </div>
                     </div>`
             }
         ];
 
+        const ruleKinds = [
+            'основа', 'процесс', 'лигатуры', 'формы', 'буква н',
+            'ряды', 'галики', 'знаки', 'ошибки'
+        ];
+        const ruleHints = [
+            'как читать столбцы',
+            'в каком порядке писать',
+            'как буквы соединяются',
+            'начало · середина · конец',
+            'точка и конечная а',
+            'гласные · согласные',
+            'дополнительные знаки',
+            'паузы и числа',
+            'что чаще всего путают'
+        ];
+
         return `
         <div class="wr-wrap">
-            <div class="about-kicker">Практическое руководство</div>
-            <h2 class="about-title">Правила письма Тодо Бичиг</h2>
-            <p class="about-lead">От направления штрихов до самых частых ошибок — здесь собрано всё, что нужно знать, прежде чем взяться за перо. Нажимайте на раскрывающиеся блоки и на знаки — они кликабельны и открывают подробную карточку.</p>
+            <div class="wr-hero">
+                <div class="wr-hero-main">
+                    <div class="about-kicker">Практическое руководство</div>
+                    <h2 class="about-title">Правила письма Тодо Бичиг</h2>
+                    <p class="about-lead">Короткий маршрут от направления письма к частым ошибкам. Открывайте правила по порядку.</p>
+                    <div class="wr-hero-actions">
+                        <button type="button" class="practice-btn wr-action-primary" onclick="wrOpenRule(0)">Начать с первого правила</button>
+                        <button type="button" class="practice-skip wr-action-link" onclick="wrToggleRules(true)">Раскрыть всё</button>
+                        <button type="button" class="practice-skip wr-action-link" onclick="wrToggleRules(false)">Свернуть всё</button>
+                    </div>
+                </div>
+            </div>
             ${sections.map((s, i) => `
-                <details class="wr-acc"${i === 0 ? ' open' : ''}>
-                    <summary><span class="wr-acc-n">${i + 1}</span><span>${s.title}</span><span class="wr-acc-chev" aria-hidden="true">▾</span></summary>
+                <details class="wr-acc" id="wr-acc-${i}"${i === 0 ? ' open' : ''}>
+                    <summary>
+                        <span class="wr-acc-n">${i + 1}</span>
+                        <span class="wr-acc-title">
+                            <span>${s.title}</span>
+                            <small>${escapeHtml(ruleHints[i] || '')}</small>
+                        </span>
+                        <span class="wr-acc-kind">${escapeHtml(ruleKinds[i] || 'правило')}</span>
+                        <span class="wr-acc-chev" aria-hidden="true">▾</span>
+                    </summary>
                     <div class="wr-acc-body">${s.body}</div>
                 </details>`).join('')}
             <p class="about-source">По материалам самоучителя: А. В. Бадмаев. «Практический самоучитель старокалмыцкой письменности». — Элиста, 1971.</p>
         </div>`;
+    }
+
+    function wrOpenRule(i) {
+        const el = document.getElementById('wr-acc-' + i);
+        if (!el) return;
+        el.open = true;
+        el.scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'start' });
+        const summary = el.querySelector('summary');
+        if (summary) {
+            try { summary.focus({ preventScroll: true }); } catch (e) {}
+        }
+    }
+
+    function wrToggleRules(open) {
+        document.querySelectorAll('.wr-acc').forEach(el => { el.open = !!open; });
     }
 
     // Переход из примечания к карточке правила: закрываем модалку, открываем раздел правил, подсвечиваем карточку.
@@ -302,7 +455,9 @@
 
     // Открыть карточку буквы прямо в модалке (для перекрёстных ссылок в примечаниях).
     function charByLatin(lat) { return charData.find(x => x.latin === lat); }
+    function charByIdx(idx) { return charData.find(x => x.idx === idx); }
     function gotoChar(lat) { const c = charByLatin(lat); if (c) pushModal(c.idx); }
+    function gotoCharIdx(idx) { const c = charByIdx(idx); if (c) pushModal(c.idx); }
 
     // Делаем ссылки в примечаниях кликабельными: «Глобальное правило №2» → карточка правила,
     // ссылки на другие буквы («в строке И», «см. выше Б» и т. п.) → карточка этой буквы.
@@ -503,7 +658,7 @@
             form = letter.final != null ? letter.final : (letter.medial != null ? letter.medial : letter.initial || '');
         } else {
             // Правило Тодо для «н»: перед согласной в СЕРЕДИНЕ слова тоже пишется
-            // без точки-цег, как буква «а» (санчир, зандн, гэндн) — тот же принцип,
+            // без точки-цег, как буква «а» (санчир, зандан, гэндэн) — тот же принцип,
             // что и на конце слова (см. ветку pos === total - 1 выше и заметку idx 21).
             const nextIsConsForN = !!next && (next.category === 'consonants' || next.category === 'galik');
             if (letter.idx === 21 && nextIsConsForN && composeCharByIdx[0] && composeCharByIdx[0].medial != null) {
@@ -1759,7 +1914,7 @@
         } catch (e) {}
         const rootCls = `rd-root${showKm ? '' : ' rd-hide-km'}${showTr ? '' : ' rd-hide-tr'}${showRu ? '' : ' rd-hide-ru'}`;
         return `
-            <div class="rd-note">Тексты письмом Тодо набраны по пособию «Цаһан толһа» (Очр Номт; перенабор А. Оргаева).
+            <div class="rd-note">Тексты письмом Тодо набраны по пособию «Цаһан толһа» (Очра Номт; перенабор А. Оргаева).
             Читаются вертикально, столбцы — слева направо. Транслитерация и перевод — черновые (первый проход), их можно дополнять.</div>
             <div class="${rootCls}">
                 <div class="rd-controls">
