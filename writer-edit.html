@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="ru"><head>
+<script>(function(){try{var p=new URLSearchParams(location.search).get('theme');if(p==='dark'||p==='light'){document.documentElement.setAttribute('data-theme',p);document.documentElement.style.colorScheme=p;}}catch(e){}})();</script>
+<script>window.addEventListener('message',function(e){var d=e&&e.data;if(d&&(d.__todoTheme==='dark'||d.__todoTheme==='light')){document.documentElement.setAttribute('data-theme',d.__todoTheme);document.documentElement.style.colorScheme=d.__todoTheme;}});/* Сообщаем родителю, что слушатель темы готов — он пришлёт актуальную тему (ресинхронизация после загрузки, страхует от гонки при переключении во время загрузки iframe). */try{parent.postMessage({__todoWriterReady:true},'*');}catch(e){}</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Тодо Бичик — редактор начертаний (контуры)</title>
+<style>
+:root{--bg:#fafaf9;--card:#fff;--ink:#1c1917;--sub:#57534e;--muted:#a8a29e;--accent:#0d9488;--accent-dark:#0f766e;--border:#e7e5e4;--contour:#d6d3d1;--fill:#f3f1ef;--good:#0d9488;--bad:#dc2626;}
+[data-theme="dark"]{--bg:#0c0a09;--card:#1c1917;--ink:#fafaf9;--sub:#a8a29e;--muted:#78716c;--accent:#14b8a6;--accent-dark:#5eead4;--border:#44403c;--contour:#57534e;--fill:#211e1b;--good:#2dd4bf;--bad:#f87171;}
+[data-theme="dark"] svg{background:repeating-linear-gradient(0deg,transparent,transparent 49.5%,#2a2724 49.5%,#2a2724 50.5%),repeating-linear-gradient(90deg,transparent,transparent 49.5%,#2a2724 49.5%,#2a2724 50.5%);}
+[data-theme="dark"] .fbtn.active{background:#10312b;}
+[data-theme="dark"] #live polyline{stroke:#d6d3d1;}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,-apple-system,sans-serif;padding:14px;}
+.wrap{max-width:720px;margin:0 auto;}
+.kicker{font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-dark);font-weight:600;}
+h1{font-size:1.25rem;margin:.15rem 0 .2rem;}
+.lead{color:var(--sub);font-size:.84rem;margin:0 0 .6rem;}
+.tabs{display:flex;gap:.3rem;overflow-x:auto;margin-bottom:.5rem;padding-bottom:2px;}
+.tab{white-space:nowrap;border:1px solid var(--border);background:var(--card);color:var(--sub);border-radius:9px;padding:.34rem .6rem;font-size:.8rem;font-weight:600;cursor:pointer;}
+.tab.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+.letter-nav{display:flex;align-items:center;gap:.3rem;margin-bottom:.55rem;overflow-x:auto;padding:2px 1px 4px;}
+.letter-btn{flex:0 0 auto;min-width:2.1rem;height:2.1rem;padding:0 .45rem;border:1px solid var(--border);background:var(--card);color:var(--sub);border-radius:9px;font:inherit;font-size:.86rem;font-weight:700;cursor:pointer;}
+.letter-btn:hover,.letter-btn:focus-visible{border-color:var(--accent);color:var(--accent);outline:none;}
+.letter-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+.modes{display:flex;gap:.4rem;margin-bottom:.5rem;}
+.mode{flex:1;border:1px solid var(--border);background:var(--card);color:var(--sub);border-radius:11px;padding:.5rem;font-size:.86rem;font-weight:700;cursor:pointer;}
+.mode.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+.forms{display:flex;gap:.4rem;margin-bottom:.5rem;}
+.fbtn{flex:1;border:1px solid var(--border);background:var(--card);color:var(--sub);border-radius:10px;padding:.4rem;font-size:.8rem;font-weight:600;cursor:pointer;}
+.fbtn.active{border-color:var(--accent);background:#ecfdf5;color:var(--accent-dark);}
+.fbtn:disabled{opacity:.32;cursor:default;}
+.stage-card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 1px 3px rgb(0 0 0/.06);padding:10px;max-width:480px;margin:0 auto;}
+.title{text-align:center;font-size:.82rem;color:var(--sub);margin-bottom:.3rem;font-weight:600;}
+.stage-forms{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.4rem;margin-bottom:.55rem;}
+.stage-form{border:1px solid var(--border);background:var(--bg);color:var(--ink);border-radius:11px;padding:.35rem .25rem .28rem;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:.2rem;min-width:0;}
+.stage-form.active{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset;background:#ecfdf5;}
+.stage-form.missing{opacity:.4;cursor:default;}
+.stage-form.done{border-color:var(--accent);}
+.stage-form-svg{display:block;width:100%;height:112px;background:transparent;border-radius:8px;touch-action:auto;}
+.stage-form-svg path{fill:currentColor;}
+.stage-form-label{font-size:.64rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);}
+.stage-form.active .stage-form-label{color:var(--accent-dark);}
+[data-theme="dark"] .stage-form.active{background:#10312b;}
+.stage{position:relative;}
+svg{display:block;width:100%;height:auto;touch-action:none;border-radius:10px;background:repeating-linear-gradient(0deg,transparent,transparent 49.5%,#f0eeec 49.5%,#f0eeec 50.5%),repeating-linear-gradient(90deg,transparent,transparent 49.5%,#f0eeec 49.5%,#f0eeec 50.5%);}
+svg.shake{animation:shk .32s;}
+@keyframes shk{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+.contour{fill:var(--fill);stroke:var(--contour);stroke-width:1.5;}
+.contour.hide{display:none;}
+.cue{fill:var(--accent);opacity:.85;animation:pulse 1.1s ease-in-out infinite;}
+@keyframes pulse{0%,100%{r:7;opacity:.85}50%{r:11;opacity:.35}}
+.banner{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0;}
+.banner .pill{background:var(--accent);color:#fff;font-weight:700;font-size:1.05rem;padding:.5rem 1rem;border-radius:999px;box-shadow:0 6px 18px rgb(13 148 136/.35);transform:scale(.8);}
+.banner.show{animation:pop 1.2s ease both;}
+@keyframes pop{0%{opacity:0}12%{opacity:1}22%{opacity:1}88%{opacity:1}100%{opacity:0}}
+.banner.show .pill{animation:popS 1.2s ease both;}
+@keyframes popS{0%{transform:scale(.8)}14%{transform:scale(1.06)}24%{transform:scale(1)}100%{transform:scale(1)}}
+.controls{display:flex;gap:.45rem;margin-top:.55rem;flex-wrap:wrap;}
+.btn{flex:1;min-width:84px;border-radius:11px;padding:.56rem;font-size:.82rem;font-weight:600;cursor:pointer;background:var(--card);color:var(--sub);border:1px solid var(--border);}
+.btn-acc{background:var(--accent);color:#fff;border:none;}
+.btn:disabled{opacity:.4;cursor:default;}
+.speed{display:flex;gap:.3rem;align-items:center;}
+.sp{border:1px solid var(--border);background:var(--card);color:var(--sub);border-radius:8px;padding:.4rem .5rem;font-size:.78rem;font-weight:600;cursor:pointer;}
+.sp.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+.row{display:flex;justify-content:space-between;align-items:center;margin-top:.5rem;gap:.5rem;}
+.prog{font-size:.78rem;color:var(--sub);font-weight:600;}
+.status{font-size:.8rem;font-weight:600;min-height:1.1em;}
+.status.bad{color:var(--bad);}
+.status.good{color:var(--good);}
+.toggle{font-size:.78rem;color:var(--sub);display:flex;align-items:center;gap:.35rem;cursor:pointer;user-select:none;}
+.hint{font-size:.75rem;color:var(--muted);margin:.5rem 0 0;line-height:1.5;}
+@media (max-width:640px){
+  body{padding:10px;}
+  .wrap{max-width:none;}
+  .lead{font-size:.8rem;}
+  .tabs{margin-left:-2px;margin-right:-2px;}
+  .tab{padding:.48rem .7rem;}
+  .modes,.forms{position:sticky;top:0;z-index:4;background:var(--bg);padding:.25rem 0;}
+  .stage-card{padding:8px;border-radius:14px;max-width:320px;}
+  .stage-forms{gap:.28rem;margin-bottom:.45rem;}
+  .stage-form{padding:.28rem .18rem .24rem;}
+  .stage-form-svg{height:86px;}
+  .stage-form-label{font-size:.58rem;}
+  .row{align-items:flex-start;flex-direction:column;}
+  .controls .btn{min-width:calc(50% - .25rem);}
+}
+@media (max-width:380px){
+  .stage-card{max-width:300px;}
+  .stage-form-svg{height:82px;}
+}
+</style></head>
+<body><div class="wrap">
+<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin-bottom:10px;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:var(--card)">
+  <div style="font-size:.82rem;color:var(--sub)"><b style="color:var(--ink)">Редактор контуров глифов</b> — меняйте SVG-path в <code>js/writer-data.js</code></div>
+  <a href="writer-strokes-edit.html" style="font-size:.82rem;font-weight:700;color:var(--accent-dark);text-decoration:none;border:1px solid var(--border);padding:7px 11px;border-radius:9px">Направление штрихов →</a>
+</div>
+<div class="kicker">Тодо Бичик · редактор начертаний</div>
+<h1>Контуры знаков (SVG path)</h1>
+<p class="lead">Здесь правятся формы букв. Порядок и направление штрихов — в отдельном редакторе.</p>
+<div class="tabs" id="tabs"></div>
+<div class="letter-nav" id="letterNav" aria-label="Знаки выбранного раздела"></div>
+<div class="modes">
+  <button class="mode active" id="mAnim">▶ Смотреть</button>
+  <button class="mode" id="mPract">✎ Писать</button>
+</div>
+<div class="forms" id="forms"></div>
+<div class="stage-card">
+  <div class="title" id="title"></div>
+  <div class="stage-forms" id="stageForms" aria-label="Все формы выбранной буквы"></div>
+  <div class="stage">
+    <svg id="svg" viewBox="0 0 360 760" xmlns="http://www.w3.org/2000/svg">
+      <path id="contour" class="contour" d=""></path>
+      <g id="done"></g><g id="hint"></g><g id="anim"></g><g id="live"></g><g id="cue"></g>
+    </svg>
+    <div class="banner" id="banner"><div class="pill" id="pill">Готово ✓</div></div>
+  </div>
+
+  <!-- animate controls -->
+  <div id="animBar">
+    <div class="controls">
+      <button class="btn btn-acc" id="play">▶ Играть заново</button>
+    </div>
+    <div class="row">
+      <div class="speed">
+        <span style="font-size:.76rem;color:var(--muted)">скорость</span>
+        <button class="sp" data-sp="0.5">×0.5</button>
+        <button class="sp active" data-sp="1">×1</button>
+        <button class="sp" data-sp="2">×2</button>
+      </div>
+      <div style="display:flex;gap:.8rem"><label class="toggle"><input type="checkbox" id="smT" checked> сглаживание</label><label class="toggle"><input type="checkbox" id="ctA" checked> контур</label></div>
+    </div>
+  </div>
+
+  <!-- practice controls -->
+  <div id="practBar" style="display:none">
+    <div class="row">
+      <span class="prog" id="prog"></span>
+      <span class="status" id="status"></span>
+    </div>
+    <div class="controls">
+      <button class="btn" id="undo">↶ Отменить штрих</button>
+      <button class="btn" id="clear">Очистить</button>
+      <button class="btn" id="hintBtn">💡 Подсказка</button>
+    </div>
+    <div class="row">
+      <label class="toggle"><input type="checkbox" id="ctP" checked> контур-подсказка</label>
+      <label class="toggle"><input type="checkbox" id="cueT" checked> точка старта</label>
+    </div>
+  </div>
+</div>
+<p class="hint" id="hintText"></p>
+</div>
+<script src="js/writer-data.js"></script>
+<script src="js/writer-strokes-saved.js"></script>
+<script>
+const DATA=WRITER_DATA;
+const SAVED=WRITER_STROKES_SAVED;
+const COLORS=['#0d9488','#dc2626','#2563eb','#9333ea','#ea580c','#db2777','#65a30d','#0891b2'];
+const FORMS=[['initial','нач.'],['medial','сер.'],['final','кон.']];
+const CATS=[...new Set(DATA.map(d=>d.cat))];
+const NS='http://www.w3.org/2000/svg';
+const REDUCED=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// ---- build reference model from saved strokes ----
+const MODEL={};
+for(const id in SAVED){const g=SAVED[id];MODEL[id]={};
+  for(const f in (g.forms||{})){const st=(g.forms[f].strokes||[]).slice().sort((a,b)=>a.order-b.order);
+    if(st.length)MODEL[id][f]=st.map(s=>({order:s.order,points:s.points}));}}
+function hasModel(id,f){return !!(MODEL[id]&&MODEL[id][f]&&MODEL[id][f].length);}
+function firstForm(id){for(const[f]of FORMS)if(hasModel(id,f))return f;const d=DATA.find(x=>x.id===id);return d&&d.forms?Object.keys(d.forms)[0]:'initial';}
+
+// ---- dom ----
+const el=(t,a)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e;};
+const $=id=>document.getElementById(id);
+const svg=$('svg'),contour=$('contour'),gDone=$('done'),gHint=$('hint'),gAnim=$('anim'),gLive=$('live'),gCue=$('cue');
+const tabs=$('tabs'),letterNav=$('letterNav'),formsEl=$('forms'),stageFormsEl=$('stageForms'),titleEl=$('title'),banner=$('banner'),pill=$('pill');
+const animBar=$('animBar'),practBar=$('practBar'),progEl=$('prog'),statusEl=$('status'),hintText=$('hintText');
+function clearG(g){while(g.firstChild)g.removeChild(g.firstChild);}
+function glyph(){return DATA.find(d=>d.id===curId);}
+function formLabel(f){return (FORMS.find(x=>x[0]===f)||[,f])[1];}
+function strokes(){return (MODEL[curId]&&MODEL[curId][curForm])||[];}
+function formPath(d,f){return d&&d.forms&&d.forms[f]?d.forms[f]:'';}
+
+// ---- state ----
+let curCat=CATS[0];
+let curId=(DATA.find(d=>d.cat===curCat)||DATA[0]).id;
+let curForm=firstForm(curId);
+let mode='animate';
+let speed=1;
+const completed=new Set();   // "id|form" the user wrote correctly
+// practice
+let sIdx=0, misses=0, drawing=false, pts=[];
+let rafId=null, animToken=0;
+
+// ---- geometry ----
+const dist=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1]);
+function plen(p){let L=0;for(let i=1;i<p.length;i++)L+=dist(p[i-1],p[i]);return L;}
+function resample(p,n){if(!p.length)return[];if(p.length===1)return Array(n).fill(p[0]);
+  const cum=[0];for(let k=1;k<p.length;k++)cum.push(cum[k-1]+dist(p[k-1],p[k]));
+  const L=cum[cum.length-1]||1,out=[];
+  for(let s=0;s<n;s++){const t=L*s/(n-1);let k=1;while(k<cum.length-1&&cum[k]<t)k++;
+    const seg=(cum[k]-cum[k-1])||1e-6,f=(t-cum[k-1])/seg;
+    out.push([p[k-1][0]+(p[k][0]-p[k-1][0])*f,p[k-1][1]+(p[k][1]-p[k-1][1])*f]);}return out;}
+function diag(p){let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;for(const q of p){x0=Math.min(x0,q[0]);y0=Math.min(y0,q[1]);x1=Math.max(x1,q[0]);y1=Math.max(y1,q[1]);}return Math.hypot(x1-x0,y1-y0);}
+const pstr=p=>p.map(q=>q[0].toFixed(1)+','+q[1].toFixed(1)).join(' ');
+function arrow(p1,p2){const a=Math.atan2(p2[1]-p1[1],p2[0]-p1[0]),L=16,W=8;
+  return p2[0]+','+p2[1]+' '+(p2[0]-L*Math.cos(a)+W*Math.sin(a))+','+(p2[1]-L*Math.sin(a)-W*Math.cos(a))+' '+(p2[0]-L*Math.cos(a)-W*Math.sin(a))+','+(p2[1]-L*Math.sin(a)+W*Math.cos(a));}
+
+// ---- smoothing (for pretty animation/display only; matching uses raw points) ----
+let useSmooth=true;
+function dedupe(p){const o=[p[0]];for(let i=1;i<p.length;i++)if(dist(p[i],o[o.length-1])>0.8)o.push(p[i]);return o.length>1?o:p.slice();}
+function movavg(p,w){if(p.length<3)return p.slice();const h=w>>1,o=[];for(let i=0;i<p.length;i++){if(i<h||i>=p.length-h){o.push(p[i]);continue;}let sx=0,sy=0;for(let j=-h;j<=h;j++){sx+=p[i+j][0];sy+=p[i+j][1];}o.push([sx/w,sy/w]);}return o;}
+function perp(q,a,b){const dx=b[0]-a[0],dy=b[1]-a[1],L2=dx*dx+dy*dy;if(!L2)return dist(q,a);let t=((q[0]-a[0])*dx+(q[1]-a[1])*dy)/L2;t=Math.max(0,Math.min(1,t));return Math.hypot(q[0]-(a[0]+t*dx),q[1]-(a[1]+t*dy));}
+function rdp(p,eps){if(p.length<3)return p.slice();const keep=new Array(p.length).fill(false);keep[0]=keep[p.length-1]=true;const stk=[[0,p.length-1]];while(stk.length){const[a,b]=stk.pop();let idx=-1,dm=0;for(let i=a+1;i<b;i++){const dd=perp(p[i],p[a],p[b]);if(dd>dm){dm=dd;idx=i;}}if(dm>eps&&idx>=0){keep[idx]=true;stk.push([a,idx],[idx,b]);}}return p.filter((_,i)=>keep[i]);}
+function clean(p){if(p.length<2)return p.slice();let q=dedupe(p);q=movavg(q,5);q=rdp(q,2.4);if(q.length<2)q=[p[0],p[p.length-1]];return q;}
+function smoothD(p){const f=n=>n.toFixed(1);if(p.length<2)return'';if(p.length===2)return'M'+f(p[0][0])+' '+f(p[0][1])+'L'+f(p[1][0])+' '+f(p[1][1]);
+  let d='M'+f(p[0][0])+' '+f(p[0][1]);
+  for(let i=0;i<p.length-1;i++){const p0=p[i-1]||p[i],p1=p[i],p2=p[i+1],p3=p[i+2]||p[i+1];
+    const c1x=p1[0]+(p2[0]-p0[0])/6,c1y=p1[1]+(p2[1]-p0[1])/6,c2x=p2[0]-(p3[0]-p1[0])/6,c2y=p2[1]-(p3[1]-p1[1])/6;
+    d+='C'+f(c1x)+' '+f(c1y)+' '+f(c2x)+' '+f(c2y)+' '+f(p2[0])+' '+f(p2[1]);}return d;}
+function buildSmooth(){for(const id in MODEL)for(const f in MODEL[id])MODEL[id][f].forEach(st=>{st.disp=clean(st.points);st.d=smoothD(st.disp);});}
+function gDisp(st){return useSmooth&&st.disp?st.disp:st.points;}
+function gD(st){return useSmooth&&st.d?st.d:null;}
+function lenOf(node,st){try{const L=node.getTotalLength();if(L>0)return L;}catch(e){}return plen(gDisp(st))||1;}
+
+// ---- compare user stroke to model ----
+function compare(u,m){
+  if(u.length<2)return{ok:false,reason:'short'};
+  const N=16,ru=resample(u,N),rm=resample(m,N);
+  let fwd=0,rev=0;for(let i=0;i<N;i++){fwd+=dist(ru[i],rm[i]);rev+=dist(ru[i],rm[N-1-i]);}
+  fwd/=N;rev/=N;
+  const d=Math.max(diag(m),40);
+  const tol=Math.max(0.30*d,34), endTol=Math.max(0.45*d,62);
+  const sOk=dist(ru[0],rm[0])<endTol, eOk=dist(ru[N-1],rm[N-1])<endTol;
+  if(rev+8<fwd && fwd>tol)return{ok:false,reason:'dir'};
+  if(fwd<=tol&&sOk&&eOk)return{ok:true};
+  return{ok:false,reason:'shape'};
+}
+
+// ---- drawing a finished model stroke ----
+function paintStroke(g,st,w){const c=COLORS[(st.order-1)%COLORS.length],dp=gDisp(st),dd=gD(st);
+  if(dd)g.appendChild(el('path',{d:dd,fill:'none',stroke:c,'stroke-width':w||7,'stroke-linecap':'round','stroke-linejoin':'round'}));
+  else g.appendChild(el('polyline',{points:pstr(dp),fill:'none',stroke:c,'stroke-width':w||7,'stroke-linecap':'round','stroke-linejoin':'round'}));
+  if(dp.length>1)g.appendChild(el('polygon',{points:arrow(dp[dp.length-2],dp[dp.length-1]),fill:c}));
+  g.appendChild(el('circle',{cx:dp[0][0],cy:dp[0][1],r:5.5,fill:c}));
+  g.appendChild(el('text',{x:dp[0][0]-3,y:dp[0][1]+3.5,'font-size':9,fill:'#fff'})).textContent=st.order;}
+
+// ---- animation ----
+function stopAnim(){animToken++;if(rafId)cancelAnimationFrame(rafId);rafId=null;}
+function animate(list,g,onDone){
+  stopAnim();const tok=++animToken;clearG(g);let i=0;
+  function next(){
+    if(i>=list.length){onDone&&onDone();return;}
+    const st=list[i],c=COLORS[(st.order-1)%COLORS.length],dp=gDisp(st),dd=gD(st);
+    const node=dd?el('path',{d:dd,fill:'none',stroke:c,'stroke-width':7,'stroke-linecap':'round','stroke-linejoin':'round'})
+                 :el('polyline',{points:pstr(dp),fill:'none',stroke:c,'stroke-width':7,'stroke-linecap':'round','stroke-linejoin':'round'});
+    g.appendChild(node);const L=lenOf(node,st);
+    node.style.strokeDasharray=L;node.style.strokeDashoffset=L;
+    if(REDUCED){node.style.strokeDashoffset=0;finishOne();return;}
+    const dur=Math.max(380,L*4.2)/speed,t0=performance.now();
+    function step(now){if(tok!==animToken)return;const k=Math.min(1,(now-t0)/dur);
+      node.style.strokeDashoffset=L*(1-k);
+      if(k<1){rafId=requestAnimationFrame(step);}else finishOne();}
+    rafId=requestAnimationFrame(step);
+    function finishOne(){if(tok!==animToken)return;
+      if(dp.length>1)g.appendChild(el('polygon',{points:arrow(dp[dp.length-2],dp[dp.length-1]),fill:c}));
+      g.appendChild(el('circle',{cx:dp[0][0],cy:dp[0][1],r:5,fill:c}));
+      i++;setTimeout(()=>{if(tok===animToken)rafId=requestAnimationFrame(next);},200/speed);}
+  }
+  next();
+}
+
+// ---- builders ----
+function catLetters(){return DATA.filter(d=>d.cat===curCat);}
+function selectLetter(id){curId=id;if(!hasModel(curId,curForm))curForm=firstForm(curId);buildLetterPick();buildForms();refresh();}
+function buildLetterPick(){letterNav.innerHTML='';catLetters().forEach(d=>{const b=document.createElement('button');
+  b.type='button';b.className='letter-btn'+(d.id===curId?' active':'');b.textContent=d.cy;
+  b.setAttribute('aria-pressed',d.id===curId?'true':'false');
+  b.onclick=()=>selectLetter(d.id);letterNav.appendChild(b);});}
+function buildTabs(){tabs.innerHTML='';CATS.forEach(cat=>{const t=document.createElement('button');
+  t.className='tab'+(cat===curCat?' active':'');t.textContent=cat;
+  t.onclick=()=>{curCat=cat;const first=DATA.find(d=>d.cat===cat);if(!first)return;curId=first.id;curForm=firstForm(curId);buildTabs();buildLetterPick();buildForms();refresh();};
+  tabs.appendChild(t);});}
+function buildForms(){formsEl.innerHTML='';FORMS.forEach(([k,lbl])=>{const ok=hasModel(curId,k);const b=document.createElement('button');
+  b.className='fbtn'+(k===curForm?' active':'');b.disabled=!ok;
+  b.textContent=lbl+(completed.has(curId+'|'+k)?' ✓':'');
+  if(ok)b.onclick=()=>{curForm=k;buildForms();refresh();};formsEl.appendChild(b);});}
+function buildStageForms(){stageFormsEl.innerHTML='';const d=glyph();FORMS.forEach(([k,lbl])=>{const ok=hasModel(curId,k),path=formPath(d,k),done=completed.has(curId+'|'+k);
+  const b=document.createElement('button');b.type='button';
+  b.className='stage-form'+(k===curForm?' active':'')+(ok?'':' missing')+(done?' done':'');
+  b.disabled=!ok;b.setAttribute('aria-label',d.cy+' · '+lbl);
+  const mini=document.createElementNS(NS,'svg');mini.setAttribute('viewBox','0 0 360 760');mini.setAttribute('class','stage-form-svg');mini.setAttribute('aria-hidden','true');
+  if(path)mini.appendChild(el('path',{d:path}));
+  const cap=document.createElement('span');cap.className='stage-form-label';cap.textContent=lbl+(done?' ✓':'');
+  b.appendChild(mini);b.appendChild(cap);
+  if(ok)b.onclick=()=>{curForm=k;buildForms();refresh();};
+  stageFormsEl.appendChild(b);
+});}
+
+// ---- refresh per mode ----
+function setMode(m){mode=m;$('mAnim').classList.toggle('active',m==='animate');$('mPract').classList.toggle('active',m==='practice');
+  animBar.style.display=m==='animate'?'':'none';practBar.style.display=m==='practice'?'':'none';refresh();}
+function refresh(){
+  stopAnim();clearG(gDone);clearG(gHint);clearG(gAnim);clearG(gLive);clearG(gCue);
+  banner.className='banner';statusEl.textContent='';statusEl.className='status';
+  contour.classList.toggle('hide', mode==='animate' ? !$('ctA').checked : !$('ctP').checked);
+  contour.setAttribute('d',glyph().forms[curForm]||'');
+  titleEl.textContent=glyph().cy+' · '+formLabel(curForm);
+  buildStageForms();
+  if(mode==='animate'){hintText.textContent='Стрелка показывает направление штриха. Цвет = порядок (1,2,3…).';animate(strokes(),gAnim);}
+  else{sIdx=0;misses=0;hintText.textContent='Пиши штрихи по порядку, в направлении письма. После 3 промахов покажу подсказку.';renderPractice();}
+}
+// ---- practice ----
+function renderPractice(){
+  clearG(gDone);clearG(gCue);
+  strokes().slice(0,sIdx).forEach(st=>paintStroke(gDone,st));
+  const total=strokes().length;
+  progEl.textContent='штрих '+Math.min(sIdx+1,total)+' / '+total;
+  if(sIdx>=total){progEl.textContent='форма размечена · '+total+'/'+total;return;}
+  if($('cueT').checked){const st=strokes()[sIdx];
+    gCue.appendChild(el('circle',{class:'cue',cx:st.points[0][0],cy:st.points[0][1],r:7}));}
+}
+function finishGlyph(){
+  completed.add(curId+'|'+curForm);buildForms();buildStageForms();
+  clearG(gCue);pill.textContent='Готово ✓';banner.className='banner show';
+  statusEl.textContent='Все штрихи верны!';statusEl.className='status good';
+  animate(strokes(),gDone);  // celebratory replay over the done layer
+}
+function flash(reason){
+  svg.classList.remove('shake');void svg.offsetWidth;svg.classList.add('shake');
+  statusEl.className='status bad';
+  statusEl.textContent = reason==='dir' ? 'Не то направление — веди штрих в сторону письма'
+    : reason==='short' ? 'Слишком коротко — проведи штрих целиком'
+    : 'Мимо — попробуй ещё раз этот штрих';
+}
+function showHint(){const st=strokes()[sIdx];if(!st)return;
+  clearG(gHint);const c=COLORS[(st.order-1)%COLORS.length],dd=gD(st);
+  const node=dd?el('path',{d:dd,fill:'none',stroke:c,'stroke-width':6,'stroke-linecap':'round','stroke-linejoin':'round',opacity:.28,'stroke-dasharray':'2 7'})
+               :el('polyline',{points:pstr(gDisp(st)),fill:'none',stroke:c,'stroke-width':6,'stroke-linecap':'round','stroke-linejoin':'round',opacity:.28,'stroke-dasharray':'2 6'});
+  gHint.appendChild(node);
+  statusEl.className='status';statusEl.textContent='Подсказка: повтори пунктир.';
+}
+function undo(){if(sIdx>0){sIdx--;misses=0;clearG(gHint);renderPractice();statusEl.textContent='';statusEl.className='status';}}
+function clearPractice(){sIdx=0;misses=0;clearG(gHint);renderPractice();statusEl.textContent='';statusEl.className='status';}
+
+// ---- pointer drawing (practice only) ----
+function sp(e){const r=svg.getBoundingClientRect(),t=e.touches?e.touches[0]:e;return[(t.clientX-r.left)/r.width*360,(t.clientY-r.top)/r.height*760];}
+svg.addEventListener('pointerdown',e=>{if(mode!=='practice'||sIdx>=strokes().length)return;e.preventDefault();drawing=true;pts=[sp(e)];});
+svg.addEventListener('pointermove',e=>{if(!drawing)return;e.preventDefault();pts.push(sp(e));let pl=gLive.firstChild;
+  if(!pl){pl=el('polyline',{fill:'none',stroke:'#78716c','stroke-width':7,'stroke-linecap':'round','stroke-linejoin':'round',opacity:.85});gLive.appendChild(pl);}
+  pl.setAttribute('points',pstr(pts));});
+window.addEventListener('pointerup',()=>{if(!drawing)return;drawing=false;clearG(gLive);
+  if(mode!=='practice'||sIdx>=strokes().length)return;
+  const target=strokes()[sIdx],res=compare(pts,target.points);
+  if(res.ok){misses=0;clearG(gHint);sIdx++;
+    if(sIdx>=strokes().length){renderPractice();finishGlyph();}
+    else{statusEl.className='status good';statusEl.textContent='Верно!';renderPractice();}
+  }else{misses++;flash(res.reason);if(misses>=3)showHint();}});
+
+// ---- wire controls ----
+$('mAnim').onclick=()=>setMode('animate');
+$('mPract').onclick=()=>setMode('practice');
+$('play').onclick=()=>{clearG(gAnim);animate(strokes(),gAnim);};
+document.querySelectorAll('.sp').forEach(b=>b.onclick=()=>{speed=parseFloat(b.dataset.sp);
+  document.querySelectorAll('.sp').forEach(x=>x.classList.toggle('active',x===b));});
+$('ctA').onchange=()=>contour.classList.toggle('hide',!$('ctA').checked);
+$('smT').onchange=()=>{useSmooth=$('smT').checked;refresh();};
+$('ctP').onchange=()=>contour.classList.toggle('hide',!$('ctP').checked);
+$('cueT').onchange=renderPractice;
+$('undo').onclick=undo;$('clear').onclick=clearPractice;$('hintBtn').onclick=showHint;
+
+// ---- go ----
+buildSmooth();buildTabs();buildLetterPick();buildForms();setMode('animate');
+</script><script>(function(){function h(){try{parent.postMessage({__todoWriterHeight:Math.max(document.documentElement.scrollHeight,document.body.scrollHeight)},'*');}catch(e){}}window.addEventListener('load',h);window.addEventListener('resize',h);if(window.MutationObserver){new MutationObserver(h).observe(document.documentElement,{subtree:true,childList:true,attributes:true});}setInterval(h,500);h();})();</script></body></html>
