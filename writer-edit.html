@@ -4,7 +4,7 @@
 <script>window.addEventListener('message',function(e){var d=e&&e.data;if(d&&(d.__todoTheme==='dark'||d.__todoTheme==='light')){document.documentElement.setAttribute('data-theme',d.__todoTheme);document.documentElement.style.colorScheme=d.__todoTheme;}});/* Сообщаем родителю, что слушатель темы готов — он пришлёт актуальную тему (ресинхронизация после загрузки, страхует от гонки при переключении во время загрузки iframe). */try{parent.postMessage({__todoWriterReady:true},'*');}catch(e){}</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Тодо Бичик — тренажёр письма</title>
+<title>Тодо Бичик — редактор начертаний (контуры)</title>
 <style>
 :root{--bg:#fafaf9;--card:#fff;--ink:#1c1917;--sub:#57534e;--muted:#a8a29e;--accent:#0d9488;--accent-dark:#0f766e;--border:#e7e5e4;--contour:#d6d3d1;--fill:#f3f1ef;--good:#0d9488;--bad:#dc2626;}
 [data-theme="dark"]{--bg:#0c0a09;--card:#1c1917;--ink:#fafaf9;--sub:#a8a29e;--muted:#78716c;--accent:#14b8a6;--accent-dark:#5eead4;--border:#44403c;--contour:#57534e;--fill:#211e1b;--good:#2dd4bf;--bad:#f87171;}
@@ -92,9 +92,13 @@ svg.shake{animation:shk .32s;}
 }
 </style></head>
 <body><div class="wrap">
-<div class="kicker">Тодо Бичик · тренажёр письма</div>
-<h1>Смотри и пиши знаки</h1>
-<p class="lead">Выберите раздел и знак. Ниже сразу видны все три формы — нажмите нужную, затем «Смотреть» или «Писать».</p>
+<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin-bottom:10px;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:var(--card)">
+  <div style="font-size:.82rem;color:var(--sub)"><b style="color:var(--ink)">Редактор контуров глифов</b> — меняйте SVG-path в <code>js/writer-data.js</code></div>
+  <a href="writer-strokes-edit.html" style="font-size:.82rem;font-weight:700;color:var(--accent-dark);text-decoration:none;border:1px solid var(--border);padding:7px 11px;border-radius:9px">Направление штрихов →</a>
+</div>
+<div class="kicker">Тодо Бичик · редактор начертаний</div>
+<h1>Контуры знаков (SVG path)</h1>
+<p class="lead">Здесь правятся формы букв. Порядок и направление штрихов — в отдельном редакторе.</p>
 <div class="tabs" id="tabs"></div>
 <div class="letter-nav" id="letterNav" aria-label="Знаки выбранного раздела"></div>
 <div class="modes">

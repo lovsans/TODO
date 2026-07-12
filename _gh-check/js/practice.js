@@ -32,7 +32,7 @@
     // форме, а «выучен» — когда освоены ВСЕ имеющиеся у знака формы.
     const FORM_ORDER = ['initial', 'medial', 'final'];
     const FORM_LABELS = { initial: 'начальная', medial: 'серединная', final: 'конечная' };
-    const FORM_MASTERY = 1; // верных подряд на каждую форму, чтобы она считалась освоенной
+    const FORM_MASTERY = 2; // верных подряд на каждую форму, чтобы она считалась освоенной
 
     // Прогресс по формам конкретного знака (с подстраховкой на старый формат данных,
     // где был только общий p.streak без разбивки по формам).
@@ -54,7 +54,7 @@
             const prevStreak = prevKey ? ((formProgress(letter, prevKey) || {}).streak || 0) : Infinity;
             if (i > 0 && prevStreak < 1) return 0;             // следующая форма ещё не «открыта»
             const fp = formProgress(letter, fk);
-            if (fp && fp.mastered) return 1;      // освоена — изредка повторяем
+            if (fp && fp.streak >= FORM_MASTERY) return 1;      // освоена — изредка повторяем
             if (!fp || !fp.seen) return 5;                      // совсем новая — показываем чаще
             return 3;                                           // в процессе освоения
         });
@@ -349,7 +349,7 @@
         const p = practiceProgress[letterKey(c)];
         if (!p || !p.forms) return false;
         const avail = FORM_ORDER.filter(k => c[k]);
-        return avail.length > 0 && avail.every(k => (p.forms[k] && p.forms[k].mastered));
+        return avail.length > 0 && avail.every(k => (p.forms[k] && p.forms[k].streak >= FORM_MASTERY));
     }
     // Ответ засчитывается в прогресс конкретной формы (fkey), а в p.seen/p.correct
     // копится агрегат по знаку — он нужен только чтобы отличить совсем «новый» знак
@@ -360,13 +360,7 @@
         if (!p.forms) p.forms = {};
         const f = p.forms[fkey] || (p.forms[fkey] = { seen: 0, streak: 0 });
         f.seen++;
-        if (ok) {
-            f.streak++;
-            if (f.streak >= FORM_MASTERY) f.mastered = true;
-            p.correct = (p.correct || 0) + 1;
-        } else {
-            f.streak = 0;
-        }
+        if (ok) { f.streak++; p.correct = (p.correct || 0) + 1; } else { f.streak = 0; }
         p.seen = (p.seen || 0) + 1;
         practiceProgress[k] = p; saveProgress();
     }
@@ -507,7 +501,7 @@
         const started = totalAll > 0 && learnedAll > 0;
         const intro = started
             ? `<div class="hp-overall">Выучено букв и знаков: <b>${learnedAll} / ${totalAll}</b> (${pctAll}%)</div>`
-            : `<div class="hp-empty">Прогресс появится, когда вы начнёте тренировки. Знак считается выученным, когда каждая его форма (начальная/серединная/конечная) отвечена верно хотя бы один раз.</div>`;
+            : `<div class="hp-empty">Прогресс появится, когда вы начнёте тренировки. Знак считается выученным, когда каждая его форма (начальная/серединная/конечная) отвечена верно два раза подряд.</div>`;
         return `
             <div class="hp-card">
                 <div class="hp-top">

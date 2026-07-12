@@ -10,8 +10,7 @@
     const PATH_UNITS = [
         { title: 'Правила', lessons: [
             { id: 'wr', kind: 'link', title: 'Правила письма', sub: 'Направление, штрихи, позиции букв', cat: 'writing_rules' },
-            { id: 'rr', kind: 'link', title: 'Правила чтения', sub: 'Сингармонизм и особые случаи', cat: 'rules' },
-            { id: 'har', kind: 'link', title: 'Сингармонизм', sub: 'Задний и передний ряды гласных', cat: 'harmony' }
+            { id: 'rr', kind: 'link', title: 'Правила чтения', sub: 'Сингармонизм и особые случаи', cat: 'rules' }
         ]},
         { title: 'Гласные', lessons: [
             { id: 'vow', kind: 'quiz', title: 'Семь гласных', sub: 'а · э · и · о · у · ө · ү', idxs: [0,1,2,3,4,5,6] }
