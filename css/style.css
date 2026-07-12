@@ -1006,6 +1006,10 @@ mark.hl {
     border-radius: var(--radius); padding: 1rem 1.1rem;
 }
 .about-step span:last-child { color: var(--text-secondary); }
+.about-step-body { flex: 1; color: var(--text-secondary); }
+.about-step-body > p { margin: 0 0 0.45rem; }
+.about-step-lead { margin-bottom: 0.55rem !important; }
+.about-step-body .wr-glyph-item { margin-top: 0.15rem; }
 .about-step-n {
     flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%;
     background: var(--accent); color: #fff; font-weight: 700; font-size: 0.85rem;
@@ -1709,6 +1713,58 @@ mark.hl {
 .wr-dir-svg text { fill: var(--text-muted); font-size: 8px; font-family: 'Inter', sans-serif; }
 .wr-dir-caption { text-align: center; font-size: 0.82rem; color: var(--text-muted); font-style: italic; margin-top: -0.4rem; margin-bottom: 0.5rem; }
 
+/* нурһн — простая вертикальная линия (ось письма) */
+.wr-nurhun-line {
+    display: inline-block;
+    width: 2px;
+    background: var(--todo-ink);
+    border-radius: 1px;
+}
+.wr-nurhun-line--inline { height: 1.35em; vertical-align: middle; }
+.wr-nurhun-line-track {
+    display: flex; align-items: flex-start; justify-content: center;
+    height: 80px; width: 2.5px; flex-shrink: 0;
+}
+.wr-nurhun-line--card {
+    height: 80px; width: 2.5px;
+    transform: scaleY(0); transform-origin: top center;
+    animation: wr-nurhun-draw 1.1s ease-out forwards;
+}
+.wr-nurhun-card {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 0.45rem; flex: 1; width: 100%;
+}
+.wr-nurhun-card-label {
+    font-size: 0.78rem; font-weight: 700; color: var(--accent); line-height: 1.2;
+    opacity: 0; animation: wr-nurhun-label-in 0.35s ease-out 0.95s forwards;
+}
+@keyframes wr-nurhun-draw {
+    from { transform: scaleY(0); }
+    to { transform: scaleY(1); }
+}
+@keyframes wr-nurhun-label-in {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .wr-nurhun-line--card { transform: scaleY(1); animation: none; }
+    .wr-nurhun-card-label { opacity: 1; animation: none; }
+}
+.wr-glyph-item--nurhun {
+    justify-content: center; min-width: 72px; min-height: 118px; padding: 0.85rem 1rem;
+}
+.wr-glyph-item--nurhun .wr-glyph-hint { margin-top: 0.15rem; }
+.wr-nurhun-ref {
+    display: inline-flex; align-items: center; gap: 0.4rem; vertical-align: middle;
+    padding: 0.1rem 0.45rem; margin: 0 0.1rem;
+    background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 6px;
+    cursor: pointer; font: inherit; color: inherit;
+}
+.wr-nurhun-ref:hover, .wr-nurhun-ref:focus-visible {
+    border-color: var(--accent); background: var(--accent-glow); outline: none;
+}
+.wr-nurhun-label { font-size: 0.85rem; font-weight: 700; color: var(--accent); }
+
 .wr-vowels-chart {
     margin: 1rem 0 1.1rem;
     text-align: center;
@@ -1755,6 +1811,7 @@ mark.hl {
 /* Полоса кликабельных знаков — переиспользует существующий .about-glyphstrip,
    но добавляет курсор/подсказку интерактивности. */
 .wr-glyph-row { display: flex; flex-wrap: wrap; justify-content: flex-start; gap: 0.75rem; margin: 0.9rem 0 1.1rem; }
+.wr-glyph-row--solo { justify-content: center; }
 .wr-glyph-item {
     display: flex; flex-direction: column; align-items: center; gap: 0.35rem;
     background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius);
