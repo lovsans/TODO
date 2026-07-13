@@ -116,6 +116,7 @@
     function wrNurhunCard(hint) {
         return `
             <div class="wr-glyph-item wr-glyph-item--nurhun" role="button" tabindex="0" onclick="gotoChar('nurγun')"
+                 onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();gotoChar('nurγun');}"
                  onmouseenter="wrReplayNurhunAnim(this)" aria-label="Открыть элемент «нурһн»">
                 <div class="wr-nurhun-card">
                     ${wrNurhunLine('card')}
@@ -133,6 +134,7 @@
             : `gotoChar('${String(lat).replace(/\\/g, '\\\\').replace(/'/g, "\\'")}')`;
         return `
             <div class="wr-glyph-item" role="button" tabindex="0" onclick="${open}"
+                 onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();${open};}"
                  aria-label="Открыть знак «${escapeHtml(c.cyrillic)}»">
                 <span class="wr-glyph-g">${glyph}</span>
                 <span class="wr-glyph-c">${escapeHtml(c.cyrillic)}</span>
@@ -208,40 +210,44 @@
                 <line class="wr-line" x1="116" y1="8" x2="170" y2="8"></line>
                 <polygon class="wr-arrow" points="166,3 166,13 176,8"></polygon>
             </svg>
-            <div class="wr-dir-caption">Внутри столбца — сверху вниз; столбцы читаются и пишутся слева направо</div>`;
+            <div class="wr-dir-caption">Внутри столбца — сверху вниз.<br>Столбцы читаются и пишутся слева направо.</div>`;
 
         const sections = [
             {
                 title: 'Направление письма',
                 body: `
-                    <p>Тодо Бичик — вертикальное письмо: буквы «нанизываются» сверху вниз на вертикальную ось, которая по-калмыцки называется <strong>нурһн</strong> — «спинка». Один столбец соответствует примерно одной строке привычного горизонтального письма.</p>
+                    <p>Тодо\u00A0Бичик — вертикальное письмо: буквы «нанизываются» сверху вниз на вертикальную ось, которая по-калмыцки называется <strong>нурһн</strong>\u00A0— «спинка». Один столбец соответствует примерно одной строке привычного горизонтального письма.</p>
                     ${dirSvg}
-                    <div class="wr-glyph-row wr-glyph-row--solo">${wrNurhunCard('центральная ось, стержень')}</div>
-                    <p>Столбцы располагаются и читаются <strong>слева направо</strong> — так же, как в монгольской вертикальной письменности, из которой выросло Тодо Бичик. Поэтому лист или страница заполняются последовательно: дописали столбец до конца — переходят к следующему, правее.</p>`
+                    <div class="wr-glyph-row wr-glyph-row--solo">${wrNurhunCard('центральная ось · стержень')}</div>
+                    <p>Столбцы располагаются и читаются <strong>слева\u00A0направо</strong> — так же, как в монгольской вертикальной письменности, из которой выросло Тодо\u00A0Бичик.</p>
+                    <p>Поэтому лист или страница заполняются последовательно: дописали столбец до конца — переходят к следующему, правее.</p>`
             },
             {
                 title: 'Порядок штрихов',
                 body: `
-                    <p>Общее правило: штрихи внутри знака ведутся <strong>сверху вниз и слева направо</strong>, начиная от вертикального хребта — сначала основная линия буквы, затем отходящие от неё элементы (зубцы, петли, крючки).</p>
+                    <p>Общее правило: штрихи внутри знака ведутся <strong>сверху\u00A0вниз и слева\u00A0направо</strong>, начиная от вертикального хребта — сначала основная линия буквы, затем отходящие от неё элементы (зубцы, петли, крючки).</p>
                     <div class="about-steps">
-                        <div class="about-step"><span class="about-step-n">1</span><div class="about-step-body"><p>Для части согласных (н, һ, х) добавьте верхнюю «корону» —</p><p class="about-step-lead">с которой начинается буква:</p>${wrGlyph('titm', 'титм — «корона»')}</div></div>
-                        <div class="about-step"><span class="about-step-n">2</span><span>Допишите основной элемент буквы — обычно это зубец, ${wrGlyph('aran', 'аран — «зубец»')}, отходящий от центральной оси.</span></div>
-                        <div class="about-step"><span class="about-step-n">3</span><span>Проведите вертикальный штрих — ${wrNurhunRef()}, на который «нанизана» буква.</span></div>
-                        <div class="about-step"><span class="about-step-n">4</span><span>Диакритические знаки (точки, черты, крючки) ставятся <em>последними</em>, уже после того как всё слово дописано целиком — начиная снизу и двигаясь вверх по ходу часовой стрелки.</span></div>
+                        <div class="about-step"><span class="about-step-n">1</span><div class="about-step-body"><p>Для части согласных (н, һ, х) добавьте верхнюю «корону», с которой начинается буква:</p>${wrGlyph('titm', 'титм · «корона»')}</div></div>
+                        <div class="about-step"><span class="about-step-n">2</span><div class="about-step-body"><p>Допишите основной элемент буквы — обычно это зубец, отходящий от центральной оси:</p>${wrGlyph('aran', 'аран · «зубец»')}</div></div>
+                        <div class="about-step"><span class="about-step-n">3</span><div class="about-step-body"><p>Проведите вертикальный штрих, на который «нанизана» буква:</p><div class="wr-glyphs-after wr-glyphs-after--step">${wrNurhunRef()}</div></div></div>
+                        <div class="about-step"><span class="about-step-n">4</span><div class="about-step-body"><p>Диакритические знаки (точки, черты, крючки) ставятся <em>последними</em>, уже после того как всё слово дописано целиком — начиная снизу и двигаясь вверх по ходу часовой стрелки.</p></div></div>
                     </div>
-                    <p>Именно так, по словам А. В. Бадмаева, разбирается по знакам слово «хальмг»: сначала дописывается весь слоговой костяк слова, и только потом, снизу вверх по часовой стрелке, расставляются все точки и чёрточки. Пошаговую анимацию порядка и направления штрихов для каждого конкретного знака смотрите в разделе <a class="note-link" role="link" tabindex="0" onclick="showSection('direction');return false;">«Направление письма» (тренажёр)</a> — там же можно прописать знак самостоятельно.</p>`
+                    <p>Именно так, по словам А.\u00A0В.\u00A0Бадмаева, разбирается по знакам слово «хальмг»: сначала дописывается весь слоговой костяк слова, и только потом, снизу вверх по часовой стрелке, расставляются все точки и чёрточки.</p>
+                    <p>Пошаговую анимацию порядка и направления штрихов для каждого конкретного знака смотрите в разделе <a class="note-link" role="link" tabindex="0" onclick="showSection('direction');return false;">«Направление письма» (тренажёр)</a> — там же можно прописать знак самостоятельно.</p>`
             },
             {
                 title: 'Соединительные элементы и лигатуры',
                 body: `
-                    <p>Буквы Тодо Бичик не «склеены» произвольно — у письма есть небольшой набор именованных строительных элементов, из которых собирается любой знак:</p>
+                    <p>Буквы Тодо\u00A0Бичик не «склеены» произвольно — у письма есть небольшой набор именованных строительных элементов, из которых собирается любой знак:</p>
                     ${wrGlyphRow([
-                        ['titm', 'корона — верхний элемент'],
-                        ['aran', 'зубец — базовый штрих'],
-                        ['nurγun', 'центральная ось, стержень'],
-                        ['udān', 'удан — знак долготы']
+                        ['titm', 'корона · верхний элемент'],
+                        ['aran', 'зубец · базовый штрих'],
+                        ['nurγun', 'центральная ось · стержень'],
+                        ['udān', 'удан · знак долготы']
                     ])}
-                    <p>Настоящие лигатуры в Тодо Бичик образуют «круглые» согласные — ${wrGlyph('b1', 'б — круглая согласная')}, п, к, г — у которых нет собственной соединительной вертикальной черты. Вместо того чтобы тянуться через хребет, они попросту «вбирают» в свою дугу круглую гласную целиком: сочетания бо, бу, бө, бү пишутся одним слитным росчерком, а не буквой и гласной по отдельности.</p>
+                    <p>Настоящие лигатуры в Тодо\u00A0Бичик образуют «круглые» согласные — б, п, к, г — у которых нет собственной соединительной вертикальной черты. Пример круглой согласной:</p>
+                    <div class="wr-glyphs-after">${wrGlyph('b1', 'б · круглая согласная')}</div>
+                    <p>Вместо того чтобы тянуться через хребет, они попросту «вбирают» в свою дугу круглую гласную целиком: сочетания бо, бу, бө, бү пишутся одним слитным росчерком, а не буквой и гласной по отдельности.</p>
                     <div class="wr-round-lesson">
                         <div class="wr-mini-title">Круглая согласная + круглая гласная</div>
                         <p>Это не две раздельные буквы подряд. Гласная входит внутрь арки согласной, и слог пишется одним цельным движением.</p>
@@ -252,7 +258,8 @@
                             ${wrRoundCard('к + ү', 'kü', 'кү: «ү» не дописывается отдельно')}
                         </div>
                     </div>
-                    <p>Слоги тоже не собираются механически из «согласный + гласный»: многие пишутся единым эталонным начертанием, которое стоит запомнить целиком. Такие слоговые связки — по сериям в разделе <a class="note-link" role="link" tabindex="0" onclick="showSection('syllables');return false;">«Слоги»</a>, например ${wrGlyph('na', 'слог «на» — начальная форма', 'initial')}.</p>`
+                    <p>Слоги тоже не собираются механически из «согласный + гласный»: многие пишутся единым эталонным начертанием, которое стоит запомнить целиком. Такие слоговые связки — по сериям в разделе <a class="note-link" role="link" tabindex="0" onclick="showSection('syllables');return false;">«Слоги»</a>. Например:</p>
+                    <div class="wr-glyphs-after">${wrGlyph('na', 'слог «на» · начальная', 'initial')}</div>`
             },
             {
                 title: 'Позиции букв: начальная, срединная, конечная, изолированная',
@@ -261,7 +268,7 @@
                     <table class="wr-table">
                         <thead><tr><th>Позиция</th><th>Когда используется</th></tr></thead>
                         <tbody>
-                            <tr><td><strong>Начальная</strong></td><td>У некоторых согласных пишут знак «титм» («корона»): ${wrGlyph('titm', 'титм — корона')}</td></tr>
+                            <tr><td><strong>Начальная</strong></td><td><p class="wr-table-lead">У некоторых согласных пишут знак «титм» («корона»):</p><div class="wr-glyphs-after">${wrGlyph('titm', 'титм · корона')}</div></td></tr>
                             <tr><td><strong>Срединная</strong></td><td>буква внутри слова, между двумя другими знаками.</td></tr>
                             <tr><td><strong>Конечная</strong></td><td>последняя буква слова; у ряда согласных отдельной конечной формы нет.</td></tr>
                         </tbody>
@@ -287,7 +294,7 @@
                             ${wrFinalSyllCard('ги', 'gi', 'конечная и после г')}
                         </div>
                     </div>
-                    <p>В Тодо Бичик для написания каждой буквы отдельно, изолированно, пишут в их начальной форме.</p>`
+                    <p>В Тодо\u00A0Бичик для написания каждой буквы отдельно, изолированно, пишут в их начальной форме.</p>`
             },
             {
                 title: 'Буква «н» и точка',
@@ -300,13 +307,18 @@
                         ${wrNCard('4. Конечная «а»', 'после согласной читается как буква «а»', 'сара', 'сар', 'Конечный знак после согласной выглядит как «н», но читается как конечная буква «а».', 'final')}
                     </div>
                     <div class="wr-n-rule">
-                        <strong>Проверка в одно действие:</strong> после «н» гласная — ставим точку; после «н» согласная — точки нет; в конечной форме буква «н» выглядит как конечная буква «а», в конце после согласной — читаем как «а».
+                        <strong>Проверка в одно действие:</strong> после «н» гласная — ставим точку;<br>после «н» согласная — точки нет;<br>в конечной форме буква «н» выглядит как конечная буква «а»;<br>в конце после согласной — читаем как «а».
                     </div>`
             },
             {
                 title: 'Особенности гласных и согласных',
                 body: `
-                    <p><strong>Гласные</strong> — семь основных (а, э, и, о, у, ө, ү), плюс их долгие варианты и дифтонги с «й». Начальная форма гласной всегда получает добавочный элемент — корону ${wrGlyph('titm', 'титм — корона')}, ${wrGlyph('a', 'а — начальная', 'initial')}. Гласная «и» смягчает соседние звуки (${wrGlyph('i', 'палатализация')}); буква «у» отличается от «ү» только одной дополнительной чертой слева-внизу — это диакритический знак, который добавляется уже после того, как всё слово дописано, ${wrGlyph('uru_tatasn', 'уру татасн')}.</p>
+                    <p><strong>Гласные</strong> — семь основных (а, э, и, о, у, ө, ү), плюс их долгие варианты и дифтонги с «й». Начальная форма гласной всегда получает добавочный элемент — корону:</p>
+                    <div class="wr-glyphs-after">${wrGlyph('titm', 'титм · корона')} ${wrGlyph('a', 'а · начальная', 'initial')}</div>
+                    <p>Гласная «и» смягчает соседние звуки (палатализация):</p>
+                    <div class="wr-glyphs-after">${wrGlyph('i', 'палатализация')}</div>
+                    <p>Буква «у» отличается от «ү» только одной дополнительной чертой слева-внизу — это диакритический знак, который добавляется уже после того, как всё слово дописано:</p>
+                    <div class="wr-glyphs-after">${wrGlyph('uru_tatasn', 'уру татасн')}</div>
                     <figure class="wr-vowels-chart">
                         <picture>
                             <source srcset="img/vowels-strokes.webp" type="image/webp">
@@ -345,18 +357,19 @@
                             <tr><td class="wr-td-glyph">${wrTdGlyph('x_γaliq')}</td><td>х-галик — придыхание в заимствованиях (Лхаса)</td></tr>
                         </tbody>
                     </table>
-                    <p>Сама буква «ч» ${wrGlyph('č', 'ч — изначально галик')} тоже когда-то была галиком: в старых рукописях она встречалась только в заимствованных словах, а лишь позже стала записывать звук «ч» и в исконно калмыцких словах вроде «чон», «чавч», «чееҗ».</p>
+                    <p>Сама буква «ч» тоже когда-то была галиком: в старых рукописях она встречалась только в заимствованных словах, а лишь позже стала записывать звук «ч» и в исконно калмыцких словах вроде «чон», «чавч», «чееҗ».</p>
+                    <div class="wr-glyphs-after">${wrGlyph('č', 'ч · изначально галик')}</div>
                     <p>Полный набор галиков со всеми вариантами — в разделе <a class="note-link" role="link" tabindex="0" onclick="showSection('galik');return false;">«Галики и заимствования»</a>; там же можно попрактиковаться в их распознавании.</p>`
             },
             {
                 title: 'Пунктуация и цифры',
                 body: `
-                    <p>Знаки препинания в Тодо Бичик немногочисленны, но обязательны: они обозначают начало и конец текста, абзаца или предложения.</p>
+                    <p>Знаки препинания в Тодо\u00A0Бичик немногочисленны, но обязательны: они обозначают начало и конец текста, абзаца или предложения.</p>
                     ${wrGlyphRow([
-                        ['birγa', 'бирга — начало текста'],
-                        ['point_4', 'четыре точки — конец текста'],
-                        ['comma', 'запятая — логическое деление'],
-                        ['colon', 'две точки — конец предложения']
+                        ['birγa', 'бирга · начало текста'],
+                        ['point_4', 'четыре точки · конец текста'],
+                        ['comma', 'запятая · логическое деление'],
+                        ['colon', 'две точки · конец предложения']
                     ])}
                     <p>Цифры от 0 до 9 пишутся собственными знаками, не связанными по форме с буквами:</p>
                     ${wrGlyphRow(['0','1','2','3','4','5','6','7','8','9'].map(d => [d, null]))}`
@@ -387,10 +400,12 @@
                         </div>
                         <div class="wr-mistake">
                             <div class="wr-mistake-bad"><span class="wr-mistake-tag">Неверно</span><span>Не различать «у» и «ү» — у обеих букв похожий круглый «живот».</span></div>
-                            <div class="wr-mistake-good"><span class="wr-mistake-tag">Верно</span><span>У буквы «у» слева-внизу есть дополнительная черта — ${wrGlyph('uru_tatasn')}; у «ү» её нет.</span></div>
+                            <div class="wr-mistake-good"><span class="wr-mistake-tag">Верно</span><span>У буквы «у» слева-внизу есть дополнительная черта; у «ү» её нет:</span></div>
+                            <div class="wr-mistake-glyphs">${wrGlyph('uru_tatasn')}</div>
                         </div>
                         <div class="wr-mistake">
-                            <div class="wr-mistake-bad"><span class="wr-mistake-tag">Неверно</span><span>В середине и в конце слова путать знак «г» ${wrGlyph('g1')} со знаком «к» — это документированная ошибка даже среди калмыцких имён (Пунцук вместо Пунцуг).</span></div>
+                            <div class="wr-mistake-bad"><span class="wr-mistake-tag">Неверно</span><span>В середине и в конце слова путать знак «г» со знаком «к» — это документированная ошибка даже среди калмыцких имён (Пунцук вместо Пунцуг).</span></div>
+                            <div class="wr-mistake-glyphs">${wrGlyph('g1')} ${wrGlyph('k', 'к', 'medial')}</div>
                             <div class="wr-mistake-good"><span class="wr-mistake-tag">Верно</span><span>Сверяться с карточкой знака: «г» и «к» различаются графически, несмотря на внешнее сходство под влиянием русской орфографии.</span></div>
                         </div>
                     </div>`
@@ -920,6 +935,9 @@
                 <div class="cw-stage">
                     <span class="cw-stage-label">Собранное слово (сверху вниз)</span>
                     <div class="cw-zoom">
+                        <button class="cw-btn cw-btn-ghost ww-color-btn" id="cw-color-toggle"
+                                onclick="toggleGlyphColored()" aria-pressed="true"
+                                title="Переключить между цветными буквами и обычным шрифтом">🎨 Цветные буквы</button>
                         <span class="cw-zoom-label-txt">Размер</span>
                         <button class="cw-zoom-btn" onclick="composeZoom(-1)" title="Меньше" aria-label="Уменьшить">−</button>
                         <span class="cw-zoom-val" id="cw-zoom-val">100%</span>
@@ -973,6 +991,8 @@
         const nx = document.getElementById('cw-next');
         if (nx) nx.style.display = 'none';
         applyComposeZoom();
+        wwColored = loadWwColored();
+        applyGlyphColoredBtns();
         composeRender();
     }
 
@@ -989,7 +1009,7 @@
         placedLetters.forEach(lt => { if (lt.idx === -1) segs.push([]); else segs[segs.length - 1].push(lt); });
         const assembled = segs.map(s => trimSpine(assembleWord(s))).filter(Boolean).join('  ');
         // Раскраска по буквам (одни и те же цвета для собранной строки и для чипов).
-        const colorPlan = composeColorPlan(placedLetters);
+        const colorPlan = composeColorPlan(placedLetters, wwColored ? null : { plain: true });
         const asmEl = document.getElementById('cw-assembled');
         if (asmEl) {
             asmEl.classList.toggle('cw-empty', total === 0);
@@ -1010,7 +1030,7 @@
                 const t = tileById[iid];
                 const lt = t.letter;
                 const cc = colorPlan.colorByIndex[i];
-                const clCls = (cc != null && !composeState.answered) ? ' cl' + cc : '';
+                const clCls = (cc != null && !composeState.answered && wwColored) ? ' cl' + cc : '';
                 return `<span class="cw-chip${clCls}" onclick="composeRemoveAt(${i})" title="Убрать">
                             <span class="cw-chip-num">${i + 1}</span>${escapeHtml(t.label || composeLabel(lt))}<span class="cw-chip-x">✕</span>
                         </span>`;
@@ -1041,8 +1061,13 @@
         return s || (lt.latin || '');
     }
 
+    function wwNormalizeCyr(str) {
+        // В тодо нет отдельной буквы «я» — это йот + «а» (йа), как в слоге йасун.
+        return String(str).replace(/[яЯ]/g, 'йа');
+    }
+
     function wwParse(str) {
-        const s = String(str).toLowerCase();
+        const s = wwNormalizeCyr(String(str)).toLowerCase();
         const ids = [];
         let i = 0;
         while (i < s.length) {
@@ -1107,9 +1132,8 @@
         try { localStorage.setItem('todo-ww-zoom', String(wwZoomVal)); } catch (e) {}
         applyWwZoom();
     }
-    function wwInit() { wwZoomVal = loadWwZoom(); applyWwZoom(); wwColored = loadWwColored(); applyWwColoredBtn(); wwRender(); }
-
-    // ── Цветные буквы / обычный шрифт для «Написать слово» (своя память) ──
+    // ── Цветные буквы / обычный шрифт — общая настройка для «Составить слово»
+    // и «Написать слово» (один переключатель, одна память в localStorage). ──
     let wwColored = true;
     function loadWwColored() {
         try {
@@ -1117,19 +1141,27 @@
             return v === null ? true : v === '1';
         } catch (e) { return true; }
     }
-    function applyWwColoredBtn() {
-        const btn = document.getElementById('ww-color-toggle');
-        if (!btn) return;
-        btn.classList.toggle('is-active', wwColored);
-        btn.textContent = wwColored ? '🎨 Цветные буквы' : '🖋 Обычный шрифт';
-        btn.setAttribute('aria-pressed', wwColored ? 'true' : 'false');
+    function applyGlyphColoredBtns() {
+        const on = !!wwColored;
+        const label = on ? '🎨 Цветные буквы' : '🖋 Обычный шрифт';
+        ['ww-color-toggle', 'cw-color-toggle'].forEach(id => {
+            const btn = document.getElementById(id);
+            if (!btn) return;
+            btn.classList.toggle('is-active', on);
+            btn.textContent = label;
+            btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+        });
     }
-    function wwToggleColored() {
+    function toggleGlyphColored() {
         wwColored = !wwColored;
         try { localStorage.setItem('todo-ww-colored', wwColored ? '1' : '0'); } catch (e) {}
-        applyWwColoredBtn();
+        applyGlyphColoredBtns();
         wwRender();
+        composeRender();
     }
+    function wwToggleColored() { toggleGlyphColored(); }
+
+    function wwInit() { wwZoomVal = loadWwZoom(); applyWwZoom(); wwColored = loadWwColored(); applyGlyphColoredBtns(); wwRender(); }
 
     // Палитра «разноцветных букв» для картинки: классы style.css внутри SVG не
     // действуют, поэтому в картинке цвет ставится инлайн. Совпадает с cl0…cl9.
@@ -1188,6 +1220,17 @@
                     </button>`;
         }).join('');
         const galikRow = `<div class="ww-krow-label">Галики и заимствованные</div><div class="ww-krow ww-krow-signs">${galikKeys}</div>`;
+        const finalKeys = WW_FINAL_DEFS.map(d => {
+            const lt = composeCharByIdx[d.idx];
+            if (!lt) return '';
+            const glyph = lt.final != null ? lt.final : (lt.initial != null ? lt.initial : (lt.medial || ''));
+            const ins = escapeHtml(d.ins);
+            return `<button class="ww-key ww-key-sign" onclick="wwInsert('${ins}')" title="${escapeHtml(d.title)}">
+                        <span class="ww-key-glyph">${escapeHtml(trimSpine(glyph))}</span>
+                        <span class="ww-key-cap">${escapeHtml(d.cap)}</span>
+                    </button>`;
+        }).join('');
+        const finalRow = `<div class="ww-krow-label">Конечные формы</div><div class="ww-krow ww-krow-signs">${finalKeys}</div>`;
         // Отдельный ряд цифр и знаков письма (бирга, точки, запятая). Глиф на кнопке
         // рисуется шрифтом тодо из поля initial; подпись — привычное название/цифра.
         const signKeys = WW_SIGN_DEFS.map(d => {
@@ -1206,13 +1249,13 @@
                 <div class="ww-typebox">
                     <input id="ww-input" class="ww-input" type="text" inputmode="text"
                            autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"
-                           placeholder="Печатайте кириллицей и цифры; пробел — новое слово" oninput="wwRender()">
+                           placeholder="Печатайте кириллицей и цифры; пробел — новое слово" oninput="wwNormalizeInput()">
                 </div>
                 <div class="cw-stage">
                     <span class="cw-stage-label">Ваше слово (сверху вниз)</span>
                     <div class="cw-zoom">
                         <button class="cw-btn cw-btn-ghost ww-color-btn" id="ww-color-toggle"
-                                onclick="wwToggleColored()" aria-pressed="true"
+                                onclick="toggleGlyphColored()" aria-pressed="true"
                                 title="Переключить между цветными буквами и обычным шрифтом">🎨 Цветные буквы</button>
                         <span class="cw-zoom-label-txt">Размер</span>
                         <button class="cw-zoom-btn" onclick="wwZoom(-1)" title="Меньше" aria-label="Уменьшить">−</button>
@@ -1245,7 +1288,7 @@
                     </div>
                 </div>
                 <div class="ww-kbd-hint">Можно печатать с клавиатуры или нажимать буквы, цифры и знаки ниже:</div>
-                <div class="ww-keyboard">${keyboard}${galikRow}${signRow}</div>
+                <div class="ww-keyboard">${keyboard}${galikRow}${finalRow}${signRow}</div>
             </div>`;
     }
     function wwTranslitLabel(lt) {
@@ -1271,6 +1314,21 @@
             });
         }
         return { todoWords, translitWords };
+    }
+
+    function wwNormalizeInput() {
+        const inp = document.getElementById('ww-input');
+        if (!inp) return;
+        const old = inp.value;
+        const norm = wwNormalizeCyr(old);
+        if (norm !== old) {
+            const pos = inp.selectionStart != null ? inp.selectionStart : old.length;
+            const yaBefore = (old.slice(0, pos).match(/[яЯ]/g) || []).length;
+            inp.value = norm;
+            const newPos = pos + yaBefore;
+            inp.setSelectionRange(newPos, newPos);
+        }
+        wwRender();
     }
 
     function wwRender() {

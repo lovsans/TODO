@@ -1700,10 +1700,23 @@ mark.hl {
 .wr-acc[open] .wr-acc-chev { transform: rotate(180deg); color: var(--accent); }
 .wr-acc-body {
     padding: 0 1.2rem 1.25rem 4.1rem; color: var(--text-secondary); line-height: 1.7; font-size: 0.94rem;
+    overflow-wrap: break-word; text-wrap: pretty;
 }
 .wr-acc-body p { margin-bottom: 0.8rem; }
 .wr-acc-body p:last-child { margin-bottom: 0; }
 .wr-acc-body strong { color: var(--text-primary); }
+.wr-table-lead { margin: 0 0 0.35rem; }
+.wr-glyphs-after {
+    display: flex; flex-wrap: wrap; gap: 0.65rem; align-items: flex-start;
+    margin: 0.15rem 0 0.85rem;
+}
+.wr-acc-body .wr-glyphs-after:last-child { margin-bottom: 0; }
+.wr-table td .wr-glyphs-after { margin: 0.2rem 0 0; }
+.about-step-body .wr-glyphs-after { margin: 0.1rem 0 0; }
+.wr-glyphs-after .wr-nurhun-ref { margin: 0; }
+.wr-mistake-glyphs {
+    display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.35rem 0 0.55rem 2.15rem;
+}
 
 /* Диаграмма направления письма */
 .wr-dir-svg { display: block; margin: 0.5rem auto 1rem; max-width: 260px; width: 100%; height: auto; }
@@ -1711,7 +1724,10 @@ mark.hl {
 .wr-dir-svg .wr-dot { fill: var(--todo-ink); }
 .wr-dir-svg .wr-arrow { fill: var(--accent); }
 .wr-dir-svg text { fill: var(--text-muted); font-size: 8px; font-family: 'Inter', sans-serif; }
-.wr-dir-caption { text-align: center; font-size: 0.82rem; color: var(--text-muted); font-style: italic; margin-top: -0.4rem; margin-bottom: 0.5rem; }
+.wr-dir-caption {
+    text-align: center; font-size: 0.82rem; color: var(--text-muted); font-style: italic;
+    margin-top: -0.4rem; margin-bottom: 0.5rem; line-height: 1.45; max-width: 28rem; margin-inline: auto;
+}
 
 /* нурһн — простая вертикальная линия (ось письма) */
 .wr-nurhun-line {
@@ -1828,7 +1844,10 @@ mark.hl {
 }
 .wr-glyph-c { font-size: 0.78rem; font-weight: 700; color: var(--accent); }
 .wr-glyph-item[aria-label*="нурһн"] .wr-glyph-c { color: var(--accent); font-weight: 800; }
-.wr-glyph-hint { font-size: 0.68rem; color: var(--text-muted); max-width: 120px; text-align: center; line-height: 1.3; }
+.wr-glyph-hint {
+    font-size: 0.68rem; color: var(--text-muted); max-width: 7.5rem;
+    text-align: center; line-height: 1.35; text-wrap: balance; hyphens: none;
+}
 
 /* Мини-уроки внутри правил письма. */
 .wr-mini-title {
@@ -1880,7 +1899,7 @@ mark.hl {
 
 /* Таблицы (галики, цифры, пунктуация) */
 .wr-table { width: 100%; border-collapse: collapse; margin: 0.6rem 0 1rem; font-size: 0.88rem; }
-.wr-table th, .wr-table td { padding: 0.5rem 0.6rem; border-bottom: 1px solid var(--border); text-align: left; }
+.wr-table th, .wr-table td { padding: 0.5rem 0.6rem; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
 .wr-table th { color: var(--text-muted); font-weight: 700; font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.4px; }
 .wr-table td { color: var(--text-secondary); }
 .wr-table tr:last-child td { border-bottom: 0; }
@@ -1918,7 +1937,11 @@ mark.hl {
 .wr-n-rule {
     background: var(--accent-glow); border: 1px solid var(--accent-light);
     border-radius: var(--radius); padding: 0.8rem 0.95rem;
-    font-size: 0.88rem; color: var(--text-primary); line-height: 1.55;
+    font-size: 0.88rem; color: var(--text-primary); line-height: 1.55; text-wrap: pretty;
+}
+.wr-n-rule br { display: none; }
+@media (min-width: 520px) {
+    .wr-n-rule br { display: inline; }
 }
 
 /* Ошибки новичков: «неверно» / «верно» */
@@ -1928,6 +1951,7 @@ mark.hl {
     border-radius: var(--radius); padding: 1rem 1.1rem; box-shadow: var(--shadow);
 }
 .wr-mistake-bad, .wr-mistake-good { display: flex; gap: 0.5rem; align-items: flex-start; font-size: 0.88rem; line-height: 1.55; }
+.wr-mistake-bad > span:last-child, .wr-mistake-good > span:last-child { min-width: 0; flex: 1; }
 .wr-mistake-bad { color: var(--text-secondary); margin-bottom: 0.55rem; }
 .wr-mistake-good { color: var(--text-primary); }
 .wr-mistake-tag { flex-shrink: 0; font-weight: 700; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.4px;
@@ -1941,6 +1965,7 @@ mark.hl {
     .wr-acc-kind { display: none; }
     .wr-acc-body { padding: 0 0.95rem 1rem; }
     .wr-mistake-grid { grid-template-columns: 1fr; }
+    .wr-mistake-glyphs { margin-left: 0; justify-content: center; }
     .wr-n-grid { grid-template-columns: 1fr; }
     .wr-round-grid { grid-template-columns: 1fr; }
     .wr-glyph-row { gap: 0.5rem; }

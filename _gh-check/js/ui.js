@@ -319,7 +319,12 @@
         if (cat === 'about') updateHomeProgress();
         if (practiceScopes[cat]) setupPractice(cat);
         if (cat === 'copybook') requestAnimationFrame(() => requestAnimationFrame(cbFit));
-        if (cat === 'compose_word' && !composeState.inited) { composeZoomVal = loadComposeZoom(); composeSetup(loadComposeWi()); }
+        if (cat === 'compose_word') {
+            wwColored = loadWwColored();
+            applyGlyphColoredBtns();
+            if (!composeState.inited) { composeZoomVal = loadComposeZoom(); composeSetup(loadComposeWi()); }
+            else composeRender();
+        }
         if (cat === 'write_word') wwInit();
         if (cat === 'path') renderPathRoot();
         if (cat === 'direction') mountWriter();
