@@ -3,13 +3,106 @@
 
     function renderNavTabs() {
         const el = document.getElementById('nav-tabs');
-        el.innerHTML = navGroups.map(g => `
-            <div class="nav-group">
-                <div class="nav-group-label">${g.label}</div>
-                <div class="nav-group-items" aria-label="${escapeHtml(g.label)}">
-                    ${g.cats.map(c => `<button class="nav-item ${c === 'about' ? 'active' : ''}" data-cat="${c}"${c === 'about' ? ' aria-current="page"' : ''} onclick="showSection('${c}')">${categoryMeta[c].label}</button>`).join('')}
+        el.innerHTML = `
+            <div class="nav-tiles-row">
+                <div class="nav-tiles" role="tablist" aria-label="Группы разделов">
+                    ${navGroups.map((g, i) => `
+                        <button type="button" class="nav-tile" role="tab"
+                                aria-expanded="false" aria-controls="nav-group-panel-${i}" id="nav-group-toggle-${i}"
+                                data-nav-group="${i}" onclick="toggleNavGroup(${i})">
+                            <span class="nav-group-label">${escapeHtml(g.label)}</span>
+                            <span class="nav-group-chevron" aria-hidden="true"></span>
+                        </button>`).join('')}
                 </div>
-            </div>`).join('');
+                <div class="nav-bulk" aria-label="Управление группами">
+                    <button type="button" class="nav-bulk-btn" onclick="expandAllNavGroups()">Развернуть все</button>
+                    <button type="button" class="nav-bulk-btn" onclick="collapseAllNavGroups()">Свернуть все</button>
+                </div>
+            </div>
+            <div class="nav-panels">
+                ${navGroups.map((g, i) => `
+                    <div class="nav-group-panel" id="nav-group-panel-${i}" data-nav-panel="${i}" role="tabpanel" aria-labelledby="nav-group-toggle-${i}" hidden>
+                        <div class="nav-group-items" aria-label="${escapeHtml(g.label)}">
+                            ${g.cats.map(c => `<button class="nav-item ${c === 'about' ? 'active' : ''}" data-cat="${c}"${c === 'about' ? ' aria-current="page"' : ''} onclick="showSection('${c}')">${categoryMeta[c].label}</button>`).join('')}
+                        </div>
+                    </div>`).join('')}
+            </div>`;
+        applyNavGroupState();
+    }
+
+    const NAV_GROUP_STORE = 'todo-nav-groups-collapsed';
+
+    function getCollapsedNavGroups() {
+        try {
+            const raw = localStorage.getItem(NAV_GROUP_STORE);
+            if (raw) return new Set(JSON.parse(raw).map(Number));
+        } catch (e) {}
+        return new Set();
+    }
+
+    function saveCollapsedNavGroups(collapsed) {
+        try { localStorage.setItem(NAV_GROUP_STORE, JSON.stringify([...collapsed])); } catch (e) {}
+    }
+
+    function setNavGroupCollapsed(i, collapsed) {
+        const tile = document.getElementById('nav-group-toggle-' + i);
+        const panel = document.getElementById('nav-group-panel-' + i);
+        if (tile) tile.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+        if (tile) tile.classList.toggle('is-active', !collapsed);
+        if (panel) {
+            panel.classList.toggle('is-open', !collapsed);
+            if (collapsed) panel.setAttribute('hidden', '');
+            else panel.removeAttribute('hidden');
+        }
+    }
+
+    function toggleNavGroup(i) {
+        const panel = document.getElementById('nav-group-panel-' + i);
+        if (!panel) return;
+        const collapsed = panel.classList.contains('is-open');
+        setNavGroupCollapsed(i, collapsed);
+        syncNavGroupStore();
+    }
+
+    function syncNavGroupStore() {
+        const collapsed = new Set();
+        navGroups.forEach((_, i) => {
+            const panel = document.getElementById('nav-group-panel-' + i);
+            if (panel && !panel.classList.contains('is-open')) collapsed.add(i);
+        });
+        saveCollapsedNavGroups(collapsed);
+    }
+
+    function collapseAllNavGroups() {
+        navGroups.forEach((_, i) => setNavGroupCollapsed(i, true));
+        saveCollapsedNavGroups(new Set(navGroups.map((_, i) => i)));
+    }
+
+    function expandAllNavGroups() {
+        navGroups.forEach((_, i) => setNavGroupCollapsed(i, false));
+        saveCollapsedNavGroups(new Set());
+    }
+
+    function applyNavGroupState() {
+        let collapsed;
+        try {
+            if (localStorage.getItem(NAV_GROUP_STORE) === null) {
+                collapseAllNavGroups();
+                return;
+            }
+            collapsed = getCollapsedNavGroups();
+        } catch (e) {
+            collapseAllNavGroups();
+            return;
+        }
+        navGroups.forEach((_, i) => setNavGroupCollapsed(i, collapsed.has(i)));
+    }
+
+    function ensureNavGroupOpen(cat) {
+        const gi = navGroups.findIndex(g => g.cats.includes(cat));
+        if (gi < 0) return;
+        setNavGroupCollapsed(gi, false);
+        syncNavGroupStore();
     }
 
     function renderSectionContent(cat) {
@@ -265,6 +358,7 @@
 
     function showSection(cat) {
         exitSearch();
+        ensureNavGroupOpen(cat);
         document.getElementById('sections-container').style.display = '';
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         const sec = document.getElementById('section-' + cat);
