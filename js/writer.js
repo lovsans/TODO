@@ -20,7 +20,11 @@
         frame.dataset.mounted = '1';
         let theme = 'light';
         try { theme = document.documentElement.getAttribute('data-theme') || 'light'; } catch (e) {}
-        frame.src = 'writer.html?theme=' + theme;
+        try {
+            frame.src = new URL('./writer.html', document.baseURI).href + '?theme=' + theme;
+        } catch (e) {
+            frame.src = 'writer.html?theme=' + theme;
+        }
     }
 
     // Сообщения от тренажёра. Обрабатываем два типа:

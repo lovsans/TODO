@@ -242,7 +242,9 @@
         if (window.jspdf && window.jspdf.jsPDF) return Promise.resolve(window.jspdf);
         return new Promise(function (resolve, reject) {
             const s = document.createElement('script');
-            s.src = 'js/vendor/jspdf.umd.min.js';
+            s.src = typeof resolveScriptSrc === 'function'
+                ? resolveScriptSrc('./js/vendor/jspdf.umd.min.js')
+                : './js/vendor/jspdf.umd.min.js';
             s.onload = function () { resolve(window.jspdf); };
             s.onerror = function () { reject(new Error('jspdf load failed')); };
             document.head.appendChild(s);

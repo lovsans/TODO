@@ -284,7 +284,7 @@
             showSectionReady(cat);
         }).catch(function () {
             if (gen !== showSectionGen) return;
-            showSectionReady(cat);
+            console.error('Не удалось загрузить скрипты раздела:', cat);
         });
     }
 

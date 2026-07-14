@@ -29,25 +29,28 @@
 
     // Ленивая подгрузка скриптов разделов — не парсим всё при первом открытии сайта.
     const __loadedScripts = Object.create(null);
+    function resolveScriptSrc(src) {
+        try { return new URL(src, document.baseURI).href; }
+        catch (e) { return src; }
+    }
     function loadScriptOnce(src) {
-        if (__loadedScripts[src]) return __loadedScripts[src];
-        __loadedScripts[src] = new Promise(function (resolve, reject) {
+        const url = resolveScriptSrc(src);
+        if (__loadedScripts[url]) return __loadedScripts[url];
+        __loadedScripts[url] = new Promise(function (resolve, reject) {
             const s = document.createElement('script');
-            s.src = src;
+            s.src = url;
             s.async = true;
             s.onload = function () { resolve(); };
-            s.onerror = function () { reject(new Error('script load failed: ' + src)); };
+            s.onerror = function () { reject(new Error('script load failed: ' + url)); };
             document.head.appendChild(s);
         });
-        return __loadedScripts[src];
+        return __loadedScripts[url];
     }
 
     const SECTION_SCRIPT_DEPS = {
-        reading: ['js/barintodo-data.js', 'js/reading-data.js'],
-        harmony: ['js/harmony-data.js', 'js/harmony.js'],
-        path: ['js/path.js'],
-        copybook: ['js/copybook.js'],
-        direction: ['js/writer.js']
+        reading: ['./js/barintodo-data.js', './js/reading-data.js'],
+        harmony: ['./js/harmony-data.js', './js/harmony.js'],
+        path: ['./js/path.js']
     };
 
     function scheduleIdle(fn) {
