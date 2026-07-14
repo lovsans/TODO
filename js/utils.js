@@ -27,40 +27,6 @@
         window.scrollTo({ top: 0, behavior: reducedMotion() ? 'auto' : 'smooth' });
     }
 
-    // Ленивая подгрузка скриптов разделов — не парсим всё при первом открытии сайта.
-    const __loadedScripts = Object.create(null);
-    function resolveScriptSrc(src) {
-        try { return new URL(src, document.baseURI).href; }
-        catch (e) { return src; }
-    }
-    function loadScriptOnce(src) {
-        const url = resolveScriptSrc(src);
-        if (__loadedScripts[url]) return __loadedScripts[url];
-        __loadedScripts[url] = new Promise(function (resolve, reject) {
-            const s = document.createElement('script');
-            s.src = url;
-            s.async = true;
-            s.onload = function () { resolve(); };
-            s.onerror = function () { reject(new Error('script load failed: ' + url)); };
-            document.head.appendChild(s);
-        });
-        return __loadedScripts[url];
-    }
-
-    const SECTION_SCRIPT_DEPS = {
-        reading: ['./js/barintodo-data.js', './js/reading-data.js'],
-        harmony: ['./js/harmony-data.js', './js/harmony.js'],
-        path: ['./js/path.js']
-    };
-
-    function scheduleIdle(fn) {
-        if (typeof requestIdleCallback === 'function') {
-            requestIdleCallback(function () { fn(); }, { timeout: 1200 });
-        } else {
-            setTimeout(fn, 0);
-        }
-    }
-
     // ── Сохранение написанного слова как картинки ─────────────────────────────
     // Картинка рисуется самим браузером: блок вертикального письма со встроенным
     // шрифтом тодо упаковывается в SVG <foreignObject> и переносится на <canvas>.

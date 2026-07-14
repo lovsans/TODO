@@ -276,21 +276,6 @@
     }
 
     function showSection(cat) {
-        const deps = SECTION_SCRIPT_DEPS[cat];
-        const load = deps ? Promise.all(deps.map(loadScriptOnce)) : Promise.resolve();
-        const gen = ++showSectionGen;
-        load.then(function () {
-            if (gen !== showSectionGen) return;
-            showSectionReady(cat);
-        }).catch(function () {
-            if (gen !== showSectionGen) return;
-            console.error('Не удалось загрузить скрипты раздела:', cat);
-        });
-    }
-
-    let showSectionGen = 0;
-
-    function showSectionReady(cat) {
         exitSearch();
         mountSection(cat);
         document.getElementById('sections-container').style.display = '';
@@ -305,7 +290,7 @@
             else n.removeAttribute('aria-current');
         });
         scrollTopSmooth();
-        if (cat === 'about') scheduleIdle(updateHomeProgress);
+        if (cat === 'about') updateHomeProgress();
         if (practiceScopes[cat]) setupPractice(cat);
         if (cat === 'copybook') {
             ensureCopybookInit();

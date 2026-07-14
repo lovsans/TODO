@@ -83,4 +83,5 @@
     initSearch();
     const searchInp = document.getElementById('search-input');
     if (searchInp) searchInp.addEventListener('input', runSearchDebounced);
-    scheduleIdle(updateHomeProgress);
+    initCopybook();
+    updateHomeProgress();
