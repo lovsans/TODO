@@ -275,8 +275,9 @@
     // ---- рисование ----
     function cbCanvasPoint(e, st) {
         const r = st.canvas.getBoundingClientRect();
-        return { x: (e.clientX - r.left) / r.width * st.canvas.width,
-                 y: (e.clientY - r.top) / r.height * st.canvas.height };
+        const w = r.width || 1, h = r.height || 1;
+        return { x: (e.clientX - r.left) / w * st.canvas.width,
+                 y: (e.clientY - r.top) / h * st.canvas.height };
     }
     function cbStrokeStyle(st) {
         const ctx = st.ctx, r = st.canvas.getBoundingClientRect();
@@ -295,6 +296,10 @@
     function cbStartStroke(pt) {
         const st = cbCur(); if (!st) return;
         cbDrawing = true; st._pts = [pt];
+        cbStrokeStyle(st);
+        const ctx = st.ctx, r = Math.max(ctx.lineWidth / 2, 1);
+        ctx.fillStyle = cbState.tool === 'eraser' ? 'rgba(0,0,0,1)' : cbState.color;
+        ctx.beginPath(); ctx.arc(pt.x, pt.y, r, 0, Math.PI * 2); ctx.fill();
     }
     function cbDrawMove(e) {
         const st = cbCur(); if (!st || !cbDrawing) return;
@@ -350,17 +355,27 @@
     }
 
     function cbPtrDown(e) {
+        if (!cbCur()) ensureCopybookInit();
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        cbDismissHint();
+        const vp = e.currentTarget;
         cbPointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
         if (cbPointers.size >= 2) {
-            cbMultiTouch = true;                 // на всё касание: рисовать нельзя
-            if (cbDrawing) cbAbortStroke();      // отменить начатый штрих
+            cbMultiTouch = true;
+            if (cbDrawing) cbAbortStroke();
             cbDrawing = false; cbDrawId = null; cbPendingDown = null;
             cbStartGesture();
         } else {
-            // первый палец: пока не рисуем — ждём движения (чтобы тап/жест не оставлял точку)
             const st = cbCur();
-            cbPendingDown = st ? cbCanvasPoint(e, st) : null;
             cbDrawId = e.pointerId;
+            if (st && (e.pointerType === 'mouse' || e.pointerType === 'pen')) {
+                cbStartStroke(cbCanvasPoint(e, st));
+            } else {
+                cbPendingDown = st ? cbCanvasPoint(e, st) : null;
+            }
+        }
+        if (e.pointerType === 'touch') {
+            try { vp.setPointerCapture(e.pointerId); } catch (err) {}
         }
         e.preventDefault();
     }
@@ -380,6 +395,11 @@
         e.preventDefault();
     }
     function cbPtrUp(e) {
+        if (!cbPointers.has(e.pointerId)) return;
+        const vp = document.getElementById('cb-viewport');
+        if (vp && e.pointerType === 'touch') {
+            try { vp.releasePointerCapture(e.pointerId); } catch (err) {}
+        }
         cbPointers.delete(e.pointerId);
         if (cbGesture && cbPointers.size < 2) cbGesture = null;
         if (cbDrawing && (e.pointerId === cbDrawId || cbPointers.size === 0)) cbEndStroke();
@@ -409,20 +429,32 @@
         if (h) h.classList.add('cb-hidden');
         try { localStorage.setItem('todo-cb-hint', '1'); } catch (e) {}
     }
+    function cbDismissHint() {
+        const h = document.getElementById('cb-hint');
+        if (h && !h.classList.contains('cb-hidden')) cbCloseHint();
+    }
+
+    function ensureCopybookInit() {
+        const viewport = document.getElementById('cb-viewport');
+        if (!viewport) return;
+        initCopybook();
+    }
 
     function initCopybook() {
         const viewport = document.getElementById('cb-viewport');
+        if (!viewport) return;
         document.querySelectorAll('.cb-stage').forEach(stage => {
             const n = +stage.dataset.sheet;
+            if (cbSheets[n]) return;
             const img = stage.querySelector('.cb-img');
             const canvas = stage.querySelector('.cb-canvas');
+            if (!img || !canvas) return;
             const ctx = canvas.getContext('2d');
             const rec = { n, canvas, ctx, img, states: [null], redo: [] };
             cbSheets[n] = rec;
             function fit() {
                 const w = img.naturalWidth || 1400, h = img.naturalHeight || 1980;
                 if (canvas.width !== w) { canvas.width = w; canvas.height = h; }
-                // восстановить сохранённое
                 let saved = null;
                 try { saved = localStorage.getItem('todo-cb-' + n); } catch (e) {}
                 if (saved) { rec.states = [saved]; cbRestoreURL(rec, saved); }
@@ -430,14 +462,13 @@
             }
             if (img.complete && img.naturalWidth) fit(); else img.addEventListener('load', fit);
         });
-        if (viewport) {
-            viewport.addEventListener('pointerdown', cbPtrDown);
-            viewport.addEventListener('pointermove', cbPtrMove);
-            viewport.addEventListener('pointerup', cbPtrUp);
-            viewport.addEventListener('pointercancel', cbPtrUp);
-            viewport.addEventListener('pointerleave', e => {
-                if (cbPointers.has(e.pointerId)) cbPtrUp(e);
-            });
+        if (!viewport.dataset.cbListeners) {
+            viewport.dataset.cbListeners = '1';
+            const ptrOpts = { passive: false, capture: true };
+            viewport.addEventListener('pointerdown', cbPtrDown, ptrOpts);
+            viewport.addEventListener('pointermove', cbPtrMove, ptrOpts);
+            viewport.addEventListener('pointerup', cbPtrUp, ptrOpts);
+            viewport.addEventListener('pointercancel', cbPtrUp, ptrOpts);
             viewport.addEventListener('wheel', e => {
                 const vp = viewport.getBoundingClientRect();
                 if (e.ctrlKey || e.metaKey) {              // масштаб у курсора
@@ -454,10 +485,13 @@
         }
         cbRenderLetterbar();
         cbUpdateToolUI();
-        window.addEventListener('resize', () => {
-            const sec = document.getElementById('section-copybook');
-            if (sec && sec.classList.contains('active')) requestAnimationFrame(cbFit);
-        });
+        if (!viewport.dataset.cbResize) {
+            viewport.dataset.cbResize = '1';
+            window.addEventListener('resize', () => {
+                const sec = document.getElementById('section-copybook');
+                if (sec && sec.classList.contains('active')) requestAnimationFrame(cbFit);
+            });
+        }
         let seen = null; try { seen = localStorage.getItem('todo-cb-hint'); } catch (e) {}
         if (seen) { const h = document.getElementById('cb-hint'); if (h) h.classList.add('cb-hidden'); }
     }

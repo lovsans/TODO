@@ -12,8 +12,6 @@
             </div>`).join('');
     }
 
-    const mountedSections = new Set();
-
     function renderSectionContent(cat) {
         if (cat === 'about') return renderAbout();
         if (cat === 'path') return '<div id="path-root"></div>';
@@ -43,7 +41,7 @@
                 <div class="section-title">${categoryMeta[cat].label}</div>
                 <div class="section-info">${categoryMeta[cat].info}</div>
                 <div class="writer-host">
-                    <iframe id="writer-frame" title="Тренажёр письма Тодо Бичик" loading="lazy"
+                    <iframe id="writer-frame" title="Тренажёр письма Тодо Бичик"
                             style="width:100%;border:0;display:block;height:1024px;border-radius:14px;background:var(--bg-secondary);"></iframe>
                 </div>`;
         }
@@ -80,25 +78,15 @@
             <div class="char-grid">${list.map(renderCard).join('')}</div>`;
     }
 
-    function mountSection(cat) {
-        if (mountedSections.has(cat)) return;
-        const sec = document.getElementById('section-' + cat);
-        if (!sec) return;
-        sec.innerHTML = renderSectionContent(cat);
-        mountedSections.add(cat);
-    }
-
     function renderSections() {
         const el = document.getElementById('sections-container');
         const cats = Object.keys(categoryMeta);
         el.innerHTML = cats.map((cat, i) =>
-            `<div class="section ${i === 0 ? 'active' : ''}" id="section-${cat}"></div>`
+            `<div class="section ${i === 0 ? 'active' : ''}" id="section-${cat}">${renderSectionContent(cat)}</div>`
         ).join('');
-        mountedSections.clear();
-        mountSection('about');
     }
 
-    // Стек переходов по карточкам (для кнопки «Назад» при переходах из примечаний).
+    // Стек переходов по карточкам
     let modalStack = [];
     // Режим списка для «Пред./След.»: null — внутри своей категории; 'summary' — по всей сводной таблице.
     let modalNavMode = null;
@@ -277,7 +265,6 @@
 
     function showSection(cat) {
         exitSearch();
-        mountSection(cat);
         document.getElementById('sections-container').style.display = '';
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         const sec = document.getElementById('section-' + cat);
@@ -301,7 +288,6 @@
         }
         if (cat === 'write_word') wwInit();
         if (cat === 'path') renderPathRoot();
-        if (cat === 'direction') mountWriter();
         if (cat === 'harmony') setupHarmony();
     }
 
