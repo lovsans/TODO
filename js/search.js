@@ -3,9 +3,36 @@
 
     function initSearch() {
         const sel = document.getElementById('search-filter');
-        sel.innerHTML = '<option value="all">Все разделы</option>' +
+        sel.innerHTML = '<option value="all">Везде</option>' +
             '<option value="words">Слова</option>' +
             searchableCats.map(c => `<option value="${c}">${categoryMeta[c].label}</option>`).join('');
+        buildSearchIndex();
+    }
+
+    let searchLetterPool = null;
+    let searchFieldsByIdx = null;
+
+    function computeSearchFields(c) {
+        const cyr = (c.cyrillic && !String(c.cyrillic).includes('_')) ? normText(c.cyrillic) : '';
+        const lat = (c.latin && !String(c.latin).includes('_')) ? normText(c.latin) : '';
+        return { cyr, lat, latF: lat ? foldLatin(lat) : '', notes: normText(c.notes), id: (c.id != null) ? String(c.id) : '' };
+    }
+
+    function buildSearchIndex() {
+        if (searchLetterPool) return;
+        searchLetterPool = [];
+        searchFieldsByIdx = new Array(charData.length);
+        for (let i = 0; i < charData.length; i++) {
+            const c = charData[i];
+            if (!searchableCats.includes(c.category)) continue;
+            searchLetterPool.push(c);
+            searchFieldsByIdx[c.idx] = computeSearchFields(c);
+        }
+    }
+
+    function searchFields(c) {
+        buildSearchIndex();
+        return searchFieldsByIdx[c.idx] || computeSearchFields(c);
     }
 
     function exitSearch() {
@@ -128,13 +155,6 @@
             </div>`;
     }
 
-    function searchFields(c) {
-        const cyr = (c.cyrillic && !String(c.cyrillic).includes('_')) ? normText(c.cyrillic) : '';
-        const lat = (c.latin && !String(c.latin).includes('_')) ? normText(c.latin) : '';
-        return { cyr, lat, latF: lat ? foldLatin(lat) : '', notes: normText(c.notes), id: (c.id != null) ? String(c.id) : '' };
-    }
-
-    // 0 — нет совпадения; больше — релевантнее
     function tokenScore(c, t) {
         const F = searchFields(c);
         if (/^#?\d+$/.test(t)) {                       // номер буквы — только точное совпадение
@@ -164,6 +184,21 @@
         return total;
     }
 
+    function syncNavFromSection(cat) {
+        if (!cat) return;
+        document.querySelectorAll('.nav-item').forEach(n => {
+            const on = n.getAttribute('data-cat') === cat;
+            n.classList.toggle('active', on);
+            if (on) n.setAttribute('aria-current', 'page');
+            else n.removeAttribute('aria-current');
+        });
+    }
+
+    function filterNavCategory(f) {
+        if (f === 'words') return 'words';
+        return searchableCats.includes(f) ? f : null;
+    }
+
     function runSearch() {
         const inp = document.getElementById('search-input');
         const q = normText(inp ? inp.value : '');
@@ -171,33 +206,38 @@
         document.getElementById('search-clear').style.display = q ? 'flex' : 'none';
         const res = document.getElementById('search-results');
         const sections = document.getElementById('sections-container');
-        const active = q !== '' || f !== 'all';
 
-        if (!active) {
+        // Без текста запроса — обычные разделы; фильтр только сужает поиск, не заменяет навигацию.
+        if (!q) {
             res.style.display = 'none';
             res.innerHTML = '';
             sections.style.display = '';
+            const navCat = f !== 'all' ? filterNavCategory(f) : null;
+            if (navCat) showSection(navCat);
+            else {
+                const activeSec = document.querySelector('.section.active');
+                const cat = activeSec && activeSec.id.startsWith('section-')
+                    ? activeSec.id.slice('section-'.length) : null;
+                syncNavFromSection(cat);
+            }
             return;
         }
 
         const tokens = q ? q.split(/\s+/).filter(Boolean) : [];
         const doLetters = (f !== 'words');                 // буквы: всё, кроме фильтра «Слова»
-        const doWords   = (f === 'all' || f === 'words');  // слова: «Все разделы» или «Слова»
+        const doWords   = (f === 'all' || f === 'words');  // слова: «Везде» или «Слова»
 
         // --- буквы и знаки ---
         let letters = [];
         if (doLetters) {
-            let pool = charData.filter(c => searchableCats.includes(c.category));
-            if (f !== 'all' && f !== 'words') pool = pool.filter(c => c.category === f);
-            if (q) {
-                letters = pool
-                    .map(c => ({ c, s: scoreMatch(c, tokens) }))
-                    .filter(x => x.s > 0)
-                    .sort((a, b) => b.s - a.s || ((a.c.id ?? 1e9) - (b.c.id ?? 1e9)))
-                    .map(x => x.c);
-            } else {
-                letters = pool;
-            }
+            buildSearchIndex();
+            let pool = searchLetterPool;
+            if (f !== 'all' && f !== 'words') pool = charsByCategory[f] || [];
+            letters = pool
+                .map(c => ({ c, s: scoreMatch(c, tokens) }))
+                .filter(x => x.s > 0)
+                .sort((a, b) => b.s - a.s || ((a.c.id ?? 1e9) - (b.c.id ?? 1e9)))
+                .map(x => x.c);
         }
 
         // --- слова ---
@@ -228,3 +268,5 @@
 
         res.innerHTML = html;
     }
+
+    const runSearchDebounced = debounce(runSearch, 120);

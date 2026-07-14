@@ -49,10 +49,10 @@
             <div class="search-input-wrap">
                 <span class="search-icon" aria-hidden="true">⌕</span>
                 <input id="search-input" type="search" inputmode="search" autocomplete="off"
-                       placeholder="Поиск: кириллица, латиница или № буквы…" oninput="runSearch()" aria-label="Поиск по алфавиту">
+                       placeholder="Поиск: кириллица, латиница или № буквы…" aria-label="Поиск по алфавиту">
                 <button id="search-clear" class="search-clear" onclick="clearSearch()" aria-label="Очистить" style="display:none">×</button>
             </div>
-            <select id="search-filter" onchange="runSearch()" aria-label="Раздел"></select>
+            <select id="search-filter" onchange="runSearch()" aria-label="Область поиска"></select>
         </div>
         <nav class="nav-tabs" id="nav-tabs" aria-label="Разделы алфавита"></nav>
         <div id="search-results" class="search-results" style="display:none"></div>
@@ -74,19 +74,18 @@
     </div>
 
 
-    <script src="js/vendor/jspdf.umd.min.js"></script>
-    <script src="js/data.js"></script>
-    <script src="js/harmony-data.js"></script>
-    <script src="js/reading-data.js"></script>
-    <script src="js/utils.js"></script>
-    <script src="js/lessons.js"></script>
-    <script src="js/ui.js"></script>
-    <script src="js/search.js"></script>
-    <script src="js/practice.js"></script>
-    <script src="js/harmony.js"></script>
-    <script src="js/path.js"></script>
-    <script src="js/copybook.js"></script>
-    <script src="js/writer.js"></script>
-    <script src="js/main.js"></script>
+    <script src="js/data.js" defer></script>
+    <script src="js/harmony-data.js" defer></script>
+    <script src="js/reading-data.js" defer></script>
+    <script src="js/utils.js" defer></script>
+    <script src="js/lessons.js" defer></script>
+    <script src="js/ui.js" defer></script>
+    <script src="js/search.js" defer></script>
+    <script src="js/practice.js" defer></script>
+    <script src="js/harmony.js" defer></script>
+    <script src="js/path.js" defer></script>
+    <script src="js/copybook.js" defer></script>
+    <script src="js/writer.js" defer></script>
+    <script src="js/main.js" defer></script>
 </body>
 </html>

@@ -1,6 +1,15 @@
 /* utils.js — общие помощники: экранирование, перемешивание, тема, util-функции. */
 
 
+    function debounce(fn, ms) {
+        let t = null;
+        return function () {
+            const args = arguments, ctx = this;
+            clearTimeout(t);
+            t = setTimeout(function () { fn.apply(ctx, args); }, ms);
+        };
+    }
+
     function shuffleArr(a) {
         const r = a.slice();
         for (let i = r.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [r[i], r[j]] = [r[j], r[i]]; }

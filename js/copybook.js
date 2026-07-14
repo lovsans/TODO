@@ -238,12 +238,23 @@
         t.drawImage(st.canvas, 0, 0, w, h);
         return { dataUrl: tmp.toDataURL('image/jpeg', 0.92), w, h };
     }
+    function loadJspdf() {
+        if (window.jspdf && window.jspdf.jsPDF) return Promise.resolve(window.jspdf);
+        return new Promise(function (resolve, reject) {
+            const s = document.createElement('script');
+            s.src = 'js/vendor/jspdf.umd.min.js';
+            s.onload = function () { resolve(window.jspdf); };
+            s.onerror = function () { reject(new Error('jspdf load failed')); };
+            document.head.appendChild(s);
+        });
+    }
+
     function cbDownloadPDF() {
-        if (!window.jspdf || !window.jspdf.jsPDF) { alert('Модуль PDF не загрузился. Проверьте, что файл js/vendor/jspdf.umd.min.js доступен.'); return; }
-        const { jsPDF } = window.jspdf;
         const btn = document.getElementById('cb-save-pdf');
         if (btn) { btn.disabled = true; btn.textContent = '⏳ Готовим PDF…'; }
-        try {
+        loadJspdf().then(function (jspdfMod) {
+            if (!jspdfMod || !jspdfMod.jsPDF) throw new Error('jspdf missing');
+            const { jsPDF } = jspdfMod;
             const pages = [1, 2, 3].map(cbSheetImageData).filter(Boolean);
             if (!pages.length) return;
             let doc = null;
@@ -254,9 +265,11 @@
                 doc.addImage(p.dataUrl, 'JPEG', 0, 0, p.w, p.h);
             });
             if (doc) doc.save('todo-propis.pdf');
-        } finally {
+        }).catch(function () {
+            alert('Модуль PDF не загрузился. Проверьте, что файл js/vendor/jspdf.umd.min.js доступен.');
+        }).finally(function () {
             if (btn) { btn.disabled = false; btn.textContent = '⤓ PDF (все листы)'; }
-        }
+        });
     }
 
     // ---- рисование ----

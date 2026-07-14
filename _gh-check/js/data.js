@@ -2769,6 +2769,15 @@
     }
 ];
 
+    // Индекс знаков по категории — один раз при загрузке, вместо charData.filter() в каждом разделе.
+    const charsByCategory = Object.create(null);
+    for (let ci = 0; ci < charData.length; ci++) {
+        const ch = charData[ci];
+        const cat = ch.category;
+        if (!charsByCategory[cat]) charsByCategory[cat] = [];
+        charsByCategory[cat].push(ch);
+    }
+
     const categoryMeta = {
         about:       { label: 'О письме', info: null },
         path:        { label: 'Путь', info: null },
@@ -3131,6 +3140,9 @@
     // Чистая подпись для кнопок/транслитерации там, где cyrillic содержит техническую
     // пометку (idx 29 и галики), чтобы не показывать «п_ф_галик» и т.п.
     const WW_NICE_LABEL = { 29: 'п', 27: 'п', 28: 'п', 40: 'з', 41: 'з', 42: 'з', 43: 'җ', 54: 'х', 38: 'ч·', 55: 'а_откид', 56: 'и²' };
+    // Кириллица дифтонга в конечной форме (айи→ай, эйи→эй …) — только для подписи
+    // в конце слова; в начале и середине остаётся полная форма (айи, эйи…).
+    const DIPHTHONG_FINAL_CYR = { 14: 'ай', 15: 'эй', 16: 'ий', 17: 'ой', 18: 'уй', 19: 'өй', 20: 'үй' };
 
     const navGroups = [
         { label: 'Начало',      cats: ['about', 'course', 'writing_rules', 'path'] },

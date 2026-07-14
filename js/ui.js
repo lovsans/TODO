@@ -12,128 +12,90 @@
             </div>`).join('');
     }
 
+    const mountedSections = new Set();
+
+    function renderSectionContent(cat) {
+        if (cat === 'about') return renderAbout();
+        if (cat === 'path') return '<div id="path-root"></div>';
+        if (cat === 'writing_rules') return renderWritingRules();
+        if (cat === 'course') return renderCourse();
+        if (cat === 'rules') {
+            return `
+                <div class="section-title">Правила чтения</div>
+                <div class="section-info">Ключевые закономерности «ясного письма» по самоучителю А. В. Бадмаева (1971).</div>
+                ${renderRules()}`;
+        }
+        if (cat === 'harmony') return renderHarmony();
+        if (cat === 'words') {
+            return `
+                <div class="section-title">Слова для чтения</div>
+                <div class="section-info">Старое написание ⇄ современный калмыцкий. Нажмите на карточку, чтобы увидеть современную форму.</div>
+                ${renderWords()}`;
+        }
+        if (cat === 'reading') {
+            return `
+                <div class="section-title">${categoryMeta[cat].label}</div>
+                <div class="section-info">${categoryMeta[cat].info}</div>
+                ${renderReading()}`;
+        }
+        if (cat === 'direction') {
+            return `
+                <div class="section-title">${categoryMeta[cat].label}</div>
+                <div class="section-info">${categoryMeta[cat].info}</div>
+                <div class="writer-host">
+                    <iframe id="writer-frame" title="Тренажёр письма Тодо Бичик" loading="lazy"
+                            style="width:100%;border:0;display:block;height:1024px;border-radius:14px;background:var(--bg-secondary);"></iframe>
+                </div>`;
+        }
+        if (cat === 'copybook') return renderCopybook();
+        if (cat === 'compose_word') {
+            return `
+                <div class="section-title">${categoryMeta[cat].label}</div>
+                <div class="section-info">${categoryMeta[cat].info}</div>
+                ${renderCompose()}`;
+        }
+        if (cat === 'write_word') {
+            return `
+                <div class="section-title">${categoryMeta[cat].label}</div>
+                <div class="section-info">${categoryMeta[cat].info}</div>
+                ${renderWriteWord()}`;
+        }
+        if (practiceScopes[cat]) return practiceMarkup(cat);
+        if (cat === 'syllables') {
+            return `
+                <div class="section-title">${categoryMeta[cat].label}</div>
+                <div class="section-info">${categoryMeta[cat].info}</div>
+                ${renderSyllables()}`;
+        }
+        if (cat === 'summary') {
+            return `
+                <div class="section-title">${categoryMeta[cat].label}</div>
+                <div class="section-info">${categoryMeta[cat].info}</div>
+                ${renderSummary()}`;
+        }
+        const list = charsByCategory[cat] || [];
+        return `
+            <div class="section-title">${categoryMeta[cat].label}</div>
+            <div class="section-info">${categoryMeta[cat].info}</div>
+            <div class="char-grid">${list.map(renderCard).join('')}</div>`;
+    }
+
+    function mountSection(cat) {
+        if (mountedSections.has(cat)) return;
+        const sec = document.getElementById('section-' + cat);
+        if (!sec) return;
+        sec.innerHTML = renderSectionContent(cat);
+        mountedSections.add(cat);
+    }
+
     function renderSections() {
         const el = document.getElementById('sections-container');
         const cats = Object.keys(categoryMeta);
-        el.innerHTML = cats.map((cat, i) => {
-            if (cat === 'about') {
-                return `
-                    <div class="section ${i === 0 ? 'active' : ''}" id="section-${cat}">
-                        ${renderAbout()}
-                    </div>`;
-            }
-            if (cat === 'path') {
-                return `
-                    <div class="section ${i === 0 ? 'active' : ''}" id="section-${cat}">
-                        <div id="path-root"></div>
-                    </div>`;
-            }
-            if (cat === 'writing_rules') {
-                return `
-                    <div class="section ${i === 0 ? 'active' : ''}" id="section-${cat}">
-                        ${renderWritingRules()}
-                    </div>`;
-            }
-            if (cat === 'course') {
-                return `
-                    <div class="section ${i === 0 ? 'active' : ''}" id="section-${cat}">
-                        ${renderCourse()}
-                    </div>`;
-            }
-            if (cat === 'rules') {
-                return `
-                    <div class="section ${i === 0 ? 'active' : ''}" id="section-${cat}">
-                        <div class="section-title">Правила чтения</div>
-                        <div class="section-info">Ключевые закономерности «ясного письма» по самоучителю А. В. Бадмаева (1971).</div>
-                        ${renderRules()}
-                    </div>`;
-            }
-            if (cat === 'harmony') {
-                return `
-                    <div class="section ${i === 0 ? 'active' : ''}" id="section-${cat}">
-                        ${renderHarmony()}
-                    </div>`;
-            }
-            if (cat === 'words') {
-                return `
-                    <div class="section ${i === 0 ? 'active' : ''}" id="section-${cat}">
-                        <div class="section-title">Слова для чтения</div>
-                        <div class="section-info">Старое написание ⇄ современный калмыцкий. Нажмите на карточку, чтобы увидеть современную форму.</div>
-                        ${renderWords()}
-                    </div>`;
-            }
-            if (cat === 'reading') {
-                return `
-                    <div class="section ${i === 0 ? 'active' : ''}" id="section-${cat}">
-                        <div class="section-title">${categoryMeta[cat].label}</div>
-                        <div class="section-info">${categoryMeta[cat].info}</div>
-                        ${renderReading()}
-                    </div>`;
-            }
-            if (cat === 'direction') {
-                return `
-                    <div class="section ${i === 0 ? 'active' : ''}" id="section-${cat}">
-                        <div class="section-title">${categoryMeta[cat].label}</div>
-                        <div class="section-info">${categoryMeta[cat].info}</div>
-                        <div class="writer-host">
-                            <iframe id="writer-frame" title="Тренажёр письма Тодо Бичик" loading="lazy"
-                                    style="width:100%;border:0;display:block;height:1024px;border-radius:14px;background:var(--bg-secondary);"></iframe>
-                        </div>
-                    </div>`;
-            }
-            if (cat === 'copybook') {
-                return `
-                    <div class="section ${i === 0 ? 'active' : ''}" id="section-${cat}">
-                        ${renderCopybook()}
-                    </div>`;
-            }
-            if (cat === 'compose_word') {
-                return `
-                    <div class="section ${i === 0 ? 'active' : ''}" id="section-${cat}">
-                        <div class="section-title">${categoryMeta[cat].label}</div>
-                        <div class="section-info">${categoryMeta[cat].info}</div>
-                        ${renderCompose()}
-                    </div>`;
-            }
-            if (cat === 'write_word') {
-                return `
-                    <div class="section ${i === 0 ? 'active' : ''}" id="section-${cat}">
-                        <div class="section-title">${categoryMeta[cat].label}</div>
-                        <div class="section-info">${categoryMeta[cat].info}</div>
-                        ${renderWriteWord()}
-                    </div>`;
-            }
-            if (practiceScopes[cat]) {
-                return `
-                    <div class="section ${i === 0 ? 'active' : ''}" id="section-${cat}">
-                        ${practiceMarkup(cat)}
-                    </div>`;
-            }
-            if (cat === 'syllables') {
-                return `
-                    <div class="section ${i === 0 ? 'active' : ''}" id="section-${cat}">
-                        <div class="section-title">${categoryMeta[cat].label}</div>
-                        <div class="section-info">${categoryMeta[cat].info}</div>
-                        ${renderSyllables()}
-                    </div>`;
-            }
-            if (cat === 'summary') {
-                return `
-                    <div class="section ${i === 0 ? 'active' : ''}" id="section-${cat}">
-                        <div class="section-title">${categoryMeta[cat].label}</div>
-                        <div class="section-info">${categoryMeta[cat].info}</div>
-                        ${renderSummary()}
-                    </div>`;
-            }
-            return `
-                <div class="section ${i === 0 ? 'active' : ''}" id="section-${cat}">
-                    <div class="section-title">${categoryMeta[cat].label}</div>
-                    <div class="section-info">${categoryMeta[cat].info}</div>
-                    <div class="char-grid">
-                        ${charData.filter(c => c.category === cat).map(renderCard).join('')}
-                    </div>
-                </div>`;
-        }).join('');
+        el.innerHTML = cats.map((cat, i) =>
+            `<div class="section ${i === 0 ? 'active' : ''}" id="section-${cat}"></div>`
+        ).join('');
+        mountedSections.clear();
+        mountSection('about');
     }
 
     // Стек переходов по карточкам (для кнопки «Назад» при переходах из примечаний).
@@ -215,22 +177,33 @@
     }
 
     // ── Пред./След. — переключение между карточками внутри той же категории ──
+    // Кэш индексов charData по категории — для «Пред./След.» в модалке.
+    const modalNavListCache = Object.create(null);
+
+    function charIndicesForCategory(cat) {
+        const key = 'cat:' + cat;
+        if (!modalNavListCache[key]) {
+            const list = [];
+            for (let i = 0; i < charData.length; i++) {
+                if (charData[i].category === cat) list.push(i);
+            }
+            modalNavListCache[key] = list;
+        }
+        return modalNavListCache[key];
+    }
+
     function modalNavList() {
         const cur = charData[modalStack[modalStack.length - 1]];
         if (!cur) return [];
-        const list = [];
         if (modalNavMode === 'summary' && typeof SUMMARY_CATS !== 'undefined') {
-            SUMMARY_CATS.forEach(g => {
-                for (let i = 0; i < charData.length; i++) {
-                    if (charData[i].category === g.cat) list.push(i);
-                }
-            });
-            return list;
+            if (!modalNavListCache.__summary__) {
+                const list = [];
+                SUMMARY_CATS.forEach(g => list.push(...charIndicesForCategory(g.cat)));
+                modalNavListCache.__summary__ = list;
+            }
+            return modalNavListCache.__summary__;
         }
-        for (let i = 0; i < charData.length; i++) {
-            if (charData[i].category === cur.category) list.push(i);
-        }
-        return list;
+        return charIndicesForCategory(cur.category);
     }
     function modalGo(idx) {
         modalStack = [idx];
@@ -304,6 +277,7 @@
 
     function showSection(cat) {
         exitSearch();
+        mountSection(cat);
         document.getElementById('sections-container').style.display = '';
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         const sec = document.getElementById('section-' + cat);

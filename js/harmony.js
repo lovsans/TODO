@@ -120,7 +120,7 @@
         letters.forEach((lt, i) => {
             const ci = colorByIndex[i] != null ? colorByIndex[i] : (i % CW_COLOR_N);
             const isSlot = i === slotIdx;
-            const lbl = (hideSlot && isSlot) ? '?' : composeLabel(lt);
+            const lbl = (hideSlot && isSlot) ? '?' : composeLabel(lt, { pos: i, letters });
             const slotCls = isSlot ? ' harmony-leg-slot' + (slotTone ? ' harmony-leg-slot-' + slotTone : '') : '';
             h += `<span class="harmony-leg-chip cl${ci}${slotCls}">${escapeHtml(lbl)}</span>`;
         });
@@ -321,7 +321,7 @@
         return `
             <div class="harmony-wrap practice-container">
                 <div class="section-title">Сингармонизм на практике</div>
-                <div class="section-info">Сингармонизм относится ко всему слову: гласные обычно сохраняют один ряд — передний <b>э, ө, ү</b> или задний <b>а, о, у</b>. Буква <b>и</b> нейтральна: она бывает и в переднерядных, и в заднерядных словах, а ряд определяют другие гласные.</div>
+                <div class="section-info">В калмыцком языке существует правило сингармонизма. Сингармонизм относится ко всему слову: гласные обычно сохраняют один ряд — передний <b>э, ө, ү</b> (мягкие) или задний <b>а, о, у</b> (твердые). Буква <b>и</b> нейтральна: она бывает и в переднерядных, и в заднерядных словах, а ряд определяют другие гласные.</div>
                 <div class="harmony-i-note">
                     <strong>Буква «и»</strong> — нейтральная. Смотрите не на неё саму, а на соседние гласные:
                     <span class="harmony-i-example"><span class="harmony-row-soft">шинэ</span> — передний ряд («э»)</span>
