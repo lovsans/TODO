@@ -1,0 +1,16 @@
+# Temporary / staging copies
+_gh-check/
+
+# Raw source data extracts
+_badmaev_drills.txt
+_badmaev_extract.txt
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo

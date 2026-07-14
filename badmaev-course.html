@@ -2,8 +2,12 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="color-scheme" content="light dark">
+    <meta name="theme-color" content="#f7f6f2" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#121310" media="(prefers-color-scheme: dark)">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Побуквенный курс по Бадмаеву — Тодо Бичик</title>
     <script>
         (function () {
@@ -47,13 +51,18 @@
         body {
             margin: 0;
             min-height: 100vh;
+            min-height: 100dvh;
             font-family: Inter, system-ui, sans-serif;
             background: var(--bg);
             color: var(--text);
             line-height: 1.55;
+            -webkit-tap-highlight-color: transparent;
+            overscroll-behavior-y: contain;
+            overflow-x: hidden;
         }
         button, input { font: inherit; }
-        button { color: inherit; }
+        button { color: inherit; touch-action: manipulation; }
+        a { touch-action: manipulation; }
         .topbar {
             position: sticky;
             top: 0;
@@ -66,6 +75,8 @@
             max-width: 1180px;
             margin: auto;
             padding: 14px 20px;
+            padding-left: max(20px, env(safe-area-inset-left));
+            padding-right: max(20px, env(safe-area-inset-right));
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -121,6 +132,9 @@
             max-width: 1180px;
             margin: auto;
             padding: 34px 20px 70px;
+            padding-left: max(20px, env(safe-area-inset-left));
+            padding-right: max(20px, env(safe-area-inset-right));
+            padding-bottom: max(70px, env(safe-area-inset-bottom));
         }
         .hero {
             display: grid;
@@ -535,7 +549,8 @@
             .hero { grid-template-columns: 1fr; }
             .overall { text-align: left; }
             .layout { grid-template-columns: 1fr; }
-            .lesson-nav { position: static; overflow-x: auto; }
+            .lesson-nav { position: static; overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; -webkit-overflow-scrolling: touch; }
+            .lesson-nav::-webkit-scrollbar { display: none; }
             .lesson-list { display: flex; min-width: max-content; }
             .lesson-link { width: 140px; }
             .forms-grid { grid-template-columns: 1fr; }
@@ -545,7 +560,10 @@
         }
         @media (max-width: 540px) {
             .brand small, .ghost-btn { display: none; }
-            .page { padding-inline: 12px; padding-top: 24px; }
+            .page { padding-inline: 12px; padding-top: 24px;
+                padding-left: max(12px, env(safe-area-inset-left));
+                padding-right: max(12px, env(safe-area-inset-right));
+            }
             .preview-note { align-items: flex-start; flex-direction: column; }
             .course-card { border-radius: 16px; }
             .lesson-head, .lesson-body { padding-inline: 16px; }
@@ -554,6 +572,10 @@
             .copy-targets { gap: 12px; }
             .word-row { grid-template-columns: 1fr auto; }
             .word-row span:last-child { grid-column: 1 / -1; }
+        }
+        @media (hover: none) and (pointer: coarse) {
+            .lesson-link:hover { background: var(--card); }
+            .lesson-link.active:hover { background: var(--accent-soft); }
         }
     </style>
 </head>
