@@ -22,9 +22,13 @@
         catch (e) { return false; }
     }
 
-    // Прокрутка страницы наверх с учётом reduced-motion (без рывка для тех, кому он мешает).
-    function scrollTopSmooth() {
-        window.scrollTo({ top: 0, behavior: reducedMotion() ? 'auto' : 'smooth' });
+    // Прокрутка к активному разделу — после раскрытия панели навигации (анимация ~0.36s).
+    function scrollToSection(el) {
+        if (!el) return;
+        const behavior = reducedMotion() ? 'auto' : 'smooth';
+        const scroll = () => el.scrollIntoView({ behavior, block: 'start' });
+        requestAnimationFrame(() => requestAnimationFrame(scroll));
+        if (!reducedMotion()) setTimeout(scroll, 380);
     }
 
     // ── Сохранение написанного слова как картинки ─────────────────────────────

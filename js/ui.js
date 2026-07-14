@@ -411,7 +411,6 @@
             if (on) n.setAttribute('aria-current', 'page');
             else n.removeAttribute('aria-current');
         });
-        scrollTopSmooth();
         if (cat === 'about') updateHomeProgress();
         if (practiceScopes[cat]) setupPractice(cat);
         if (cat === 'copybook') requestAnimationFrame(() => requestAnimationFrame(cbFit));
@@ -424,5 +423,9 @@
         if (cat === 'write_word') wwInit();
         if (cat === 'path') renderPathRoot();
         if (cat === 'harmony') setupHarmony();
+        const scrollTarget = cat === 'about'
+            ? (document.getElementById('about-hero') || sec)
+            : sec;
+        scrollToSection(scrollTarget);
     }
 

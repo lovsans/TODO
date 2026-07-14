@@ -10,7 +10,7 @@
         <div class="about-wrap">
             <div class="home-progress" id="home-progress"></div>
 
-            <div class="about-hero">
+            <div class="about-hero" id="about-hero">
                 <div>
                     <div class="about-kicker">«Ясное письмо» · Тодо Бичик</div>
                     <h2 class="about-title">Тодо Бичик — «Ясное письмо»: история создания и культурное наследие</h2>
