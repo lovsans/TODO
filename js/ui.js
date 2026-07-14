@@ -14,9 +14,20 @@
                             <span class="nav-group-chevron" aria-hidden="true"></span>
                         </button>`).join('')}
                 </div>
-                <div class="nav-bulk" aria-label="Управление группами">
-                    <button type="button" class="nav-bulk-btn" onclick="expandAllNavGroups()">Развернуть все</button>
-                    <button type="button" class="nav-bulk-btn" onclick="collapseAllNavGroups()">Свернуть все</button>
+            </div>
+            <div class="nav-bulk-row">
+                <span class="nav-bulk-hint" id="nav-bulk-hint">Управление группами</span>
+                <div class="nav-bulk" role="group" aria-labelledby="nav-bulk-hint">
+                    <button type="button" class="nav-bulk-btn nav-bulk-btn--expand"
+                            aria-label="Развернуть все группы" onclick="expandAllNavGroups()">
+                        <span class="nav-bulk-chevron nav-bulk-chevron--down" aria-hidden="true"></span>
+                        <span class="nav-bulk-text">Развернуть все</span>
+                    </button>
+                    <button type="button" class="nav-bulk-btn nav-bulk-btn--collapse"
+                            aria-label="Свернуть все группы" onclick="collapseAllNavGroups()">
+                        <span class="nav-bulk-chevron nav-bulk-chevron--up" aria-hidden="true"></span>
+                        <span class="nav-bulk-text">Свернуть все</span>
+                    </button>
                 </div>
             </div>
             <div class="nav-panels">
@@ -71,16 +82,45 @@
             if (panel && !panel.classList.contains('is-open')) collapsed.add(i);
         });
         saveCollapsedNavGroups(collapsed);
+        updateNavBulkState();
+    }
+
+    function countOpenNavGroups() {
+        let open = 0;
+        navGroups.forEach((_, i) => {
+            const panel = document.getElementById('nav-group-panel-' + i);
+            if (panel && panel.classList.contains('is-open')) open++;
+        });
+        return open;
+    }
+
+    function updateNavBulkState() {
+        const open = countOpenNavGroups();
+        const total = navGroups.length;
+        const expandBtn = document.querySelector('.nav-bulk-btn--expand');
+        const collapseBtn = document.querySelector('.nav-bulk-btn--collapse');
+        const hint = document.getElementById('nav-bulk-hint');
+        if (expandBtn) expandBtn.disabled = open === total;
+        if (collapseBtn) collapseBtn.disabled = open === 0;
+        if (hint) {
+            hint.textContent = open === 0
+                ? 'Все группы свёрнуты'
+                : open === total
+                    ? 'Все группы развёрнуты'
+                    : 'Открыто ' + open + ' из ' + total;
+        }
     }
 
     function collapseAllNavGroups() {
         navGroups.forEach((_, i) => setNavGroupCollapsed(i, true));
         saveCollapsedNavGroups(new Set(navGroups.map((_, i) => i)));
+        updateNavBulkState();
     }
 
     function expandAllNavGroups() {
         navGroups.forEach((_, i) => setNavGroupCollapsed(i, false));
         saveCollapsedNavGroups(new Set());
+        updateNavBulkState();
     }
 
     function applyNavGroupState() {
@@ -96,6 +136,7 @@
             return;
         }
         navGroups.forEach((_, i) => setNavGroupCollapsed(i, collapsed.has(i)));
+        updateNavBulkState();
     }
 
     function ensureNavGroupOpen(cat) {

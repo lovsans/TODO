@@ -266,8 +266,8 @@ mark.hl {
     padding-bottom: 1.25rem; border-bottom: 2px solid var(--border);
 }
 .nav-tiles-row {
-    display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between;
-    gap: 0.55rem 0.75rem;
+    display: flex; flex-wrap: wrap; align-items: flex-start;
+    gap: 0.55rem;
 }
 .nav-tiles {
     display: flex; flex-wrap: wrap; gap: 0.45rem;
@@ -275,16 +275,36 @@ mark.hl {
     flex: 1 1 auto;
     min-width: 0;
 }
+.nav-bulk-row {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+    gap: 0.45rem 0.75rem;
+    padding: 0.35rem 0.15rem 0.15rem;
+}
+.nav-bulk-hint {
+    font-size: 0.78rem; font-weight: 600;
+    color: var(--text-muted);
+    flex: 1 1 auto;
+    min-width: 0;
+}
 .nav-bulk {
-    display: flex; flex-wrap: wrap; gap: 0.35rem;
+    display: inline-flex;
     flex: 0 0 auto;
-    align-items: flex-start;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: var(--bg-card);
+    box-shadow: var(--shadow);
 }
 .nav-bulk-btn {
-    padding: 0.42rem 0.75rem;
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    background: var(--bg-card);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    padding: 0.48rem 0.85rem;
+    border: none;
+    border-right: 1px solid var(--border);
+    border-radius: 0;
+    background: transparent;
     color: var(--text-secondary);
     font: inherit;
     font-size: 0.78rem;
@@ -293,14 +313,29 @@ mark.hl {
     white-space: nowrap;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
-    transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+    transition: color 0.2s ease, background 0.2s ease;
 }
-.nav-bulk-btn:hover,
-.nav-bulk-btn:focus-visible {
-    border-color: var(--accent);
+.nav-bulk-btn:last-child { border-right: none; }
+.nav-bulk-chevron {
+    width: 0.38rem; height: 0.38rem; flex: 0 0 auto;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    color: var(--text-muted);
+    transition: color 0.2s ease;
+}
+.nav-bulk-chevron--down { transform: rotate(45deg); margin-top: -0.08rem; }
+.nav-bulk-chevron--up { transform: rotate(-135deg); margin-top: 0.1rem; }
+.nav-bulk-btn:hover:not(:disabled),
+.nav-bulk-btn:focus-visible:not(:disabled) {
     color: var(--accent);
     background: var(--accent-glow);
     outline: none;
+}
+.nav-bulk-btn:hover:not(:disabled) .nav-bulk-chevron,
+.nav-bulk-btn:focus-visible:not(:disabled) .nav-bulk-chevron { color: var(--accent); }
+.nav-bulk-btn:disabled {
+    opacity: 0.38;
+    cursor: not-allowed;
 }
 .nav-tile {
     flex: 0 0 5.6rem;
@@ -413,9 +448,9 @@ mark.hl {
 
 @media (max-width: 720px) {
     .nav-tabs { gap: 0.55rem; padding-bottom: 1rem; margin-bottom: 1.25rem; }
-    .nav-tiles-row { flex-direction: column; align-items: stretch; }
-    .nav-bulk { justify-content: flex-end; }
-    .nav-bulk-btn { padding: 0.48rem 0.85rem; font-size: 0.8rem; }
+    .nav-bulk-row { padding: 0.25rem 0 0.1rem; }
+    .nav-bulk { flex: 1 1 auto; width: 100%; }
+    .nav-bulk-btn { flex: 1 1 50%; padding: 0.52rem 0.65rem; font-size: 0.76rem; }
     .nav-tiles { gap: 0.4rem; }
     .nav-tile {
         flex: 0 0 5.15rem;
@@ -842,7 +877,8 @@ mark.hl {
     .cb-zoombtn { min-width: 44px; }
     .cw-zoom-btn { width: 38px; height: 38px; }
     .nav-tile { min-height: 5.15rem; }
-    .nav-bulk-btn { min-height: 2.5rem; }
+    .nav-bulk-btn { min-height: 2.65rem; }
+    .nav-bulk-btn:not(:disabled):active { background: var(--accent-glow); color: var(--accent); }
     .nav-item { min-height: 2.5rem; }
     .nav-tile:hover,
     .nav-tile:focus-visible {
