@@ -410,6 +410,13 @@
         try { localStorage.setItem('todo-cb-hint', '1'); } catch (e) {}
     }
 
+    let copybookInited = false;
+    function ensureCopybookInit() {
+        if (copybookInited) return;
+        copybookInited = true;
+        initCopybook();
+    }
+
     function initCopybook() {
         const viewport = document.getElementById('cb-viewport');
         document.querySelectorAll('.cb-stage').forEach(stage => {

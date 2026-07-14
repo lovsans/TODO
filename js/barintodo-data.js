@@ -7,7 +7,7 @@ const BARINTODO_FONT_SRC = 'data:font/ttf;base64,AAEAAAANAIAAAwBQRkZUTWqADBIAACF
 (function () {
     try {
         var st = document.createElement('style');
-        st.textContent = "@font-face{font-family:'BarinTodo';src:url(" + BARINTODO_FONT_SRC + ");font-display:block;}";
+        st.textContent = "@font-face{font-family:'BarinTodo';src:url(" + BARINTODO_FONT_SRC + ");font-display:swap;}";
         (document.head || document.documentElement).appendChild(st);
     } catch (e) {}
 })();

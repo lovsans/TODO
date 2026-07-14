@@ -7,7 +7,7 @@ const TODO_FONT_SRC = 'data:font/ttf;base64,AAEAAAAOAIAAAwBgRkZUTYB7EYsAAK0IAAAA
 (function () {
     try {
         var st = document.createElement('style');
-        st.textContent = "@font-face{font-family:'TodoPozdneyev';src:url(" + TODO_FONT_SRC + ");font-display:block;}";
+        st.textContent = "@font-face{font-family:'TodoPozdneyev';src:url(" + TODO_FONT_SRC + ");font-display:swap;}";
         (document.head || document.documentElement).appendChild(st);
     } catch (e) {}
 })();

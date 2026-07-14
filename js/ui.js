@@ -276,6 +276,21 @@
     }
 
     function showSection(cat) {
+        const deps = SECTION_SCRIPT_DEPS[cat];
+        const load = deps ? Promise.all(deps.map(loadScriptOnce)) : Promise.resolve();
+        const gen = ++showSectionGen;
+        load.then(function () {
+            if (gen !== showSectionGen) return;
+            showSectionReady(cat);
+        }).catch(function () {
+            if (gen !== showSectionGen) return;
+            showSectionReady(cat);
+        });
+    }
+
+    let showSectionGen = 0;
+
+    function showSectionReady(cat) {
         exitSearch();
         mountSection(cat);
         document.getElementById('sections-container').style.display = '';
@@ -290,9 +305,12 @@
             else n.removeAttribute('aria-current');
         });
         scrollTopSmooth();
-        if (cat === 'about') updateHomeProgress();
+        if (cat === 'about') scheduleIdle(updateHomeProgress);
         if (practiceScopes[cat]) setupPractice(cat);
-        if (cat === 'copybook') requestAnimationFrame(() => requestAnimationFrame(cbFit));
+        if (cat === 'copybook') {
+            ensureCopybookInit();
+            requestAnimationFrame(() => requestAnimationFrame(cbFit));
+        }
         if (cat === 'compose_word') {
             wwColored = loadWwColored();
             applyGlyphColoredBtns();

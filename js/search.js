@@ -6,7 +6,6 @@
         sel.innerHTML = '<option value="all">Везде</option>' +
             '<option value="words">Слова</option>' +
             searchableCats.map(c => `<option value="${c}">${categoryMeta[c].label}</option>`).join('');
-        buildSearchIndex();
     }
 
     let searchLetterPool = null;

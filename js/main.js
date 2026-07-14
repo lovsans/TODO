@@ -83,5 +83,4 @@
     initSearch();
     const searchInp = document.getElementById('search-input');
     if (searchInp) searchInp.addEventListener('input', runSearchDebounced);
-    initCopybook();
-    updateHomeProgress();    // первичное наполнение обзора прогресса на главной
+    scheduleIdle(updateHomeProgress);
