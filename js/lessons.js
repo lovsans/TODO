@@ -136,7 +136,7 @@
             <div class="wr-glyph-item" role="button" tabindex="0" onclick="${open}"
                  onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();${open};}"
                  aria-label="Открыть знак «${escapeHtml(c.cyrillic)}»">
-                <span class="wr-glyph-g">${glyph}</span>
+                <span class="wr-glyph-g${todoNumClass(c)}">${glyph}</span>
                 <span class="wr-glyph-c">${escapeHtml(c.cyrillic)}</span>
                 ${hint ? `<span class="wr-glyph-hint">${escapeHtml(hint)}</span>` : ''}
             </div>`;
@@ -161,7 +161,7 @@
         const c = charByLatin(lat);
         if (!c) return '';
         const glyph = trimSpine(c[form || 'initial'] || c.medial || c.initial || c.final || '');
-        return `<span class="wr-syll-glyph">${escapeHtml(glyph)}</span>`;
+        return `<span class="wr-syll-glyph${todoNumClass(c)}">${escapeHtml(glyph)}</span>`;
     }
 
     function wrNCard(kicker, title, todo, modern, note, tone) {
@@ -850,7 +850,6 @@
     // opt.plain — без раскраски вообще: буквы обычным цветом текста (одним
     // сплошным run'ом), используется для варианта «обычный шрифт».
     const CW_COLOR_N = 10;
-    function isTodoNumber(lt) { return !!(lt && lt.category === 'numbers'); }
     function todoNumWrap(ch, isNum) {
         const esc = escapeHtml(ch);
         return isNum ? `<span class="todo-num">${esc}</span>` : esc;
@@ -1055,7 +1054,7 @@
                 const isUsed = used.has(iid);
                 const glyph = lt.initial != null ? lt.initial : (lt.medial != null ? lt.medial : (lt.final || ''));
                 return `<div class="cw-tile ${isUsed ? 'cw-used' : ''}" onclick="composeTap('${iid}')">
-                            <div class="cw-tile-glyph">${trimSpine(glyph)}</div>
+                            <div class="cw-tile-glyph${todoNumClass(lt)}">${trimSpine(glyph)}</div>
                             <div class="cw-tile-cyr">${escapeHtml(t.label || composeLabel(lt))}</div>
                         </div>`;
             }).join('');
@@ -1864,7 +1863,7 @@
         const cyrH = tok ? highlightText(cyrLabel, tok) : escapeHtml(cyrLabel);
         const latH = tok ? highlightText(latLabel, tok) : escapeHtml(latLabel);
         function formBox(label, val) {
-            const numCls = c.category === 'numbers' ? ' todo-num' : '';
+            const numCls = todoNumClass(c);
             if (val !== null && val !== undefined)
                 return `<div class="form-box"><div class="form-box-label">${label}</div><div class="form-box-char${numCls}" aria-hidden="true">${trimSpine(val)}</div></div>`;
             return `<div class="form-box"><div class="form-box-label">${label}</div><div class="form-box-missing" aria-hidden="true">—</div></div>`;

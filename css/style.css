@@ -540,10 +540,28 @@ mark.hl {
     text-orientation: mixed;
 }
 
-/* В карточке атласа и в модалке — цифра по центру ячейки. */
+/* В карточке атласа, модалке, тренировке, пути и правилах — цифра по центру ячейки. */
 .form-box-char.todo-num,
-.modal-form-char.todo-num {
+.modal-form-char.todo-num,
+.practice-char.todo-num,
+.fb-form-glyph.todo-num,
+.lp-form-char.todo-num,
+.lp-flash-char.todo-num,
+.cw-tile-glyph.todo-num,
+.wr-glyph-g.todo-num,
+.ww-key-glyph.todo-num {
     display: flex;
+    align-items: center;
+    justify-content: center;
+    writing-mode: horizontal-tb;
+    text-orientation: mixed;
+    text-align: center;
+    line-height: 1;
+}
+
+.sum-glyph.todo-num,
+.wr-syll-glyph.todo-num {
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     writing-mode: horizontal-tb;

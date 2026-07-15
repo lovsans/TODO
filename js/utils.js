@@ -31,6 +31,10 @@
         if (!reducedMotion()) setTimeout(scroll, 380);
     }
 
+    // Цифры Тодо Бичик (категория numbers) рисуются горизонтально, не как буквы.
+    function isTodoNumber(c) { return !!(c && c.category === 'numbers'); }
+    function todoNumClass(c) { return isTodoNumber(c) ? ' todo-num' : ''; }
+
     // ── Сохранение написанного слова как картинки ─────────────────────────────
     // Картинка рисуется самим браузером: блок вертикального письма со встроенным
     // шрифтом тодо упаковывается в SVG <foreignObject> и переносится на <canvas>.

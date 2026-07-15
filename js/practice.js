@@ -321,7 +321,7 @@
         } else {
             const formList = [['initial','начальная'], ['medial','серединная'], ['final','конечная']].filter(([k]) => letter[k]);
             const formsHtml = formList.map(([k, lbl]) =>
-                `<div class="fb-form"><div class="fb-form-glyph">${escapeHtml(letter[k])}</div><div class="fb-form-lbl">${lbl}</div></div>`).join('');
+                `<div class="fb-form"><div class="fb-form-glyph${todoNumClass(letter)}">${escapeHtml(letter[k])}</div><div class="fb-form-lbl">${lbl}</div></div>`).join('');
             feedback.className = 'practice-feedback incorrect rich';
             feedback.innerHTML =
                 `<div class="fb-line">✗ Неверно. Правильно: «${escapeHtml(nm)}»${escapeHtml(showLat)}</div>` +
@@ -578,7 +578,7 @@
         if (!pool.length) {                                   // включён режим «только невыученные», а всё выучено
             st.letter = null;
             const ch = document.getElementById('practice-char__' + scope);
-            if (ch) ch.textContent = '✓';
+            if (ch) { ch.textContent = '✓'; ch.classList.remove('todo-num'); }
             if (prompt) prompt.textContent = 'Всё выучено! Снимите «Только невыученные», чтобы повторять.';
             if (choiceBox) choiceBox.innerHTML = '';
             updateProgressUI(scope); renderStreak();
@@ -594,7 +594,11 @@
         const fkey = pickForm(letter);
         const fname = FORM_LABELS[fkey];
         st.form = fname; st.formKey = fkey;
-        document.getElementById('practice-char__' + scope).textContent = trimSpine(letter[fkey]);
+        const chEl = document.getElementById('practice-char__' + scope);
+        if (chEl) {
+            chEl.textContent = trimSpine(letter[fkey]);
+            chEl.classList.toggle('todo-num', isTodoNumber(letter));
+        }
         const noun = letter.category === 'syllables' ? 'слог' : 'знак';
         const seriesHint = (scope === 'practice_syllables' && !syllableShowAll) ? ` Серия: ${SYLLABLE_GROUPS[syllableGroupIdx].title}.` : '';
 

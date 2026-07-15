@@ -173,7 +173,7 @@
         const cards = chars.map((c, i) => {
             const forms = FORM_ORDER.map(k => {
                 if (c[k] == null) return `<div class="lp-form-item"><div class="lp-form-char lp-form-empty">—</div><div class="lp-form-label">${formLbl[k]}</div></div>`;
-                return `<div class="lp-form-item"><div class="lp-form-char">${trimSpine(c[k])}</div><div class="lp-form-label">${formLbl[k]}</div></div>`;
+                return `<div class="lp-form-item"><div class="lp-form-char${todoNumClass(c)}">${trimSpine(c[k])}</div><div class="lp-form-label">${formLbl[k]}</div></div>`;
             }).join('');
             return `
                 <button type="button" class="lp-card" onclick="pathOpenFlashcard(${i})" aria-label="Увеличить знак «${escapeHtml((c.cyrillic || '').split(',')[0].trim())}»">
@@ -223,7 +223,7 @@
         const formLbl = { initial: 'Начало', medial: 'Середина', final: 'Конец' };
         const forms = FORM_ORDER.map(k => {
             if (c[k] == null) return `<div class="lp-form-item"><div class="lp-flash-char lp-form-empty">—</div><div class="lp-form-label">${formLbl[k]}</div></div>`;
-            return `<div class="lp-form-item"><div class="lp-flash-char">${trimSpine(c[k])}</div><div class="lp-form-label">${formLbl[k]}</div></div>`;
+            return `<div class="lp-form-item"><div class="lp-flash-char${todoNumClass(c)}">${trimSpine(c[k])}</div><div class="lp-form-label">${formLbl[k]}</div></div>`;
         }).join('');
         return `
             <div class="lp-lesson">
@@ -310,7 +310,7 @@
                 <div class="pp-bar"><div class="pp-bar-fill" style="width:${Math.round(pathView.qi / total * 100)}%"></div></div>
                 <div id="path-feedback" class="practice-feedback"></div>
                 <div class="practice-char-display">
-                    <div class="practice-char">${trimSpine(form)}</div>
+                    <div class="practice-char${todoNumClass(c)}">${trimSpine(form)}</div>
                     <div class="practice-prompt">Как читается ${formLbl[formKey]} форма этого знака?</div>
                 </div>
                 <div class="practice-choices" id="path-choices">${choices}</div>
