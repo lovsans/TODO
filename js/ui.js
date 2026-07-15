@@ -360,8 +360,9 @@
         document.getElementById('modal-title').textContent = (c.id !== null ? '№' + c.id + ' — ' : '') + cyr;
         const f = document.getElementById('modal-forms');
         function mf(label, val) {
+            const numCls = c.category === 'numbers' ? ' todo-num' : '';
             if (val !== null && val !== undefined)
-                return `<div class="modal-form-item"><div class="modal-form-char" aria-hidden="true">${trimSpine(val)}</div><div class="modal-form-label">${label}</div></div>`;
+                return `<div class="modal-form-item"><div class="modal-form-char${numCls}" aria-hidden="true">${trimSpine(val)}</div><div class="modal-form-label">${label}</div></div>`;
             return `<div class="modal-form-item"><div class="modal-form-char" aria-hidden="true" style="color:var(--text-muted);font-family:Inter,sans-serif;font-size:3rem;">—</div><div class="modal-form-label">${label}</div></div>`;
         }
         f.innerHTML = mf('Начало', c.initial) + mf('Середина', c.medial) + mf('Конец', c.final);

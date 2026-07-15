@@ -533,6 +533,25 @@ mark.hl {
     background: var(--bg-secondary); border: 1px dashed var(--border); border-radius: 8px;
 }
 
+/* Цифры в шрифте тодо: горизонтальная ориентация глифа (в строке, сочетаниях). */
+.todo-num {
+    display: inline-block;
+    writing-mode: horizontal-tb;
+    text-orientation: mixed;
+}
+
+/* В карточке атласа и в модалке — цифра по центру ячейки. */
+.form-box-char.todo-num,
+.modal-form-char.todo-num {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    writing-mode: horizontal-tb;
+    text-orientation: mixed;
+    text-align: center;
+    line-height: 1;
+}
+
 /* ===== СВОДНАЯ ТАБЛИЦА ===== */
 .sum-wrap {
     overflow-x: auto; -webkit-overflow-scrolling: touch;
