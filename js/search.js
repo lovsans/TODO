@@ -7,6 +7,43 @@
             '<option value="words">Слова</option>' +
             searchableCats.map(c => `<option value="${c}">${categoryMeta[c].label}</option>`).join('');
         buildSearchIndex();
+        setSearchBarOpen(false);
+    }
+
+    function isCompactSearch() {
+        try { return window.matchMedia('(max-width: 720px)').matches; }
+        catch (e) { return false; }
+    }
+
+    function setSearchBarOpen(open) {
+        const bar = document.getElementById('search-bar');
+        const btn = document.getElementById('search-toggle');
+        if (!bar || !btn) return;
+        // На широком экране панель всегда видна — класс не нужен.
+        if (!isCompactSearch()) {
+            bar.classList.remove('is-open');
+            btn.setAttribute('aria-expanded', 'false');
+            return;
+        }
+        bar.classList.toggle('is-open', !!open);
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        btn.setAttribute('aria-label', open ? 'Свернуть поиск' : 'Открыть поиск');
+        btn.title = open ? 'Свернуть поиск' : 'Поиск';
+    }
+
+    function toggleSearchBar() {
+        if (!isCompactSearch()) return;
+        const bar = document.getElementById('search-bar');
+        const open = !(bar && bar.classList.contains('is-open'));
+        setSearchBarOpen(open);
+        if (open) {
+            const inp = document.getElementById('search-input');
+            if (inp) requestAnimationFrame(function () { try { inp.focus(); } catch (e) {} });
+        }
+    }
+
+    function expandSearchBar() {
+        if (isCompactSearch()) setSearchBarOpen(true);
     }
 
     let searchLetterPool = null;
@@ -35,7 +72,8 @@
         return searchFieldsByIdx[c.idx] || computeSearchFields(c);
     }
 
-    function exitSearch() {
+    function exitSearch(opts) {
+        opts = opts || {};
         const inp = document.getElementById('search-input');
         const sel = document.getElementById('search-filter');
         const res = document.getElementById('search-results');
@@ -44,11 +82,14 @@
         if (sel) sel.value = 'all';
         if (clr) clr.style.display = 'none';
         if (res) { res.style.display = 'none'; res.innerHTML = ''; }
+        // При уходе в раздел сворачиваем; при очистке поля оставляем открытым.
+        if (!opts.keepBarOpen) setSearchBarOpen(false);
     }
 
     function clearSearch() {
-        exitSearch();
+        exitSearch({ keepBarOpen: true });
         document.getElementById('sections-container').style.display = '';
+        expandSearchBar();
         const inp = document.getElementById('search-input');
         if (inp) inp.focus();
     }

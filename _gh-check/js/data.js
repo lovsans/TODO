@@ -2813,15 +2813,31 @@
     };
 
     // Подписи чипов в навигации (только для групп, где названия совпадают с алфавитом).
-    // Короткие подписи чипов — чтобы на телефоне сетка разделов умещалась без прокрутки.
+    // Короткие подписи чипов — на телефоне все группы видны сразу в плотной сетке.
     const NAV_CHIP_LABEL = {
+        about: 'О письме',
+        course: 'Курс',
         writing_rules: 'Правила',
+        path: 'Путь',
+        vowels: 'Гласные',
         long_vowels: 'Долгие',
+        diphthongs: 'Дифтонги',
+        consonants: 'Согласные',
         galik: 'Галики',
+        syllables: 'Слоги',
         summary: 'Таблица',
+        special: 'Спец.',
+        elements: 'Элементы',
+        numbers: 'Цифры',
+        punctuation: 'Пункт.',
+        rules: 'Чтение',
+        harmony: 'Сингарм.',
+        words: 'Слова',
+        reading: 'Тексты',
         compose_word: 'Составить',
         write_word: 'Написать',
-        direction: 'Направление',
+        direction: 'Штрихи',
+        copybook: 'Пропись',
         practice_vowels: 'Гласные',
         practice_long_vowels: 'Долгие',
         practice_diphthongs: 'Дифтонги',
