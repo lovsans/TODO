@@ -69,7 +69,6 @@
         }
     })();
     applyGlyphAccent(loadGlyphAccent());
-    applyFontScale(loadFontScale());
 
     document.addEventListener('keydown', function (e) {
         if (e.key !== 'Escape') return;
@@ -86,12 +85,4 @@
     mountWriter();
     const searchInp = document.getElementById('search-input');
     if (searchInp) searchInp.addEventListener('input', runSearchDebounced);
-    bootNavigation();
-    window.addEventListener('hashchange', handleHashChange);
-    try {
-        const navMq = window.matchMedia('(max-width: 720px)');
-        const onNavMq = function () { renderNavTabs(); };
-        if (navMq.addEventListener) navMq.addEventListener('change', onNavMq);
-        else if (navMq.addListener) navMq.addListener(onNavMq);
-    } catch (e) {}
     updateHomeProgress();

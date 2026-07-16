@@ -508,7 +508,6 @@
         const intro = started
             ? `<div class="hp-overall">Выучено букв и знаков: <b>${learnedAll} / ${totalAll}</b> (${pctAll}%)</div>`
             : `<div class="hp-empty">Прогресс появится, когда вы начнёте тренировки. Знак считается выученным, когда каждая его форма (начальная/серединная/конечная) отвечена верно хотя бы один раз.</div>`;
-        const cont = getContinueAction();
         return `
             <div class="hp-card">
                 <div class="hp-top">
@@ -516,68 +515,14 @@
                     ${started ? intro : ''}
                 </div>
                 ${started ? `<div class="hp-rows">${bars}</div>` : intro}
-                <button type="button" class="hp-cta" onclick="continueLearning()">
-                    ${escapeHtml(cont.label)}
+                <button type="button" class="hp-cta" onclick="showSection('practice')">
+                    ${started ? 'Продолжить тренировку →' : 'Начать тренировку →'}
                 </button>
             </div>`;
     }
     function updateHomeProgress() {
         const el = document.getElementById('home-progress');
         if (el) el.innerHTML = renderProgressOverview();
-    }
-
-    // ===== «Продолжить»: следующий урок Пути или последняя тренировка =====
-    const LAST_PRACTICE_KEY = 'todo-last-practice';
-
-    function saveLastPractice(scope) {
-        if (!scope || !practiceScopes[scope]) return;
-        try { localStorage.setItem(LAST_PRACTICE_KEY, scope); } catch (e) {}
-    }
-    function loadLastPractice() {
-        try {
-            const s = localStorage.getItem(LAST_PRACTICE_KEY);
-            if (s && practiceScopes[s]) return s;
-        } catch (e) {}
-        return null;
-    }
-
-    function getContinueAction() {
-        if (typeof pathFlat === 'function' && typeof pathIsUnlocked === 'function' && typeof pathIsDone === 'function') {
-            const next = pathFlat().find(l => pathIsUnlocked(l.id) && !pathIsDone(l.id));
-            if (next) {
-                return {
-                    kind: 'path',
-                    lesson: next,
-                    label: 'Продолжить путь: ' + next.title + ' →'
-                };
-            }
-        }
-        const last = loadLastPractice();
-        if (last) {
-            const name = (typeof NAV_CHIP_LABEL !== 'undefined' && NAV_CHIP_LABEL[last])
-                || (categoryMeta[last] && categoryMeta[last].label)
-                || 'тренировку';
-            return { kind: 'practice', cat: last, label: 'Продолжить: ' + name + ' →' };
-        }
-        if (typeof pathFlat === 'function') {
-            return { kind: 'path-start', cat: 'path', label: 'Начать путь →' };
-        }
-        return { kind: 'practice', cat: 'practice', label: 'Начать тренировку →' };
-    }
-
-    function continueLearning() {
-        const a = getContinueAction();
-        if (a.kind === 'path' && a.lesson) {
-            if (a.lesson.kind === 'quiz' && typeof pathNodeClick === 'function') {
-                showSection('path');
-                pathNodeClick(a.lesson.id);
-                return;
-            }
-            if (a.lesson.cat) { showSection(a.lesson.cat); return; }
-            showSection('path');
-            return;
-        }
-        showSection(a.cat || 'path');
     }
 
     // ===== Экспорт / импорт прогресса =====
@@ -616,7 +561,6 @@
     }
 
     function setupPractice(scope) {
-        saveLastPractice(scope);
         const st = getPState(scope);
         if (st.timer) { clearTimeout(st.timer); st.timer = null; }
         st.answered = false;

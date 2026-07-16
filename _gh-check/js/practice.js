@@ -32,7 +32,7 @@
     // форме, а «выучен» — когда освоены ВСЕ имеющиеся у знака формы.
     const FORM_ORDER = ['initial', 'medial', 'final'];
     const FORM_LABELS = { initial: 'начальная', medial: 'серединная', final: 'конечная' };
-    const FORM_MASTERY = 1; // верных подряд на каждую форму, чтобы она считалась освоенной
+    const FORM_MASTERY = 2; // верных подряд на каждую форму, чтобы она считалась освоенной
 
     // Прогресс по формам конкретного знака (с подстраховкой на старый формат данных,
     // где был только общий p.streak без разбивки по формам).
@@ -54,7 +54,7 @@
             const prevStreak = prevKey ? ((formProgress(letter, prevKey) || {}).streak || 0) : Infinity;
             if (i > 0 && prevStreak < 1) return 0;             // следующая форма ещё не «открыта»
             const fp = formProgress(letter, fk);
-            if (fp && fp.mastered) return 1;      // освоена — изредка повторяем
+            if (fp && fp.streak >= FORM_MASTERY) return 1;      // освоена — изредка повторяем
             if (!fp || !fp.seen) return 5;                      // совсем новая — показываем чаще
             return 3;                                           // в процессе освоения
         });
@@ -321,7 +321,7 @@
         } else {
             const formList = [['initial','начальная'], ['medial','серединная'], ['final','конечная']].filter(([k]) => letter[k]);
             const formsHtml = formList.map(([k, lbl]) =>
-                `<div class="fb-form"><div class="fb-form-glyph${todoNumClass(letter)}">${escapeHtml(letter[k])}</div><div class="fb-form-lbl">${lbl}</div></div>`).join('');
+                `<div class="fb-form"><div class="fb-form-glyph">${escapeHtml(letter[k])}</div><div class="fb-form-lbl">${lbl}</div></div>`).join('');
             feedback.className = 'practice-feedback incorrect rich';
             feedback.innerHTML =
                 `<div class="fb-line">✗ Неверно. Правильно: «${escapeHtml(nm)}»${escapeHtml(showLat)}</div>` +
@@ -349,7 +349,7 @@
         const p = practiceProgress[letterKey(c)];
         if (!p || !p.forms) return false;
         const avail = FORM_ORDER.filter(k => c[k]);
-        return avail.length > 0 && avail.every(k => (p.forms[k] && p.forms[k].mastered));
+        return avail.length > 0 && avail.every(k => (p.forms[k] && p.forms[k].streak >= FORM_MASTERY));
     }
     // Ответ засчитывается в прогресс конкретной формы (fkey), а в p.seen/p.correct
     // копится агрегат по знаку — он нужен только чтобы отличить совсем «новый» знак
@@ -360,13 +360,7 @@
         if (!p.forms) p.forms = {};
         const f = p.forms[fkey] || (p.forms[fkey] = { seen: 0, streak: 0 });
         f.seen++;
-        if (ok) {
-            f.streak++;
-            if (f.streak >= FORM_MASTERY) f.mastered = true;
-            p.correct = (p.correct || 0) + 1;
-        } else {
-            f.streak = 0;
-        }
+        if (ok) { f.streak++; p.correct = (p.correct || 0) + 1; } else { f.streak = 0; }
         p.seen = (p.seen || 0) + 1;
         practiceProgress[k] = p; saveProgress();
     }
@@ -507,8 +501,7 @@
         const started = totalAll > 0 && learnedAll > 0;
         const intro = started
             ? `<div class="hp-overall">Выучено букв и знаков: <b>${learnedAll} / ${totalAll}</b> (${pctAll}%)</div>`
-            : `<div class="hp-empty">Прогресс появится, когда вы начнёте тренировки. Знак считается выученным, когда каждая его форма (начальная/серединная/конечная) отвечена верно хотя бы один раз.</div>`;
-        const cont = getContinueAction();
+            : `<div class="hp-empty">Прогресс появится, когда вы начнёте тренировки. Знак считается выученным, когда каждая его форма (начальная/серединная/конечная) отвечена верно два раза подряд.</div>`;
         return `
             <div class="hp-card">
                 <div class="hp-top">
@@ -516,68 +509,14 @@
                     ${started ? intro : ''}
                 </div>
                 ${started ? `<div class="hp-rows">${bars}</div>` : intro}
-                <button type="button" class="hp-cta" onclick="continueLearning()">
-                    ${escapeHtml(cont.label)}
+                <button type="button" class="hp-cta" onclick="showSection('practice')">
+                    ${started ? 'Продолжить тренировку →' : 'Начать тренировку →'}
                 </button>
             </div>`;
     }
     function updateHomeProgress() {
         const el = document.getElementById('home-progress');
         if (el) el.innerHTML = renderProgressOverview();
-    }
-
-    // ===== «Продолжить»: следующий урок Пути или последняя тренировка =====
-    const LAST_PRACTICE_KEY = 'todo-last-practice';
-
-    function saveLastPractice(scope) {
-        if (!scope || !practiceScopes[scope]) return;
-        try { localStorage.setItem(LAST_PRACTICE_KEY, scope); } catch (e) {}
-    }
-    function loadLastPractice() {
-        try {
-            const s = localStorage.getItem(LAST_PRACTICE_KEY);
-            if (s && practiceScopes[s]) return s;
-        } catch (e) {}
-        return null;
-    }
-
-    function getContinueAction() {
-        if (typeof pathFlat === 'function' && typeof pathIsUnlocked === 'function' && typeof pathIsDone === 'function') {
-            const next = pathFlat().find(l => pathIsUnlocked(l.id) && !pathIsDone(l.id));
-            if (next) {
-                return {
-                    kind: 'path',
-                    lesson: next,
-                    label: 'Продолжить путь: ' + next.title + ' →'
-                };
-            }
-        }
-        const last = loadLastPractice();
-        if (last) {
-            const name = (typeof NAV_CHIP_LABEL !== 'undefined' && NAV_CHIP_LABEL[last])
-                || (categoryMeta[last] && categoryMeta[last].label)
-                || 'тренировку';
-            return { kind: 'practice', cat: last, label: 'Продолжить: ' + name + ' →' };
-        }
-        if (typeof pathFlat === 'function') {
-            return { kind: 'path-start', cat: 'path', label: 'Начать путь →' };
-        }
-        return { kind: 'practice', cat: 'practice', label: 'Начать тренировку →' };
-    }
-
-    function continueLearning() {
-        const a = getContinueAction();
-        if (a.kind === 'path' && a.lesson) {
-            if (a.lesson.kind === 'quiz' && typeof pathNodeClick === 'function') {
-                showSection('path');
-                pathNodeClick(a.lesson.id);
-                return;
-            }
-            if (a.lesson.cat) { showSection(a.lesson.cat); return; }
-            showSection('path');
-            return;
-        }
-        showSection(a.cat || 'path');
     }
 
     // ===== Экспорт / импорт прогресса =====
@@ -616,7 +555,6 @@
     }
 
     function setupPractice(scope) {
-        saveLastPractice(scope);
         const st = getPState(scope);
         if (st.timer) { clearTimeout(st.timer); st.timer = null; }
         st.answered = false;
@@ -634,7 +572,7 @@
         if (!pool.length) {                                   // включён режим «только невыученные», а всё выучено
             st.letter = null;
             const ch = document.getElementById('practice-char__' + scope);
-            if (ch) { ch.textContent = '✓'; ch.classList.remove('todo-num'); }
+            if (ch) ch.textContent = '✓';
             if (prompt) prompt.textContent = 'Всё выучено! Снимите «Только невыученные», чтобы повторять.';
             if (choiceBox) choiceBox.innerHTML = '';
             updateProgressUI(scope); renderStreak();
@@ -650,11 +588,7 @@
         const fkey = pickForm(letter);
         const fname = FORM_LABELS[fkey];
         st.form = fname; st.formKey = fkey;
-        const chEl = document.getElementById('practice-char__' + scope);
-        if (chEl) {
-            chEl.textContent = trimSpine(letter[fkey]);
-            chEl.classList.toggle('todo-num', isTodoNumber(letter));
-        }
+        document.getElementById('practice-char__' + scope).textContent = trimSpine(letter[fkey]);
         const noun = letter.category === 'syllables' ? 'слог' : 'знак';
         const seriesHint = (scope === 'practice_syllables' && !syllableShowAll) ? ` Серия: ${SYLLABLE_GROUPS[syllableGroupIdx].title}.` : '';
 
