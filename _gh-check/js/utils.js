@@ -22,10 +22,29 @@
         catch (e) { return false; }
     }
 
-    // Прокрутка страницы наверх с учётом reduced-motion (без рывка для тех, кому он мешает).
-    function scrollTopSmooth() {
-        window.scrollTo({ top: 0, behavior: reducedMotion() ? 'auto' : 'smooth' });
+    // Прокрутка к активному разделу — после раскрытия панели навигации (анимация ~0.36s).
+    function scrollToSection(el) {
+        if (!el) return;
+        const behavior = reducedMotion() ? 'auto' : 'smooth';
+        const scroll = () => el.scrollIntoView({ behavior, block: 'start' });
+        requestAnimationFrame(() => requestAnimationFrame(scroll));
+        if (!reducedMotion()) setTimeout(scroll, 380);
     }
+
+    // Кнопка в конце раздела — вернуться к списку разделов.
+    function scrollToNav() {
+        const nav = document.getElementById('nav-tabs');
+        if (!nav) return;
+        nav.scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'start' });
+        try {
+            const first = nav.querySelector('.nav-group-tab, .nav-item, button');
+            if (first) first.focus({ preventScroll: true });
+        } catch (e) {}
+    }
+
+    // Цифры Тодо Бичик (категория numbers) рисуются горизонтально, не как буквы.
+    function isTodoNumber(c) { return !!(c && c.category === 'numbers'); }
+    function todoNumClass(c) { return isTodoNumber(c) ? ' todo-num' : ''; }
 
     // ── Сохранение написанного слова как картинки ─────────────────────────────
     // Картинка рисуется самим браузером: блок вертикального письма со встроенным

@@ -1,149 +1,91 @@
 /* ui.js — навигация по разделам, вкладки, модальные карточки букв. */
 
 
-    function renderNavTabs() {
-        const el = document.getElementById('nav-tabs');
-        el.innerHTML = `
-            <div class="nav-tiles-row">
-                <div class="nav-tiles" role="tablist" aria-label="Группы разделов">
-                    ${navGroups.map((g, i) => `
-                        <button type="button" class="nav-tile" role="tab"
-                                aria-expanded="false" aria-controls="nav-group-panel-${i}" id="nav-group-toggle-${i}"
-                                data-nav-group="${i}" onclick="toggleNavGroup(${i})">
-                            <span class="nav-group-label">${escapeHtml(g.label)}</span>
-                            <span class="nav-group-chevron" aria-hidden="true"></span>
-                        </button>`).join('')}
-                </div>
-            </div>
-            <div class="nav-bulk-row">
-                <span class="nav-bulk-hint" id="nav-bulk-hint">Управление группами</span>
-                <div class="nav-bulk" role="group" aria-labelledby="nav-bulk-hint">
-                    <button type="button" class="nav-bulk-btn nav-bulk-btn--expand"
-                            aria-label="Развернуть все группы" onclick="expandAllNavGroups()">
-                        <span class="nav-bulk-chevron nav-bulk-chevron--down" aria-hidden="true"></span>
-                        <span class="nav-bulk-text">Развернуть все</span>
-                    </button>
-                    <button type="button" class="nav-bulk-btn nav-bulk-btn--collapse"
-                            aria-label="Свернуть все группы" onclick="collapseAllNavGroups()">
-                        <span class="nav-bulk-chevron nav-bulk-chevron--up" aria-hidden="true"></span>
-                        <span class="nav-bulk-text">Свернуть все</span>
-                    </button>
-                </div>
-            </div>
-            <div class="nav-panels">
-                ${navGroups.map((g, i) => `
-                    <div class="nav-group-panel" id="nav-group-panel-${i}" data-nav-panel="${i}" role="tabpanel" aria-labelledby="nav-group-toggle-${i}" hidden>
-                        <div class="nav-group-items" aria-label="${escapeHtml(g.label)}">
-                            ${g.cats.map(c => `<button class="nav-item ${c === 'about' ? 'active' : ''}" data-cat="${c}"${c === 'about' ? ' aria-current="page"' : ''} onclick="showSection('${c}')">${categoryMeta[c].label}</button>`).join('')}
-                        </div>
-                    </div>`).join('')}
-            </div>`;
-        applyNavGroupState();
+    const NAV_GROUP_STORE = 'todo-nav-active-group';
+    let activeNavGroup = 0;
+
+    function navChipLabel(cat) {
+        if (typeof NAV_CHIP_LABEL !== 'undefined' && NAV_CHIP_LABEL[cat]) return NAV_CHIP_LABEL[cat];
+        return categoryMeta[cat] ? categoryMeta[cat].label : cat;
     }
 
-    const NAV_GROUP_STORE = 'todo-nav-groups-collapsed';
-
-    function getCollapsedNavGroups() {
+    function loadActiveNavGroup() {
         try {
             const raw = localStorage.getItem(NAV_GROUP_STORE);
-            if (raw) return new Set(JSON.parse(raw).map(Number));
+            if (raw == null) return 0;
+            const n = parseInt(raw, 10);
+            if (Number.isFinite(n) && n >= 0 && n < navGroups.length) return n;
         } catch (e) {}
-        return new Set();
+        return 0;
     }
 
-    function saveCollapsedNavGroups(collapsed) {
-        try { localStorage.setItem(NAV_GROUP_STORE, JSON.stringify([...collapsed])); } catch (e) {}
+    function saveActiveNavGroup(i) {
+        try { localStorage.setItem(NAV_GROUP_STORE, String(i)); } catch (e) {}
     }
 
-    function setNavGroupCollapsed(i, collapsed) {
-        const tile = document.getElementById('nav-group-toggle-' + i);
-        const panel = document.getElementById('nav-group-panel-' + i);
-        if (tile) tile.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
-        if (tile) tile.classList.toggle('is-active', !collapsed);
-        if (panel) {
-            panel.classList.toggle('is-open', !collapsed);
-            if (collapsed) panel.setAttribute('hidden', '');
-            else panel.removeAttribute('hidden');
-        }
+    function renderNavChips(groupIndex, activeCat) {
+        const g = navGroups[groupIndex];
+        if (!g) return '';
+        return g.cats.map(c => {
+            const on = c === activeCat;
+            return `<button type="button" class="nav-item${on ? ' active' : ''}" data-cat="${c}"` +
+                `${on ? ' aria-current="page"' : ''} onclick="showSection('${c}')">${escapeHtml(navChipLabel(c))}</button>`;
+        }).join('');
     }
 
-    function toggleNavGroup(i) {
-        const panel = document.getElementById('nav-group-panel-' + i);
-        if (!panel) return;
-        const collapsed = panel.classList.contains('is-open');
-        setNavGroupCollapsed(i, collapsed);
-        syncNavGroupStore();
+    function renderNavTabs() {
+        const el = document.getElementById('nav-tabs');
+        activeNavGroup = loadActiveNavGroup();
+        const activeCat = (document.querySelector('.section.active') || {}).id;
+        const cat = activeCat && activeCat.startsWith('section-') ? activeCat.slice('section-'.length) : 'about';
+        const gi = navGroups.findIndex(g => g.cats.includes(cat));
+        if (gi >= 0) activeNavGroup = gi;
+
+        el.innerHTML = `
+            <div class="nav-group-tabs" role="tablist" aria-label="Группы разделов">
+                ${navGroups.map((g, i) => `
+                    <button type="button" class="nav-group-tab${i === activeNavGroup ? ' is-active' : ''}"
+                            role="tab" id="nav-group-tab-${i}"
+                            aria-selected="${i === activeNavGroup ? 'true' : 'false'}"
+                            aria-controls="nav-chips"
+                            data-nav-group="${i}" onclick="selectNavGroup(${i})">
+                        ${escapeHtml(g.label)}
+                    </button>`).join('')}
+            </div>
+            <div class="nav-chips" id="nav-chips" role="tabpanel" aria-labelledby="nav-group-tab-${activeNavGroup}">
+                ${renderNavChips(activeNavGroup, cat)}
+            </div>`;
+        saveActiveNavGroup(activeNavGroup);
     }
 
-    function syncNavGroupStore() {
-        const collapsed = new Set();
-        navGroups.forEach((_, i) => {
-            const panel = document.getElementById('nav-group-panel-' + i);
-            if (panel && !panel.classList.contains('is-open')) collapsed.add(i);
+    function selectNavGroup(i, preferCat) {
+        if (i < 0 || i >= navGroups.length) return;
+        activeNavGroup = i;
+        saveActiveNavGroup(i);
+        const tabs = document.querySelectorAll('.nav-group-tab');
+        tabs.forEach((btn, idx) => {
+            const on = idx === i;
+            btn.classList.toggle('is-active', on);
+            btn.setAttribute('aria-selected', on ? 'true' : 'false');
         });
-        saveCollapsedNavGroups(collapsed);
-        updateNavBulkState();
-    }
-
-    function countOpenNavGroups() {
-        let open = 0;
-        navGroups.forEach((_, i) => {
-            const panel = document.getElementById('nav-group-panel-' + i);
-            if (panel && panel.classList.contains('is-open')) open++;
-        });
-        return open;
-    }
-
-    function updateNavBulkState() {
-        const open = countOpenNavGroups();
-        const total = navGroups.length;
-        const expandBtn = document.querySelector('.nav-bulk-btn--expand');
-        const collapseBtn = document.querySelector('.nav-bulk-btn--collapse');
-        const hint = document.getElementById('nav-bulk-hint');
-        if (expandBtn) expandBtn.disabled = open === total;
-        if (collapseBtn) collapseBtn.disabled = open === 0;
-        if (hint) {
-            hint.textContent = open === 0
-                ? 'Все группы свёрнуты'
-                : open === total
-                    ? 'Все группы развёрнуты'
-                    : 'Открыто ' + open + ' из ' + total;
+        const chips = document.getElementById('nav-chips');
+        if (!chips) return;
+        chips.setAttribute('aria-labelledby', 'nav-group-tab-' + i);
+        const group = navGroups[i];
+        let keep = null;
+        if (preferCat && group.cats.includes(preferCat)) keep = preferCat;
+        else {
+            const activeBtn = document.querySelector('.nav-item.active');
+            const activeCat = activeBtn ? activeBtn.getAttribute('data-cat') : null;
+            if (activeCat && group.cats.includes(activeCat)) keep = activeCat;
         }
+        chips.innerHTML = renderNavChips(i, keep);
     }
 
-    function collapseAllNavGroups() {
-        navGroups.forEach((_, i) => setNavGroupCollapsed(i, true));
-        saveCollapsedNavGroups(new Set(navGroups.map((_, i) => i)));
-        updateNavBulkState();
-    }
-
-    function expandAllNavGroups() {
-        navGroups.forEach((_, i) => setNavGroupCollapsed(i, false));
-        saveCollapsedNavGroups(new Set());
-        updateNavBulkState();
-    }
-
-    function applyNavGroupState() {
-        let collapsed;
-        try {
-            if (localStorage.getItem(NAV_GROUP_STORE) === null) {
-                collapseAllNavGroups();
-                return;
-            }
-            collapsed = getCollapsedNavGroups();
-        } catch (e) {
-            collapseAllNavGroups();
-            return;
-        }
-        navGroups.forEach((_, i) => setNavGroupCollapsed(i, collapsed.has(i)));
-        updateNavBulkState();
-    }
-
-    function ensureNavGroupOpen(cat) {
+    function syncNavGroupForCat(cat) {
         const gi = navGroups.findIndex(g => g.cats.includes(cat));
         if (gi < 0) return;
-        setNavGroupCollapsed(gi, false);
-        syncNavGroupStore();
+        selectNavGroup(gi, cat);
     }
 
     function renderSectionContent(cat) {
@@ -212,11 +154,22 @@
             <div class="char-grid">${list.map(renderCard).join('')}</div>`;
     }
 
+    function backToNavMarkup() {
+        return `
+            <div class="section-end-nav">
+                <button type="button" class="back-to-nav" onclick="scrollToNav()"
+                        aria-label="Назад к списку разделов" title="Назад к списку разделов">
+                    <span aria-hidden="true">↑</span>
+                    <span class="back-to-nav-text">Назад к списку разделов</span>
+                </button>
+            </div>`;
+    }
+
     function renderSections() {
         const el = document.getElementById('sections-container');
         const cats = Object.keys(categoryMeta);
         el.innerHTML = cats.map((cat, i) =>
-            `<div class="section ${i === 0 ? 'active' : ''}" id="section-${cat}">${renderSectionContent(cat)}</div>`
+            `<div class="section ${i === 0 ? 'active' : ''}" id="section-${cat}">${renderSectionContent(cat)}${backToNavMarkup()}</div>`
         ).join('');
     }
 
@@ -363,7 +316,7 @@
             const numCls = todoNumClass(c);
             if (val !== null && val !== undefined)
                 return `<div class="modal-form-item"><div class="modal-form-char${numCls}" aria-hidden="true">${trimSpine(val)}</div><div class="modal-form-label">${label}</div></div>`;
-            return `<div class="modal-form-item"><div class="modal-form-char" aria-hidden="true" style="color:var(--text-muted);font-family:Inter,sans-serif;font-size:3rem;">—</div><div class="modal-form-label">${label}</div></div>`;
+            return `<div class="modal-form-item"><div class="modal-form-char" aria-hidden="true" style="color:var(--text-muted);font-family:var(--font-ui);font-size:3rem;">—</div><div class="modal-form-label">${label}</div></div>`;
         }
         f.innerHTML = mf('Начало', c.initial) + mf('Середина', c.medial) + mf('Конец', c.final);
         let info = '';
@@ -400,7 +353,7 @@
 
     function showSection(cat) {
         exitSearch();
-        ensureNavGroupOpen(cat);
+        syncNavGroupForCat(cat);
         document.getElementById('sections-container').style.display = '';
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         const sec = document.getElementById('section-' + cat);

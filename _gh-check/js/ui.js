@@ -1,18 +1,92 @@
 /* ui.js — навигация по разделам, вкладки, модальные карточки букв. */
 
 
-    function renderNavTabs() {
-        const el = document.getElementById('nav-tabs');
-        el.innerHTML = navGroups.map(g => `
-            <div class="nav-group">
-                <div class="nav-group-label">${g.label}</div>
-                <div class="nav-group-items" aria-label="${escapeHtml(g.label)}">
-                    ${g.cats.map(c => `<button class="nav-item ${c === 'about' ? 'active' : ''}" data-cat="${c}"${c === 'about' ? ' aria-current="page"' : ''} onclick="showSection('${c}')">${categoryMeta[c].label}</button>`).join('')}
-                </div>
-            </div>`).join('');
+    const NAV_GROUP_STORE = 'todo-nav-active-group';
+    let activeNavGroup = 0;
+
+    function navChipLabel(cat) {
+        if (typeof NAV_CHIP_LABEL !== 'undefined' && NAV_CHIP_LABEL[cat]) return NAV_CHIP_LABEL[cat];
+        return categoryMeta[cat] ? categoryMeta[cat].label : cat;
     }
 
-    const mountedSections = new Set();
+    function loadActiveNavGroup() {
+        try {
+            const raw = localStorage.getItem(NAV_GROUP_STORE);
+            if (raw == null) return 0;
+            const n = parseInt(raw, 10);
+            if (Number.isFinite(n) && n >= 0 && n < navGroups.length) return n;
+        } catch (e) {}
+        return 0;
+    }
+
+    function saveActiveNavGroup(i) {
+        try { localStorage.setItem(NAV_GROUP_STORE, String(i)); } catch (e) {}
+    }
+
+    function renderNavChips(groupIndex, activeCat) {
+        const g = navGroups[groupIndex];
+        if (!g) return '';
+        return g.cats.map(c => {
+            const on = c === activeCat;
+            return `<button type="button" class="nav-item${on ? ' active' : ''}" data-cat="${c}"` +
+                `${on ? ' aria-current="page"' : ''} onclick="showSection('${c}')">${escapeHtml(navChipLabel(c))}</button>`;
+        }).join('');
+    }
+
+    function renderNavTabs() {
+        const el = document.getElementById('nav-tabs');
+        activeNavGroup = loadActiveNavGroup();
+        const activeCat = (document.querySelector('.section.active') || {}).id;
+        const cat = activeCat && activeCat.startsWith('section-') ? activeCat.slice('section-'.length) : 'about';
+        const gi = navGroups.findIndex(g => g.cats.includes(cat));
+        if (gi >= 0) activeNavGroup = gi;
+
+        el.innerHTML = `
+            <div class="nav-group-tabs" role="tablist" aria-label="Группы разделов">
+                ${navGroups.map((g, i) => `
+                    <button type="button" class="nav-group-tab${i === activeNavGroup ? ' is-active' : ''}"
+                            role="tab" id="nav-group-tab-${i}"
+                            aria-selected="${i === activeNavGroup ? 'true' : 'false'}"
+                            aria-controls="nav-chips"
+                            data-nav-group="${i}" onclick="selectNavGroup(${i})">
+                        ${escapeHtml(g.label)}
+                    </button>`).join('')}
+            </div>
+            <div class="nav-chips" id="nav-chips" role="tabpanel" aria-labelledby="nav-group-tab-${activeNavGroup}">
+                ${renderNavChips(activeNavGroup, cat)}
+            </div>`;
+        saveActiveNavGroup(activeNavGroup);
+    }
+
+    function selectNavGroup(i, preferCat) {
+        if (i < 0 || i >= navGroups.length) return;
+        activeNavGroup = i;
+        saveActiveNavGroup(i);
+        const tabs = document.querySelectorAll('.nav-group-tab');
+        tabs.forEach((btn, idx) => {
+            const on = idx === i;
+            btn.classList.toggle('is-active', on);
+            btn.setAttribute('aria-selected', on ? 'true' : 'false');
+        });
+        const chips = document.getElementById('nav-chips');
+        if (!chips) return;
+        chips.setAttribute('aria-labelledby', 'nav-group-tab-' + i);
+        const group = navGroups[i];
+        let keep = null;
+        if (preferCat && group.cats.includes(preferCat)) keep = preferCat;
+        else {
+            const activeBtn = document.querySelector('.nav-item.active');
+            const activeCat = activeBtn ? activeBtn.getAttribute('data-cat') : null;
+            if (activeCat && group.cats.includes(activeCat)) keep = activeCat;
+        }
+        chips.innerHTML = renderNavChips(i, keep);
+    }
+
+    function syncNavGroupForCat(cat) {
+        const gi = navGroups.findIndex(g => g.cats.includes(cat));
+        if (gi < 0) return;
+        selectNavGroup(gi, cat);
+    }
 
     function renderSectionContent(cat) {
         if (cat === 'about') return renderAbout();
@@ -43,7 +117,7 @@
                 <div class="section-title">${categoryMeta[cat].label}</div>
                 <div class="section-info">${categoryMeta[cat].info}</div>
                 <div class="writer-host">
-                    <iframe id="writer-frame" title="Тренажёр письма Тодо Бичик" loading="lazy"
+                    <iframe id="writer-frame" title="Тренажёр письма Тодо Бичик"
                             style="width:100%;border:0;display:block;height:1024px;border-radius:14px;background:var(--bg-secondary);"></iframe>
                 </div>`;
         }
@@ -80,25 +154,26 @@
             <div class="char-grid">${list.map(renderCard).join('')}</div>`;
     }
 
-    function mountSection(cat) {
-        if (mountedSections.has(cat)) return;
-        const sec = document.getElementById('section-' + cat);
-        if (!sec) return;
-        sec.innerHTML = renderSectionContent(cat);
-        mountedSections.add(cat);
+    function backToNavMarkup() {
+        return `
+            <div class="section-end-nav">
+                <button type="button" class="back-to-nav" onclick="scrollToNav()"
+                        aria-label="Назад к списку разделов" title="Назад к списку разделов">
+                    <span aria-hidden="true">↑</span>
+                    <span class="back-to-nav-text">Назад к списку разделов</span>
+                </button>
+            </div>`;
     }
 
     function renderSections() {
         const el = document.getElementById('sections-container');
         const cats = Object.keys(categoryMeta);
         el.innerHTML = cats.map((cat, i) =>
-            `<div class="section ${i === 0 ? 'active' : ''}" id="section-${cat}"></div>`
+            `<div class="section ${i === 0 ? 'active' : ''}" id="section-${cat}">${renderSectionContent(cat)}${backToNavMarkup()}</div>`
         ).join('');
-        mountedSections.clear();
-        mountSection('about');
     }
 
-    // Стек переходов по карточкам (для кнопки «Назад» при переходах из примечаний).
+    // Стек переходов по карточкам
     let modalStack = [];
     // Режим списка для «Пред./След.»: null — внутри своей категории; 'summary' — по всей сводной таблице.
     let modalNavMode = null;
@@ -238,9 +313,10 @@
         document.getElementById('modal-title').textContent = (c.id !== null ? '№' + c.id + ' — ' : '') + cyr;
         const f = document.getElementById('modal-forms');
         function mf(label, val) {
+            const numCls = todoNumClass(c);
             if (val !== null && val !== undefined)
-                return `<div class="modal-form-item"><div class="modal-form-char" aria-hidden="true">${trimSpine(val)}</div><div class="modal-form-label">${label}</div></div>`;
-            return `<div class="modal-form-item"><div class="modal-form-char" aria-hidden="true" style="color:var(--text-muted);font-family:Inter,sans-serif;font-size:3rem;">—</div><div class="modal-form-label">${label}</div></div>`;
+                return `<div class="modal-form-item"><div class="modal-form-char${numCls}" aria-hidden="true">${trimSpine(val)}</div><div class="modal-form-label">${label}</div></div>`;
+            return `<div class="modal-form-item"><div class="modal-form-char" aria-hidden="true" style="color:var(--text-muted);font-family:var(--font-ui);font-size:3rem;">—</div><div class="modal-form-label">${label}</div></div>`;
         }
         f.innerHTML = mf('Начало', c.initial) + mf('Середина', c.medial) + mf('Конец', c.final);
         let info = '';
@@ -277,7 +353,7 @@
 
     function showSection(cat) {
         exitSearch();
-        mountSection(cat);
+        syncNavGroupForCat(cat);
         document.getElementById('sections-container').style.display = '';
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         const sec = document.getElementById('section-' + cat);
@@ -289,7 +365,6 @@
             if (on) n.setAttribute('aria-current', 'page');
             else n.removeAttribute('aria-current');
         });
-        scrollTopSmooth();
         if (cat === 'about') updateHomeProgress();
         if (practiceScopes[cat]) setupPractice(cat);
         if (cat === 'copybook') requestAnimationFrame(() => requestAnimationFrame(cbFit));
@@ -301,7 +376,10 @@
         }
         if (cat === 'write_word') wwInit();
         if (cat === 'path') renderPathRoot();
-        if (cat === 'direction') mountWriter();
         if (cat === 'harmony') setupHarmony();
+        const scrollTarget = cat === 'about'
+            ? (document.getElementById('about-hero') || sec)
+            : sec;
+        scrollToSection(scrollTarget);
     }
 

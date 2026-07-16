@@ -31,6 +31,17 @@
         if (!reducedMotion()) setTimeout(scroll, 380);
     }
 
+    // Кнопка в конце раздела — вернуться к списку разделов.
+    function scrollToNav() {
+        const nav = document.getElementById('nav-tabs');
+        if (!nav) return;
+        nav.scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'start' });
+        try {
+            const first = nav.querySelector('.nav-group-tab, .nav-item, button');
+            if (first) first.focus({ preventScroll: true });
+        } catch (e) {}
+    }
+
     // Цифры Тодо Бичик (категория numbers) рисуются горизонтально, не как буквы.
     function isTodoNumber(c) { return !!(c && c.category === 'numbers'); }
     function todoNumClass(c) { return isTodoNumber(c) ? ' todo-num' : ''; }
