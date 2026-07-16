@@ -45,6 +45,12 @@
         // Авто-высота iframe.
         if (typeof data.__todoWriterHeight === 'number') {
             const frame = document.getElementById('writer-frame');
-            if (frame) frame.style.height = Math.max(560, Math.ceil(data.__todoWriterHeight) + 8) + 'px';
+            if (frame) {
+                let floor = 560;
+                try {
+                    if (window.matchMedia('(max-width: 640px)').matches) floor = 420;
+                } catch (e) {}
+                frame.style.height = Math.max(floor, Math.ceil(data.__todoWriterHeight) + 8) + 'px';
+            }
         }
     });

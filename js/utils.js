@@ -22,13 +22,13 @@
         catch (e) { return false; }
     }
 
-    // Прокрутка к активному разделу — после раскрытия панели навигации (анимация ~0.36s).
+    // Прокрутка к активному разделу (двойной rAF — после раскладки sticky-шапки).
     function scrollToSection(el) {
         if (!el) return;
         const behavior = reducedMotion() ? 'auto' : 'smooth';
-        const scroll = () => el.scrollIntoView({ behavior, block: 'start' });
-        requestAnimationFrame(() => requestAnimationFrame(scroll));
-        if (!reducedMotion()) setTimeout(scroll, 380);
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+            el.scrollIntoView({ behavior, block: 'start' });
+        }));
     }
 
     // Кнопка в конце раздела — вернуться к списку разделов.

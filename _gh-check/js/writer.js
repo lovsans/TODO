@@ -1,6 +1,5 @@
 /* writer.js — встроенный автономный тренажёр письма (раздел «Направление письма»).
-   Сама страница тренажёра вынесена в отдельный файл writer.html и грузится в iframe
-   лениво — только при первом открытии раздела (см. mountWriter в showSection). */
+   Страница тренажёра в writer.html, подключается в iframe при старте приложения. */
 
     // Монтирует тренажёр в iframe один раз: ставит src на отдельный файл.
     // Тема передаётся тремя путями, дополняющими друг друга:
@@ -46,6 +45,12 @@
         // Авто-высота iframe.
         if (typeof data.__todoWriterHeight === 'number') {
             const frame = document.getElementById('writer-frame');
-            if (frame) frame.style.height = Math.max(560, Math.ceil(data.__todoWriterHeight) + 8) + 'px';
+            if (frame) {
+                let floor = 560;
+                try {
+                    if (window.matchMedia('(max-width: 640px)').matches) floor = 420;
+                } catch (e) {}
+                frame.style.height = Math.max(floor, Math.ceil(data.__todoWriterHeight) + 8) + 'px';
+            }
         }
     });

@@ -80,6 +80,25 @@
             if (activeCat && group.cats.includes(activeCat)) keep = activeCat;
         }
         chips.innerHTML = renderNavChips(i, keep);
+        scrollActiveNavIntoView();
+    }
+
+    // На узком экране вкладки/чипы в горизонтальном скролле — подтянуть активный по X,
+    // не трогая вертикальную прокрутку страницы.
+    function scrollActiveNavIntoView() {
+        function scrollXInto(el) {
+            if (!el) return;
+            const scroller = el.parentElement;
+            if (!scroller) return;
+            const er = el.getBoundingClientRect();
+            const sr = scroller.getBoundingClientRect();
+            if (er.left < sr.left) scroller.scrollLeft += er.left - sr.left - 12;
+            else if (er.right > sr.right) scroller.scrollLeft += er.right - sr.right + 12;
+        }
+        try {
+            scrollXInto(document.querySelector('.nav-group-tab.is-active'));
+            scrollXInto(document.querySelector('.nav-item.active'));
+        } catch (e) {}
     }
 
     function syncNavGroupForCat(cat) {
@@ -118,7 +137,7 @@
                 <div class="section-info">${categoryMeta[cat].info}</div>
                 <div class="writer-host">
                     <iframe id="writer-frame" title="Тренажёр письма Тодо Бичик"
-                            style="width:100%;border:0;display:block;height:1024px;border-radius:14px;background:var(--bg-secondary);"></iframe>
+                            style="width:100%;border:0;display:block;height:min(70dvh,480px);border-radius:14px;background:var(--bg-secondary);"></iframe>
                 </div>`;
         }
         if (cat === 'copybook') return renderCopybook();

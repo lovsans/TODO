@@ -2813,14 +2813,16 @@
     };
 
     // Подписи чипов в навигации (только для групп, где названия совпадают с алфавитом).
+    // Короткие подписи: группа «Тренировка» уже задаёт контекст, длинный суффикс
+    // на узком экране раздувает ряд чипов.
     const NAV_CHIP_LABEL = {
-        practice_vowels: 'Гласные · тренажёр',
-        practice_long_vowels: 'Долгие · тренажёр',
-        practice_diphthongs: 'Дифтонги · тренажёр',
-        practice_consonants: 'Согласные · тренажёр',
-        practice_galik: 'Галики · тренажёр',
-        practice_syllables: 'Слоги · тренажёр',
-        practice_numbers: 'Цифры · тренажёр',
+        practice_vowels: 'Гласные',
+        practice_long_vowels: 'Долгие',
+        practice_diphthongs: 'Дифтонги',
+        practice_consonants: 'Согласные',
+        practice_galik: 'Галики',
+        practice_syllables: 'Слоги',
+        practice_numbers: 'Цифры',
         practice: 'Все знаки'
     };
 
