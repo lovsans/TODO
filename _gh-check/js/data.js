@@ -2813,9 +2813,15 @@
     };
 
     // Подписи чипов в навигации (только для групп, где названия совпадают с алфавитом).
-    // Короткие подписи: группа «Тренировка» уже задаёт контекст, длинный суффикс
-    // на узком экране раздувает ряд чипов.
+    // Короткие подписи чипов — чтобы на телефоне сетка разделов умещалась без прокрутки.
     const NAV_CHIP_LABEL = {
+        writing_rules: 'Правила',
+        long_vowels: 'Долгие',
+        galik: 'Галики',
+        summary: 'Таблица',
+        compose_word: 'Составить',
+        write_word: 'Написать',
+        direction: 'Направление',
         practice_vowels: 'Гласные',
         practice_long_vowels: 'Долгие',
         practice_diphthongs: 'Дифтонги',
@@ -3161,7 +3167,7 @@
     const navGroups = [
         { label: 'Начало',      cats: ['about', 'course', 'writing_rules', 'path'] },
         { label: 'Алфавит',     cats: ['vowels', 'long_vowels', 'diphthongs', 'consonants', 'galik', 'syllables', 'summary'] },
-        { label: 'Знаки письма', cats: ['special', 'elements', 'numbers', 'punctuation'] },
+        { label: 'Знаки',       cats: ['special', 'elements', 'numbers', 'punctuation'] },
         { label: 'Чтение',      cats: ['rules', 'harmony', 'words', 'reading'] },
         { label: 'Тренировка',  cats: ['practice_vowels', 'practice_long_vowels', 'practice_diphthongs', 'practice_consonants', 'practice_galik', 'practice_syllables', 'practice_numbers', 'practice'] },
         { label: 'Письмо',      cats: ['compose_word', 'write_word', 'direction', 'copybook'] }
