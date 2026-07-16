@@ -109,8 +109,10 @@ svg.shake{animation:shk .32s;}
   <div class="stage-forms" id="stageForms" aria-label="Все формы выбранной буквы"></div>
   <div class="stage">
     <svg id="svg" viewBox="0 0 360 760" xmlns="http://www.w3.org/2000/svg">
-      <path id="contour" class="contour" d=""></path>
-      <g id="done"></g><g id="hint"></g><g id="anim"></g><g id="live"></g><g id="cue"></g>
+      <g id="glyphRoot">
+        <path id="contour" class="contour" d=""></path>
+        <g id="done"></g><g id="hint"></g><g id="anim"></g><g id="live"></g><g id="cue"></g>
+      </g>
     </svg>
     <div class="banner" id="banner"><div class="pill" id="pill">Готово ✓</div></div>
   </div>
@@ -172,7 +174,11 @@ function firstForm(id){for(const[f]of FORMS)if(hasModel(id,f))return f;const d=D
 // ---- dom ----
 const el=(t,a)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e;};
 const $=id=>document.getElementById(id);
-const svg=$('svg'),contour=$('contour'),gDone=$('done'),gHint=$('hint'),gAnim=$('anim'),gLive=$('live'),gCue=$('cue');
+const svg=$('svg'),glyphRoot=$('glyphRoot'),contour=$('contour'),gDone=$('done'),gHint=$('hint'),gAnim=$('anim'),gLive=$('live'),gCue=$('cue');
+const ROT_CX=180,ROT_CY=380,NUM_ROT='rotate(-90 '+ROT_CX+' '+ROT_CY+')';
+function isNumCat(){return curCat==='Числа';}
+function applyNumRot(){if(isNumCat())glyphRoot.setAttribute('transform',NUM_ROT);else glyphRoot.removeAttribute('transform');}
+function mapPtr(x,y){if(!isNumCat())return[x,y];return[ROT_CX-(y-ROT_CY),ROT_CY+(x-ROT_CX)];}
 const tabs=$('tabs'),letterNav=$('letterNav'),formsEl=$('forms'),stageFormsEl=$('stageForms'),titleEl=$('title'),banner=$('banner'),pill=$('pill');
 const animBar=$('animBar'),practBar=$('practBar'),progEl=$('prog'),statusEl=$('status'),hintText=$('hintText');
 function clearG(g){while(g.firstChild)g.removeChild(g.firstChild);}
@@ -290,7 +296,9 @@ function buildStageForms(){stageFormsEl.innerHTML='';const d=glyph();FORMS.forEa
   b.className='stage-form'+(k===curForm?' active':'')+(ok?'':' missing')+(done?' done':'');
   b.disabled=!ok;b.setAttribute('aria-label',d.cy+' · '+lbl);
   const mini=document.createElementNS(NS,'svg');mini.setAttribute('viewBox','0 0 360 760');mini.setAttribute('class','stage-form-svg');mini.setAttribute('aria-hidden','true');
-  if(path)mini.appendChild(el('path',{d:path}));
+  const miniG=el('g',isNumCat()?{transform:NUM_ROT}:{});
+  if(path)miniG.appendChild(el('path',{d:path}));
+  mini.appendChild(miniG);
   const cap=document.createElement('span');cap.className='stage-form-label';cap.textContent=lbl+(done?' ✓':'');
   b.appendChild(mini);b.appendChild(cap);
   if(ok)b.onclick=()=>{curForm=k;buildForms();refresh();};
@@ -303,6 +311,7 @@ function setMode(m){mode=m;$('mAnim').classList.toggle('active',m==='animate');$
 function refresh(){
   stopAnim();clearG(gDone);clearG(gHint);clearG(gAnim);clearG(gLive);clearG(gCue);
   banner.className='banner';statusEl.textContent='';statusEl.className='status';
+  applyNumRot();
   contour.classList.toggle('hide', mode==='animate' ? !$('ctA').checked : !$('ctP').checked);
   contour.setAttribute('d',glyph().forms[curForm]||'');
   titleEl.textContent=glyph().cy+' · '+formLabel(curForm);
@@ -346,7 +355,7 @@ function clearPractice(){sIdx=0;misses=0;clearG(gHint);renderPractice();statusEl
 // ---- pointer drawing (practice only) ----
 let drawId=null;
 const ptrOpts={passive:false};
-function sp(e){const r=svg.getBoundingClientRect();return[(e.clientX-r.left)/r.width*360,(e.clientY-r.top)/r.height*760];}
+function sp(e){const r=svg.getBoundingClientRect();return mapPtr((e.clientX-r.left)/r.width*360,(e.clientY-r.top)/r.height*760);}
 function finishDraw(){
   if(!drawing)return;drawing=false;drawId=null;clearG(gLive);
   if(mode!=='practice'||sIdx>=strokes().length)return;
