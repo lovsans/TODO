@@ -72,11 +72,14 @@
                 <div class="search-input-wrap">
                     <span class="search-icon" aria-hidden="true">⌕</span>
                     <input id="search-input" type="search" inputmode="search" autocomplete="off"
-                           placeholder="Поиск: кириллица, латиница или № буквы…" aria-label="Поиск по алфавиту">
+                           placeholder="Буква, слово, правило или раздел…  (Ctrl+K)"
+                           aria-label="Поиск по сайту" aria-controls="search-results search-suggest"
+                           title="Ctrl+K или / — открыть поиск · Esc — очистить">
                     <button id="search-clear" class="search-clear" onclick="clearSearch()" aria-label="Очистить" style="display:none">×</button>
                 </div>
                 <select id="search-filter" onchange="runSearch()" aria-label="Область поиска"></select>
             </div>
+            <div id="search-suggest" class="search-suggest" hidden></div>
         </div>
         <nav class="nav-tabs" id="nav-tabs" aria-label="Разделы алфавита"></nav>
         <div id="search-results" class="search-results" style="display:none"></div>

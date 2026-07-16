@@ -72,11 +72,32 @@
     applyFontScale(loadFontScale());
 
     document.addEventListener('keydown', function (e) {
+        const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : '';
+        const typing = tag === 'input' || tag === 'textarea' || tag === 'select' ||
+            (e.target && e.target.isContentEditable);
+
+        // Ctrl/Cmd+K или / — фокус в поиск
+        if (((e.key === 'k' || e.key === 'K') && (e.ctrlKey || e.metaKey)) ||
+            (e.key === '/' && !typing && !e.ctrlKey && !e.metaKey && !e.altKey)) {
+            e.preventDefault();
+            if (typeof focusSearch === 'function') focusSearch();
+            return;
+        }
+
         if (e.key !== 'Escape') return;
         const overlay = document.getElementById('modal-overlay');
         if (overlay && overlay.classList.contains('active')) { closeModal(); return; }
         const b = document.getElementById('cb-board');
-        if (b && b.classList.contains('zoomed')) cbToggleZoom();
+        if (b && b.classList.contains('zoomed')) { cbToggleZoom(); return; }
+        const res = document.getElementById('search-results');
+        const inp = document.getElementById('search-input');
+        if (res && res.style.display !== 'none' && typeof clearSearch === 'function') {
+            clearSearch();
+            return;
+        }
+        if (inp && document.activeElement === inp && typeof clearSearch === 'function') {
+            clearSearch();
+        }
     });
 
     renderNavTabs();

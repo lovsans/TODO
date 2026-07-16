@@ -3192,4 +3192,4 @@
     // ============================================================
     // ПОИСК И ФИЛЬТР
     // ============================================================
-    const searchableCats = ['vowels', 'long_vowels', 'diphthongs', 'consonants', 'galik', 'syllables', 'special', 'numbers', 'punctuation'];
+    const searchableCats = ['vowels', 'long_vowels', 'diphthongs', 'consonants', 'galik', 'syllables', 'special', 'elements', 'numbers', 'punctuation'];
