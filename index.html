@@ -16,6 +16,13 @@
                 var ga = null;
                 try { ga = localStorage.getItem('todo-glyph-accent'); } catch (e) {}
                 document.documentElement.setAttribute('data-glyph-accent', ga === '1' ? '1' : '0');
+                var fs = null;
+                try { fs = localStorage.getItem('todo-font-scale'); } catch (e) {}
+                var fn = parseFloat(fs);
+                if (fn === 0.875 || fn === 1 || fn === 1.125 || fn === 1.25 || fn === 1.375 ||
+                    fn === 1.55 || fn === 1.75 || fn === 2 || fn === 2.22) {
+                    document.documentElement.style.setProperty('--ui-font-scale', String(fn));
+                }
             } catch (e) {}
         })();
     </script>
@@ -37,6 +44,16 @@
                 </div>
             </a>
             <div class="header-controls">
+                <div class="font-scale-controls" role="group" aria-label="Размер шрифта">
+                    <button type="button" class="theme-btn font-scale-btn" id="font-scale-down" onclick="bumpFontScale(-1)"
+                            title="Уменьшить шрифт" aria-label="Уменьшить шрифт">
+                        <span class="font-scale-icon font-scale-icon-sm" aria-hidden="true">A</span>
+                    </button>
+                    <button type="button" class="theme-btn font-scale-btn" id="font-scale-up" onclick="bumpFontScale(1)"
+                            title="Увеличить шрифт" aria-label="Увеличить шрифт">
+                        <span class="font-scale-icon font-scale-icon-lg" aria-hidden="true">A</span>
+                    </button>
+                </div>
                 <button type="button" class="theme-btn glyph-accent-btn" id="glyph-accent-btn" onclick="toggleGlyphAccent()"
                         title="Бирюзовые глифы тодо (в светлой и тёмной теме)" aria-label="Переключить цвет знаков тодо на бирюзовый" aria-pressed="false">🩵</button>
                 <button type="button" class="theme-btn" id="theme-toggle-btn" onclick="toggleTheme()" title="Переключить тему" aria-label="Переключить тёмную тему">🌙</button>
@@ -45,14 +62,21 @@
     </header>
 
     <main class="container" id="main-content" tabindex="-1">
-        <div class="search-bar">
-            <div class="search-input-wrap">
-                <span class="search-icon" aria-hidden="true">⌕</span>
-                <input id="search-input" type="search" inputmode="search" autocomplete="off"
-                       placeholder="Поиск: кириллица, латиница или № буквы…" aria-label="Поиск по алфавиту">
-                <button id="search-clear" class="search-clear" onclick="clearSearch()" aria-label="Очистить" style="display:none">×</button>
+        <div class="search-bar" id="search-bar">
+            <button type="button" class="search-toggle" id="search-toggle" onclick="toggleSearchBar()"
+                    aria-expanded="false" aria-controls="search-panel" title="Поиск" aria-label="Открыть поиск">
+                <span class="search-toggle-icon search-toggle-icon-open" aria-hidden="true">⌕</span>
+                <span class="search-toggle-icon search-toggle-icon-close" aria-hidden="true">×</span>
+            </button>
+            <div class="search-panel" id="search-panel">
+                <div class="search-input-wrap">
+                    <span class="search-icon" aria-hidden="true">⌕</span>
+                    <input id="search-input" type="search" inputmode="search" autocomplete="off"
+                           placeholder="Поиск: кириллица, латиница или № буквы…" aria-label="Поиск по алфавиту">
+                    <button id="search-clear" class="search-clear" onclick="clearSearch()" aria-label="Очистить" style="display:none">×</button>
+                </div>
+                <select id="search-filter" onchange="runSearch()" aria-label="Область поиска"></select>
             </div>
-            <select id="search-filter" onchange="runSearch()" aria-label="Область поиска"></select>
         </div>
         <nav class="nav-tabs" id="nav-tabs" aria-label="Разделы алфавита"></nav>
         <div id="search-results" class="search-results" style="display:none"></div>

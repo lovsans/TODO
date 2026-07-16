@@ -169,3 +169,38 @@
         applyGlyphAccent(on);
         try { localStorage.setItem('todo-glyph-accent', on ? '1' : '0'); } catch (e) { /* приватный режим — игнорируем */ }
     }
+
+    // ===== Размер шрифта интерфейса (кнопки A− / A+ в шапке) =====
+    const FONT_SCALE_STEPS = [0.875, 1, 1.125, 1.25, 1.375, 1.55, 1.75, 2, 2.22];
+    const FONT_SCALE_DEFAULT = 1;
+
+    function loadFontScale() {
+        try {
+            const n = parseFloat(localStorage.getItem('todo-font-scale'));
+            if (FONT_SCALE_STEPS.indexOf(n) >= 0) return n;
+        } catch (e) {}
+        return FONT_SCALE_DEFAULT;
+    }
+
+    function syncFontScaleButtons(scale) {
+        const i = FONT_SCALE_STEPS.indexOf(scale);
+        const down = document.getElementById('font-scale-down');
+        const up = document.getElementById('font-scale-up');
+        if (down) down.disabled = i <= 0;
+        if (up) up.disabled = i < 0 || i >= FONT_SCALE_STEPS.length - 1;
+    }
+
+    function applyFontScale(scale) {
+        const s = FONT_SCALE_STEPS.indexOf(scale) >= 0 ? scale : FONT_SCALE_DEFAULT;
+        document.documentElement.style.setProperty('--ui-font-scale', String(s));
+        syncFontScaleButtons(s);
+    }
+
+    function bumpFontScale(dir) {
+        const cur = loadFontScale();
+        const i = FONT_SCALE_STEPS.indexOf(cur);
+        const next = FONT_SCALE_STEPS[Math.max(0, Math.min(FONT_SCALE_STEPS.length - 1, (i < 0 ? 1 : i) + dir))];
+        if (next === cur) { syncFontScaleButtons(cur); return; }
+        applyFontScale(next);
+        try { localStorage.setItem('todo-font-scale', String(next)); } catch (e) {}
+    }

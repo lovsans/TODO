@@ -69,6 +69,7 @@
         }
     })();
     applyGlyphAccent(loadGlyphAccent());
+    applyFontScale(loadFontScale());
 
     document.addEventListener('keydown', function (e) {
         if (e.key !== 'Escape') return;
@@ -85,4 +86,6 @@
     mountWriter();
     const searchInp = document.getElementById('search-input');
     if (searchInp) searchInp.addEventListener('input', runSearchDebounced);
+    bootNavigation();
+    window.addEventListener('hashchange', handleHashChange);
     updateHomeProgress();

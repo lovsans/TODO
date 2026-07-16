@@ -83,8 +83,7 @@
         scrollActiveNavIntoView();
     }
 
-    // На узком экране вкладки/чипы в горизонтальном скролле — подтянуть активный по X,
-    // не трогая вертикальную прокрутку страницы.
+    // На узком экране подтянуть активный чип/вкладку по горизонтали, не трогая скролл страницы.
     function scrollActiveNavIntoView() {
         function scrollXInto(el) {
             if (!el) return;
@@ -173,9 +172,41 @@
             <div class="char-grid">${list.map(renderCard).join('')}</div>`;
     }
 
-    function backToNavMarkup() {
+    function navCatsInOrder() {
+        const out = [];
+        if (typeof navGroups === 'undefined') return out;
+        navGroups.forEach(g => {
+            (g.cats || []).forEach(c => {
+                if (isValidSection(c) && out.indexOf(c) < 0) out.push(c);
+            });
+        });
+        return out;
+    }
+
+    function nextSectionCat(cat) {
+        const list = navCatsInOrder();
+        const i = list.indexOf(cat);
+        if (i < 0 || i >= list.length - 1) return null;
+        return list[i + 1];
+    }
+
+    function showNextSection() {
+        const next = nextSectionCat(getActiveSectionCat());
+        if (next) showSection(next);
+    }
+
+    function sectionEndNavMarkup(cat) {
+        const next = nextSectionCat(cat);
+        const nextName = next ? navChipLabel(next) : '';
+        const nextBtn = next ? `
+                <button type="button" class="section-next-btn" onclick="showNextSection()"
+                        aria-label="Дальше: ${escapeHtml(nextName)}" title="Дальше: ${escapeHtml(nextName)}">
+                    <span class="section-next-text">Дальше: ${escapeHtml(nextName)}</span>
+                    <span aria-hidden="true">→</span>
+                </button>` : '';
         return `
             <div class="section-end-nav">
+                ${nextBtn}
                 <button type="button" class="back-to-nav" onclick="scrollToNav()"
                         aria-label="Назад к списку разделов" title="Назад к списку разделов">
                     <span aria-hidden="true">↑</span>
@@ -188,7 +219,7 @@
         const el = document.getElementById('sections-container');
         const cats = Object.keys(categoryMeta);
         el.innerHTML = cats.map((cat, i) =>
-            `<div class="section ${i === 0 ? 'active' : ''}" id="section-${cat}">${renderSectionContent(cat)}${backToNavMarkup()}</div>`
+            `<div class="section ${i === 0 ? 'active' : ''}" id="section-${cat}">${renderSectionContent(cat)}${sectionEndNavMarkup(cat)}</div>`
         ).join('');
     }
 
@@ -244,8 +275,9 @@
     }
     document.addEventListener('keydown', trapModalFocus);
 
-    function openModal(idx, navMode) {            // открытие с карточки в сетке — начинает новую цепочку
+    function openModal(idx, navMode, opts) {            // открытие с карточки в сетке — начинает новую цепочку
         if (!charData[idx]) return;
+        opts = opts || {};
         modalReturnFocus = document.activeElement;   // запоминаем, откуда открыли
         modalStack = [idx];
         modalNavMode = navMode || null;
@@ -253,6 +285,7 @@
         document.getElementById('modal-overlay').classList.add('active');
         document.body.style.overflow = 'hidden';
         focusModalDialog();                           // фокус уходит внутрь диалога
+        if (!opts.skipHash) setRouteHash(null, idx);
     }
 
     function pushModal(idx) {             // переход по ссылке внутри примечания — добавляет в цепочку
@@ -260,6 +293,7 @@
         modalStack.push(idx);
         renderModalContent(idx);
         focusModalDialog();               // прежняя ссылка удалена при ререндере — возвращаем фокус в диалог
+        setRouteHash(null, idx);
     }
 
     function modalBack() {
@@ -303,6 +337,7 @@
         modalStack = [idx];
         renderModalContent(idx);
         focusModalDialog();
+        setRouteHash(null, idx);
     }
     function modalPrev() {
         const list = modalNavList();
@@ -358,7 +393,9 @@
         if (nextBtn) nextBtn.disabled = pos === -1 || pos >= list.length - 1;
     }
 
-    function closeModal() {
+    function closeModal(opts) {
+        opts = opts || {};
+        const wasOpen = document.getElementById('modal-overlay').classList.contains('active');
         modalStack = [];
         modalNavMode = null;
         document.getElementById('modal-overlay').classList.remove('active');
@@ -368,9 +405,89 @@
             try { modalReturnFocus.focus(); } catch (e) {}
         }
         modalReturnFocus = null;
+        if (wasOpen && !opts.skipHash) setRouteHash(getActiveSectionCat(), null);
     }
 
-    function showSection(cat) {
+    // ===== Маршрут: #раздел / #letter-N, последний раздел в localStorage =====
+    const LAST_SECTION_KEY = 'todo-last-section';
+
+    function isValidSection(cat) {
+        return !!(cat && typeof categoryMeta !== 'undefined' && categoryMeta[cat]);
+    }
+
+    function getActiveSectionCat() {
+        const el = document.querySelector('.section.active');
+        if (!el || !el.id || el.id.indexOf('section-') !== 0) return 'about';
+        return el.id.slice('section-'.length);
+    }
+
+    function loadLastSection() {
+        try {
+            const cat = localStorage.getItem(LAST_SECTION_KEY);
+            if (isValidSection(cat)) return cat;
+        } catch (e) {}
+        return null;
+    }
+
+    function saveLastSection(cat) {
+        if (!isValidSection(cat)) return;
+        try { localStorage.setItem(LAST_SECTION_KEY, cat); } catch (e) {}
+    }
+
+    function parseLocationRoute() {
+        const raw = (location.hash || '').replace(/^#/, '');
+        if (!raw) return null;
+        const letterM = raw.match(/^letter[-/](\d+)$/i);
+        if (letterM) {
+            const idx = parseInt(letterM[1], 10);
+            if (charData && charData[idx]) {
+                return { cat: charData[idx].category, letterIdx: idx };
+            }
+            return null;
+        }
+        let cat = raw;
+        try { cat = decodeURIComponent(raw); } catch (e) {}
+        if (isValidSection(cat)) return { cat: cat, letterIdx: null };
+        return null;
+    }
+
+    function setRouteHash(cat, letterIdx) {
+        let hash;
+        if (letterIdx != null && charData && charData[letterIdx]) hash = '#letter-' + letterIdx;
+        else if (isValidSection(cat)) hash = '#' + encodeURIComponent(cat);
+        else return;
+        if (location.hash === hash) return;
+        try { history.replaceState(null, '', hash); }
+        catch (e) { location.hash = hash; }
+    }
+
+    function applyLocationRoute(opts) {
+        opts = opts || {};
+        const route = parseLocationRoute();
+        if (route) {
+            showSection(route.cat, {
+                skipHash: true,
+                skipScroll: !!opts.skipScroll || route.letterIdx != null
+            });
+            if (route.letterIdx != null) openModal(route.letterIdx, null, { skipHash: true });
+            else closeModal({ skipHash: true });
+            return true;
+        }
+        return false;
+    }
+
+    function handleHashChange() {
+        applyLocationRoute({ skipScroll: false });
+    }
+
+    function showSection(cat, opts) {
+        opts = opts || {};
+        if (!isValidSection(cat)) return;
+        // Смена раздела закрывает карточку буквы (кроме случая keepModal при маршруте).
+        if (!opts.keepModal) {
+            const overlay = document.getElementById('modal-overlay');
+            if (overlay && overlay.classList.contains('active')) closeModal({ skipHash: true });
+        }
         exitSearch();
         syncNavGroupForCat(cat);
         document.getElementById('sections-container').style.display = '';
@@ -384,6 +501,8 @@
             if (on) n.setAttribute('aria-current', 'page');
             else n.removeAttribute('aria-current');
         });
+        saveLastSection(cat);
+        if (!opts.skipHash) setRouteHash(cat, null);
         if (cat === 'about') updateHomeProgress();
         if (practiceScopes[cat]) setupPractice(cat);
         if (cat === 'copybook') requestAnimationFrame(() => requestAnimationFrame(cbFit));
@@ -396,9 +515,17 @@
         if (cat === 'write_word') wwInit();
         if (cat === 'path') renderPathRoot();
         if (cat === 'harmony') setupHarmony();
-        const scrollTarget = cat === 'about'
-            ? (document.getElementById('about-hero') || sec)
-            : sec;
-        scrollToSection(scrollTarget);
+        if (!opts.skipScroll) {
+            const scrollTarget = cat === 'about'
+                ? (document.getElementById('about-hero') || sec)
+                : sec;
+            scrollToSection(scrollTarget);
+        }
+    }
+
+    function bootNavigation() {
+        if (applyLocationRoute({ skipScroll: true })) return;
+        const last = loadLastSection();
+        showSection(last || 'about', { skipScroll: last === 'about' || !last });
     }
 
