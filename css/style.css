@@ -202,13 +202,31 @@ h1 { font-size: 1.4rem; font-weight: 700; line-height: 1.15; margin: 0; }
 .font-scale-icon-sm { font-size: 0.85rem; }
 .font-scale-icon-lg { font-size: 1.25rem; }
 
-/* Телефон: все кнопки шапки — одна сегментированная панель */
+/* Телефон: кнопки шапки в одной панели; размеры в px, чтобы A± не сползали при крупном шрифте */
 @media (max-width: 720px) {
     .header-inner {
-        gap: 0.55rem;
+        gap: 8px;
         align-items: center;
+        min-width: 0;
+    }
+    .logo {
+        min-width: 0;
+        flex: 1 1 auto;
+        gap: 8px;
+    }
+    .logo-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 14px;
+    }
+    .header h1 {
+        font-size: 16px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
     .header-controls {
+        flex: 0 0 auto;
         flex-wrap: nowrap;
         gap: 0;
         padding: 3px;
@@ -216,7 +234,7 @@ h1 { font-size: 1.4rem; font-weight: 700; line-height: 1.15; margin: 0; }
         border: 1px solid var(--border);
         border-radius: 12px;
         box-shadow: var(--shadow);
-        overflow: hidden;
+        overflow: visible;
     }
     .font-scale-controls {
         display: contents;
@@ -228,8 +246,10 @@ h1 { font-size: 1.4rem; font-weight: 700; line-height: 1.15; margin: 0; }
         border-radius: 9px;
         background: transparent;
         box-shadow: none;
-        font-size: 1.05rem;
+        font-size: 16px; /* px — не зависит от --ui-font-scale */
     }
+    .header-controls .font-scale-icon-sm { font-size: 12px; }
+    .header-controls .font-scale-icon-lg { font-size: 18px; }
     .header-controls .theme-btn:hover:not(:disabled) {
         background: var(--accent-glow);
         border-color: transparent;
@@ -1027,8 +1047,8 @@ mark.hl {
     .riddle-lb-zoombtn { min-width: 44px; min-height: 44px; padding: 0.4rem 0.6rem; }
     .sum-zoombtn { min-width: 44px; min-height: 44px; }
     .theme-btn { width: 44px; height: 44px; }
-    /* В мобильной панели шапки оставляем компактный размер */
-    .header-controls .theme-btn { width: 38px; height: 38px; }
+    /* Панель шапки на телефоне — фиксированный px, не раздувать тач-оверрайдом */
+    .header-controls .theme-btn { width: 36px; height: 36px; font-size: 16px; }
     .nav-group-tab:hover,
     .nav-group-tab:focus-visible {
         background: var(--bg-secondary);
