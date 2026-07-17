@@ -1,5 +1,5 @@
 /* Тодо Бичик — service worker (офлайн-кэш). */
-const CACHE = 'todo-bichig-v10';
+const CACHE = 'todo-bichig-v12';
 
 const PRECACHE = [
   './',
@@ -43,6 +43,7 @@ const PRECACHE = [
   './js/writer-data.js',
   './js/writer-strokes-saved.js',
   './js/vendor/jspdf.umd.min.js',
+  './img/icons/logo-192.png',
   './img/icons/icon-192.png',
   './img/icons/icon-512.png',
   './img/icons/icon-512-maskable.png',
