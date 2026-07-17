@@ -172,29 +172,101 @@
         try { localStorage.setItem('todo-theme', next); } catch (e) { /* приватный режим — игнорируем */ }
     }
 
-    // ===== Бирюзовые глифы тодо =====
-    // По умолчанию знаки тодо (атлас, конструктор слова, тренажёр, тексты для
-    // чтения, загадки) рисуются обычным цветом текста темы — тёмным в светлой,
-    // белым в тёмной. Этот переключатель в шапке делает их бирюзовым акцентом
-    // сайта сразу в ОБЕИХ темах — мягче для глаз при долгом чтении. Реализовано
-    // через CSS-переменную --todo-ink (см. style.css): контейнеры знаков тодо
-    // красятся через неё вместо --text-primary, а атрибут data-glyph-accent="1"
-    // на <html> переопределяет --todo-ink на var(--accent) независимо от темы.
-    function applyGlyphAccent(on) {
-        document.documentElement.setAttribute('data-glyph-accent', on ? '1' : '0');
-        const btn = document.getElementById('glyph-accent-btn');
+    // ===== Цвет глифов тодо (сердечко в шапке) =====
+    // Знаки тодо красятся через --todo-ink. Пресет пишется в data-glyph-color
+    // на <html>; «default» — цвет текста темы. Старый ключ todo-glyph-accent=1 → teal.
+    const GLYPH_COLOR_IDS = ['default', 'teal', 'blue', 'rose', 'amber', 'green', 'indigo', 'slate'];
+
+    function loadGlyphColor() {
+        try {
+            const v = localStorage.getItem('todo-glyph-color');
+            if (v && GLYPH_COLOR_IDS.indexOf(v) >= 0) return v;
+            if (localStorage.getItem('todo-glyph-accent') === '1') return 'teal';
+        } catch (e) {}
+        return 'default';
+    }
+
+    function syncGlyphColorUi(color) {
+        const btn = document.getElementById('glyph-color-btn');
+        const custom = color && color !== 'default';
         if (btn) {
-            btn.classList.toggle('is-active', !!on);
-            btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+            btn.classList.toggle('is-active', !!custom);
+            btn.setAttribute('aria-pressed', custom ? 'true' : 'false');
+            const label = custom ? ('Цвет глифов: ' + color) : 'Цвет глифов: как текст';
+            btn.title = label;
+            btn.setAttribute('aria-label', 'Выбрать цвет знаков тодо');
         }
+        const menu = document.getElementById('glyph-color-menu');
+        if (!menu) return;
+        menu.querySelectorAll('[data-color]').forEach(function (el) {
+            const on = el.getAttribute('data-color') === color;
+            el.setAttribute('aria-checked', on ? 'true' : 'false');
+            el.classList.toggle('is-selected', on);
+        });
     }
-    function loadGlyphAccent() {
-        try { return localStorage.getItem('todo-glyph-accent') === '1'; } catch (e) { return false; }
+
+    function applyGlyphColor(color) {
+        const id = (color && GLYPH_COLOR_IDS.indexOf(color) >= 0) ? color : 'default';
+        if (id === 'default') document.documentElement.removeAttribute('data-glyph-color');
+        else document.documentElement.setAttribute('data-glyph-color', id);
+        // Убрать устаревший атрибут, если остался
+        document.documentElement.removeAttribute('data-glyph-accent');
+        syncGlyphColorUi(id);
     }
-    function toggleGlyphAccent() {
-        const on = document.documentElement.getAttribute('data-glyph-accent') !== '1';
-        applyGlyphAccent(on);
-        try { localStorage.setItem('todo-glyph-accent', on ? '1' : '0'); } catch (e) { /* приватный режим — игнорируем */ }
+
+    function setGlyphColor(color) {
+        applyGlyphColor(color);
+        try {
+            const id = document.documentElement.getAttribute('data-glyph-color') || 'default';
+            localStorage.setItem('todo-glyph-color', id);
+            localStorage.removeItem('todo-glyph-accent');
+        } catch (e) { /* приватный режим — игнорируем */ }
+        setGlyphColorMenuOpen(false);
+    }
+
+    function setGlyphColorMenuOpen(open) {
+        const menu = document.getElementById('glyph-color-menu');
+        const btn = document.getElementById('glyph-color-btn');
+        if (!menu || !btn) return;
+        if (open) menu.removeAttribute('hidden');
+        else menu.setAttribute('hidden', '');
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
+
+    function toggleGlyphColorMenu() {
+        const btn = document.getElementById('glyph-color-btn');
+        const open = !(btn && btn.getAttribute('aria-expanded') === 'true');
+        setGlyphColorMenuOpen(open);
+    }
+
+    // Совместимость со старым onclick, если где-то остался
+    function toggleGlyphAccent() { toggleGlyphColorMenu(); }
+    function applyGlyphAccent(on) { applyGlyphColor(on ? 'teal' : 'default'); }
+    function loadGlyphAccent() { return loadGlyphColor() !== 'default'; }
+
+    function initGlyphColorPicker() {
+        const wrap = document.getElementById('glyph-color-wrap');
+        const btn = document.getElementById('glyph-color-btn');
+        const menu = document.getElementById('glyph-color-menu');
+        if (!wrap || !btn || !menu) return;
+        applyGlyphColor(loadGlyphColor());
+        btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            toggleGlyphColorMenu();
+        });
+        menu.addEventListener('click', function (e) {
+            const sw = e.target.closest('[data-color]');
+            if (!sw || !menu.contains(sw)) return;
+            e.preventDefault();
+            e.stopPropagation();
+            setGlyphColor(sw.getAttribute('data-color'));
+        });
+        document.addEventListener('click', function (e) {
+            if (!wrap.contains(e.target)) setGlyphColorMenuOpen(false);
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') setGlyphColorMenuOpen(false);
+        });
     }
 
     // ===== Размер шрифта интерфейса (кнопки A− / A+ в шапке) =====

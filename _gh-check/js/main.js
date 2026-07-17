@@ -68,7 +68,8 @@
             applyTheme(prefersDark ? 'dark' : 'light');
         }
     })();
-    applyGlyphAccent(loadGlyphAccent());
+    if (typeof initGlyphColorPicker === 'function') initGlyphColorPicker();
+    else applyGlyphColor(loadGlyphColor());
     applyFontScale(loadFontScale());
 
     document.addEventListener('keydown', function (e) {

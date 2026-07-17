@@ -13,9 +13,13 @@
                     : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
                 document.documentElement.setAttribute('data-theme', t);
                 document.documentElement.style.colorScheme = t;
-                var ga = null;
-                try { ga = localStorage.getItem('todo-glyph-accent'); } catch (e) {}
-                document.documentElement.setAttribute('data-glyph-accent', ga === '1' ? '1' : '0');
+                var gc = null;
+                try { gc = localStorage.getItem('todo-glyph-color'); } catch (e) {}
+                if (!gc) {
+                    try { if (localStorage.getItem('todo-glyph-accent') === '1') gc = 'teal'; } catch (e) {}
+                }
+                if (gc && gc !== 'default') document.documentElement.setAttribute('data-glyph-color', gc);
+                else document.documentElement.removeAttribute('data-glyph-color');
                 var fs = null;
                 try { fs = localStorage.getItem('todo-font-scale'); } catch (e) {}
                 var fn = parseFloat(fs);
@@ -54,8 +58,23 @@
                         <span class="font-scale-icon font-scale-icon-lg" aria-hidden="true">A</span>
                     </button>
                 </div>
-                <button type="button" class="theme-btn glyph-accent-btn" id="glyph-accent-btn" onclick="toggleGlyphAccent()"
-                        title="Бирюзовые глифы тодо" aria-label="Переключить цвет знаков тодо на бирюзовый" aria-pressed="false">🩵</button>
+                <div class="glyph-color-wrap" id="glyph-color-wrap">
+                    <button type="button" class="theme-btn glyph-color-btn" id="glyph-color-btn"
+                            aria-haspopup="true" aria-expanded="false" aria-controls="glyph-color-menu"
+                            title="Цвет глифов" aria-label="Выбрать цвет знаков тодо">
+                        <span class="glyph-heart" aria-hidden="true">♥</span>
+                    </button>
+                    <div class="glyph-color-menu" id="glyph-color-menu" role="menu" hidden aria-label="Цвет глифов">
+                        <button type="button" class="glyph-swatch glyph-swatch-auto" data-color="default" role="menuitemradio" title="Как текст" aria-label="Цвет как у текста">А</button>
+                        <button type="button" class="glyph-swatch" data-color="teal" role="menuitemradio" title="Бирюзовый" aria-label="Бирюзовый">♥</button>
+                        <button type="button" class="glyph-swatch" data-color="blue" role="menuitemradio" title="Синий" aria-label="Синий">♥</button>
+                        <button type="button" class="glyph-swatch" data-color="rose" role="menuitemradio" title="Розовый" aria-label="Розовый">♥</button>
+                        <button type="button" class="glyph-swatch" data-color="amber" role="menuitemradio" title="Янтарный" aria-label="Янтарный">♥</button>
+                        <button type="button" class="glyph-swatch" data-color="green" role="menuitemradio" title="Зелёный" aria-label="Зелёный">♥</button>
+                        <button type="button" class="glyph-swatch" data-color="indigo" role="menuitemradio" title="Индиго" aria-label="Индиго">♥</button>
+                        <button type="button" class="glyph-swatch" data-color="slate" role="menuitemradio" title="Серый" aria-label="Серый">♥</button>
+                    </div>
+                </div>
                 <button type="button" class="theme-btn" id="theme-toggle-btn" onclick="toggleTheme()" title="Переключить тему" aria-label="Переключить тёмную тему">🌙</button>
             </div>
         </div>

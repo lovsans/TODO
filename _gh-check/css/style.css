@@ -25,11 +25,28 @@
     --hairline: rgba(0, 0, 0, 0.06);
     --glass: rgba(255, 255, 255, 0.72);
     color-scheme: light;
-    /* Цвет знаков тодо: по умолчанию цвет текста; «Бирюзовые глифы» → акцент. */
+    /* Цвет знаков тодо: по умолчанию цвет текста; иначе — пресет из сердечка в шапке. */
     --todo-ink: var(--text-primary);
 }
 
-[data-glyph-accent="1"] { --todo-ink: var(--accent); }
+[data-glyph-color="teal"]   { --todo-ink: #0f766e; }
+[data-glyph-color="blue"]   { --todo-ink: #2563eb; }
+[data-glyph-color="rose"]   { --todo-ink: #e11d48; }
+[data-glyph-color="amber"]  { --todo-ink: #d97706; }
+[data-glyph-color="green"]  { --todo-ink: #16a34a; }
+[data-glyph-color="indigo"] { --todo-ink: #4f46e5; }
+[data-glyph-color="slate"]  { --todo-ink: #475569; }
+
+[data-theme="dark"][data-glyph-color="teal"]   { --todo-ink: #2dd4bf; }
+[data-theme="dark"][data-glyph-color="blue"]   { --todo-ink: #60a5fa; }
+[data-theme="dark"][data-glyph-color="rose"]   { --todo-ink: #fb7185; }
+[data-theme="dark"][data-glyph-color="amber"]  { --todo-ink: #fbbf24; }
+[data-theme="dark"][data-glyph-color="green"]  { --todo-ink: #4ade80; }
+[data-theme="dark"][data-glyph-color="indigo"] { --todo-ink: #a5b4fc; }
+[data-theme="dark"][data-glyph-color="slate"]  { --todo-ink: #94a3b8; }
+
+/* Совместимость со старым переключателем «бирюзовые глифы» */
+[data-glyph-accent="1"]:not([data-glyph-color]) { --todo-ink: var(--accent); }
 
 [data-theme="dark"] {
     --bg-primary: #000000;
@@ -205,7 +222,10 @@ h1 {
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 
-.header-controls { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+.header-controls {
+    display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; justify-content: flex-end;
+    overflow: visible;
+}
 .font-scale-controls { display: flex; gap: 0.25rem; align-items: center; }
 .theme-btn {
     width: 40px; height: 40px; flex-shrink: 0;
@@ -292,21 +312,83 @@ h1 {
         color: var(--accent);
         transform: none;
     }
-    .header-controls .glyph-accent-btn.is-active,
-    .header-controls .glyph-accent-btn.is-active:hover {
-        background: var(--accent);
+    .header-controls .glyph-color-btn.is-active,
+    .header-controls .glyph-color-btn.is-active:hover {
+        background: var(--accent-glow);
         border-color: transparent;
-        color: #fff;
     }
-    .header-controls .theme-btn:not(:last-child) {
+    .header-controls .theme-btn:not(:last-child),
+    .header-controls .glyph-color-wrap:not(:last-child) {
         box-shadow: inset -1px 0 0 var(--hairline);
     }
 }
-/* Кнопка «бирюзовые глифы» — только для светлой темы (в тёмной эффекта нет,
-   поэтому саму кнопку прячем, чтобы не путать). */
-/* Кнопка «бирюзовые глифы» теперь работает в обеих темах, поэтому видна всегда. */
-.glyph-accent-btn.is-active { background: var(--accent); border-color: var(--accent); color: #fff; }
-.glyph-accent-btn.is-active:hover { background: var(--accent-dark); border-color: var(--accent-dark); color: #fff; }
+
+/* Палитра цвета глифов (сердечко в шапке) */
+.glyph-color-wrap { position: relative; display: inline-flex; align-items: center; }
+.glyph-color-btn .glyph-heart {
+    font-size: 1.05em; line-height: 1;
+    color: var(--todo-ink);
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+.glyph-color-btn.is-active .glyph-heart { transform: scale(1.08); }
+.glyph-color-btn[aria-expanded="true"] {
+    background: var(--accent-glow);
+    color: var(--accent);
+}
+.glyph-color-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    z-index: 80;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    padding: 10px;
+    min-width: 168px;
+    border: 1px solid var(--hairline);
+    border-radius: 16px;
+    background: var(--bg-card);
+    box-shadow: var(--shadow-lg);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+}
+.glyph-color-menu[hidden] { display: none !important; }
+.glyph-swatch {
+    width: 34px; height: 34px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border: 2px solid transparent;
+    border-radius: 50%;
+    background: var(--swatch, var(--bg-secondary));
+    color: #fff;
+    font-size: 14px; line-height: 1;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+.glyph-swatch:hover { transform: scale(1.08); }
+.glyph-swatch[aria-checked="true"] {
+    border-color: var(--text-primary);
+    box-shadow: 0 0 0 2px var(--bg-card), 0 0 0 4px var(--swatch, var(--accent));
+}
+.glyph-swatch-auto {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-family: var(--font-ui);
+    font-size: 12px; font-weight: 700;
+}
+.glyph-swatch[data-color="teal"]   { --swatch: #0f766e; }
+.glyph-swatch[data-color="blue"]   { --swatch: #2563eb; }
+.glyph-swatch[data-color="rose"]   { --swatch: #e11d48; }
+.glyph-swatch[data-color="amber"]  { --swatch: #d97706; }
+.glyph-swatch[data-color="green"]  { --swatch: #16a34a; }
+.glyph-swatch[data-color="indigo"] { --swatch: #4f46e5; }
+.glyph-swatch[data-color="slate"]  { --swatch: #475569; }
+[data-theme="dark"] .glyph-swatch[data-color="teal"]   { --swatch: #2dd4bf; color: #0f172a; }
+[data-theme="dark"] .glyph-swatch[data-color="blue"]   { --swatch: #60a5fa; color: #0f172a; }
+[data-theme="dark"] .glyph-swatch[data-color="rose"]   { --swatch: #fb7185; color: #0f172a; }
+[data-theme="dark"] .glyph-swatch[data-color="amber"]  { --swatch: #fbbf24; color: #0f172a; }
+[data-theme="dark"] .glyph-swatch[data-color="green"]  { --swatch: #4ade80; color: #0f172a; }
+[data-theme="dark"] .glyph-swatch[data-color="indigo"] { --swatch: #a5b4fc; color: #0f172a; }
+[data-theme="dark"] .glyph-swatch[data-color="slate"]  { --swatch: #94a3b8; color: #0f172a; }
 
 .container { max-width: 1080px; margin: 0 auto; padding: 2.25rem 1.5rem 3.5rem; }
 
