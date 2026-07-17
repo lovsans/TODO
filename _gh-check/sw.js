@@ -1,11 +1,10 @@
 /* Тодо Бичик — service worker (офлайн-кэш). */
-const CACHE = 'todo-bichig-v3';
+const CACHE = 'todo-bichig-v5';
 
 const PRECACHE = [
   './',
   './index.html',
   './writer.html',
-  './badmaev-course.html',
   './manifest.webmanifest',
   './css/fonts.css',
   './css/style.css',
@@ -43,8 +42,6 @@ const PRECACHE = [
   './js/main.js',
   './js/writer-data.js',
   './js/writer-strokes-saved.js',
-  './js/badmaev-course.js',
-  './js/badmaev-course-data.js',
   './js/vendor/jspdf.umd.min.js',
   './img/icons/icon-192.png',
   './img/icons/icon-512.png',
