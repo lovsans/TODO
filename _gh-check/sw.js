@@ -1,5 +1,5 @@
 /* Тодо Бичик — service worker (офлайн-кэш). */
-const CACHE = 'todo-bichig-v6';
+const CACHE = 'todo-bichig-v7';
 
 const PRECACHE = [
   './',
@@ -106,7 +106,23 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Остальное: кэш → сеть (с записью в кэш)
+  // CSS/JS: сеть в приоритете (чтобы обновления UI не залипали в кэше)
+  if (/\.(?:css|js)$/i.test(url.pathname)) {
+    event.respondWith(
+      fetch(req)
+        .then((res) => {
+          if (res && res.status === 200) {
+            const copy = res.clone();
+            caches.open(CACHE).then((c) => c.put(req, copy));
+          }
+          return res;
+        })
+        .catch(() => caches.match(req))
+    );
+    return;
+  }
+
+  // Картинки/шрифты: кэш → сеть
   event.respondWith(
     caches.match(req).then((cached) => {
       if (cached) return cached;
