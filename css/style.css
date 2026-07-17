@@ -196,19 +196,12 @@ body {
 }
 .logo-icon {
     width: 44px; height: 44px; flex-shrink: 0;
-    background: linear-gradient(160deg, #2dd4bf 0%, var(--accent) 55%, #115e59 100%);
     border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
-    color: #fff;
-    font-family: 'TodoPozdneyev', serif;
-    font-size: 18.3px; line-height: 1;
-    writing-mode: vertical-lr; text-orientation: mixed;
-    overflow: hidden;
+    display: block;
+    object-fit: cover;
     box-shadow: 0 6px 20px rgba(15, 118, 110, 0.28);
 }
 [data-theme="dark"] .logo-icon {
-    color: #fff;
-    background: linear-gradient(160deg, #5eead4 0%, var(--accent) 55%, #0f766e 100%);
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
 }
 .logo-text { display: flex; flex-direction: column; gap: 0.1rem; min-width: 0; }
@@ -226,7 +219,7 @@ h1 {
     display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; justify-content: flex-end;
     overflow: visible;
 }
-.font-scale-controls { display: flex; gap: 0.25rem; align-items: center; }
+.font-scale-controls { display: flex; gap: 0.2rem; align-items: center; }
 .theme-btn {
     width: 40px; height: 40px; flex-shrink: 0;
     display: flex; align-items: center; justify-content: center;
@@ -247,6 +240,33 @@ h1 {
 .font-scale-icon { line-height: 1; font-weight: 700; }
 .font-scale-icon-sm { font-size: 0.85rem; }
 .font-scale-icon-lg { font-size: 1.25rem; }
+.font-scale-value {
+    flex-shrink: 0;
+    min-width: 2.75em;
+    height: 28px;
+    margin-right: 2px;
+    padding: 0 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-ui);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: rgba(60, 60, 67, 0.55);
+    background: rgba(120, 120, 128, 0.12);
+    border-radius: 980px;
+    text-align: center;
+    line-height: 1;
+    user-select: none;
+    font-variant-numeric: tabular-nums;
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+}
+[data-theme="dark"] .font-scale-value {
+    color: rgba(235, 235, 245, 0.55);
+    background: rgba(120, 120, 128, 0.24);
+}
 
 /* Телефон (Apple-стиль): шапка — стекло + одна сегментная панель; размеры в px */
 @media (max-width: 720px) {
@@ -268,7 +288,6 @@ h1 {
     .logo-icon {
         width: 38px;
         height: 38px;
-        font-size: 15.7px;
         border-radius: 11px;
         box-shadow: var(--shadow-cta);
     }
@@ -293,7 +312,12 @@ h1 {
         backdrop-filter: blur(12px);
         overflow: visible;
     }
-    .font-scale-controls { display: contents; }
+    .font-scale-controls {
+        display: flex;
+        align-items: center;
+        gap: 0;
+        flex: 0 0 auto;
+    }
     .header-controls .theme-btn {
         width: 36px;
         height: 36px;
@@ -305,6 +329,18 @@ h1 {
     }
     .header-controls .font-scale-icon-sm { font-size: 12px; }
     .header-controls .font-scale-icon-lg { font-size: 18px; }
+    .header-controls .font-scale-value {
+        height: 28px;
+        min-width: 2.5em;
+        margin-right: 1px;
+        padding: 0 7px;
+        font-size: 11px;
+        font-weight: 600;
+        background: rgba(120, 120, 128, 0.16);
+    }
+    [data-theme="dark"] .header-controls .font-scale-value {
+        background: rgba(120, 120, 128, 0.28);
+    }
     .header-controls .theme-btn:hover:not(:disabled),
     .header-controls .theme-btn:active:not(:disabled) {
         background: var(--accent-glow);
@@ -1726,6 +1762,13 @@ mark.hl {
 .about-lead {
     font-size: 1.15rem; color: var(--text-secondary); margin-bottom: 1.15rem;
     letter-spacing: -0.015em; line-height: 1.5; max-width: 36em;
+}
+.about-oirat {
+    font-family: 'BarinTodo', serif;
+    font-size: 1.35em;
+    line-height: 1;
+    color: var(--todo-ink);
+    white-space: nowrap;
 }
 .about-wrap p { color: var(--text-secondary); margin-bottom: 1rem; line-height: 1.7; }
 .about-wrap em { color: var(--accent); font-style: normal; font-weight: 600; }

@@ -270,8 +270,12 @@
     }
 
     // ===== Размер шрифта интерфейса (кнопки A− / A+ в шапке) =====
-    const FONT_SCALE_STEPS = [0.875, 1, 1.125, 1.25, 1.375, 1.55, 1.75, 2, 2.22];
+    const FONT_SCALE_STEPS = [0.65, 0.7, 0.75, 0.8, 0.875, 1, 1.125, 1.25, 1.375, 1.55, 1.75, 2, 2.22];
     const FONT_SCALE_DEFAULT = 1;
+
+    function fontScalePercent(scale) {
+        return Math.round(scale * 100);
+    }
 
     function loadFontScale() {
         try {
@@ -285,8 +289,23 @@
         const i = FONT_SCALE_STEPS.indexOf(scale);
         const down = document.getElementById('font-scale-down');
         const up = document.getElementById('font-scale-up');
-        if (down) down.disabled = i <= 0;
-        if (up) up.disabled = i < 0 || i >= FONT_SCALE_STEPS.length - 1;
+        const value = document.getElementById('font-scale-value');
+        const pct = fontScalePercent(scale);
+        if (down) {
+            down.disabled = i <= 0;
+            down.title = 'Уменьшить шрифт';
+            down.setAttribute('aria-label', 'Уменьшить шрифт');
+        }
+        if (up) {
+            up.disabled = i < 0 || i >= FONT_SCALE_STEPS.length - 1;
+            up.title = 'Увеличить шрифт';
+            up.setAttribute('aria-label', 'Увеличить шрифт');
+        }
+        if (value) {
+            value.textContent = pct + '%';
+            value.title = 'Размер текста: ' + pct + '%';
+            value.setAttribute('aria-label', 'Размер текста ' + pct + ' процентов');
+        }
     }
 
     function applyFontScale(scale) {
