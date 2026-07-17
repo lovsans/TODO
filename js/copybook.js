@@ -64,7 +64,7 @@
                     <div class="cb-pan" id="cb-pan">
                         ${sheets.map(n => `
                             <div class="cb-stage ${n===1?'active':''}" data-sheet="${n}">
-                                <img class="cb-img" src="${copybookImages[n]}" alt="Пропись, лист ${n}" draggable="false">
+                                <img class="cb-img" src="${copybookImages[n]}" alt="Пропись, лист ${n}" draggable="false" loading="lazy" decoding="async">
                                 <canvas class="cb-canvas"></canvas>
                             </div>`).join('')}
                     </div>

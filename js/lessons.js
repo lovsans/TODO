@@ -22,7 +22,7 @@
             <figure class="about-portrait">
                 <picture>
                     <source srcset="img/zaya-pandita.webp" type="image/webp">
-                    <img src="img/zaya-pandita.png" alt="Зая-пандита Намкай Гьяцо — создатель Тодо Бичик" loading="lazy">
+                    <img src="img/zaya-pandita.jpg" alt="Зая-пандита Намкай Гьяцо — создатель Тодо Бичик" loading="lazy" decoding="async">
                 </picture>
                 <figcaption>Зая-пандита Намкай Гьяцо — создатель Тодо Бичик, родился в год свиньи — земли (калм. шора һаха җил 1599 г.), принадлежал кости хошеутов, отоку гөрөөчин, а в этом отоке — к семейству шангас, что изложено в его биографии так: «ясан ину хошоуд, отог ину гөрөөчин, гөрөөчин дотороон шаңһас амуи». На совр. калм. «Яснь хошуд, отгнь гөрәчн, гөрәчн дотран шаңһс».</figcaption>
             </figure>
@@ -348,7 +348,7 @@
                         <figure class="wr-vowels-chart">
                             <picture>
                                 <source srcset="img/vowels-strokes.webp" type="image/webp">
-                                <img src="img/vowels-strokes.png" alt="Эгшг үзгүүд: начальная, срединная и конечная формы гласных с порядком штрихов" loading="lazy">
+                                <img src="img/vowels-strokes.jpg" alt="Эгшг үзгүүд: начальная, срединная и конечная формы гласных с порядком штрихов" loading="lazy" decoding="async">
                             </picture>
                             <figcaption>Эгшг үзгүүд — начальная, срединная и конечная формы с порядком штрихов</figcaption>
                         </figure>
@@ -357,11 +357,11 @@
                             <div class="wr-strokes-grid-row">
                                 <picture>
                                     <source srcset="img/consonants-strokes-1.webp" type="image/webp">
-                                    <img src="img/consonants-strokes-1.png" alt="Хадвр үзгүд: первая группа согласных с порядком штрихов" loading="lazy">
+                                    <img src="img/consonants-strokes-1.jpg" alt="Хадвр үзгүд: первая группа согласных с порядком штрихов" loading="lazy" decoding="async">
                                 </picture>
                                 <picture>
                                     <source srcset="img/consonants-strokes-2.webp" type="image/webp">
-                                    <img src="img/consonants-strokes-2.png" alt="Хадвр үзгүд: вторая группа согласных с порядком штрихов" loading="lazy">
+                                    <img src="img/consonants-strokes-2.jpg" alt="Хадвр үзгүд: вторая группа согласных с порядком штрихов" loading="lazy" decoding="async">
                                 </picture>
                             </div>
                             <figcaption>Хадвр үзгүд — порядок штрихов (две группы знаков)</figcaption>
