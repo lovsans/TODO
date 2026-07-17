@@ -133,10 +133,9 @@
         if (cat === 'direction') {
             return `
                 <div class="section-title">${categoryMeta[cat].label}</div>
-                <div class="section-info">${categoryMeta[cat].info}</div>
+                <div class="section-info section-info-writer">${categoryMeta[cat].info}</div>
                 <div class="writer-host">
-                    <iframe id="writer-frame" title="Тренажёр письма Тодо Бичик"
-                            style="width:100%;border:0;display:block;height:min(70dvh,480px);border-radius:14px;background:var(--bg-secondary);"></iframe>
+                    <iframe id="writer-frame" class="writer-frame" title="Тренажёр письма Тодо Бичик"></iframe>
                 </div>`;
         }
         if (cat === 'copybook') return renderCopybook();

@@ -48,9 +48,10 @@
             if (frame) {
                 let floor = 560;
                 try {
-                    if (window.matchMedia('(max-width: 640px)').matches) floor = 420;
+                    if (window.matchMedia('(max-width: 640px)').matches) floor = 380;
                 } catch (e) {}
-                frame.style.height = Math.max(floor, Math.ceil(data.__todoWriterHeight) + 8) + 'px';
+                // +16 — чуть воздуха снизу, чтобы sticky-кнопки не прилипали к краю
+                frame.style.height = Math.max(floor, Math.ceil(data.__todoWriterHeight) + 16) + 'px';
             }
         }
     });

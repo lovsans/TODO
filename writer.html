@@ -12,17 +12,17 @@
 [data-theme="dark"] .fbtn.active{background:#10312b;}
 [data-theme="dark"] #live polyline{stroke:#d6d3d1;}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:'IBM Plex Sans','Inter',system-ui,-apple-system,sans-serif;padding:14px;-webkit-tap-highlight-color:transparent;overscroll-behavior-y:contain;overflow-x:hidden;}
+html,body{height:auto;}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'IBM Plex Sans','Inter',system-ui,-apple-system,sans-serif;padding:14px;-webkit-tap-highlight-color:transparent;overscroll-behavior-y:auto;overflow-x:hidden;}
 .wrap{max-width:720px;margin:0 auto;}
 .kicker{font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-dark);font-weight:600;}
 h1{font-size:1.25rem;margin:.15rem 0 .2rem;}
 .lead{color:var(--sub);font-size:.84rem;margin:0 0 .6rem;}
-.tabs{display:flex;gap:.3rem;overflow-x:auto;margin-bottom:.5rem;padding-bottom:2px;scrollbar-width:none;-ms-overflow-style:none;}
-.tabs::-webkit-scrollbar{display:none;}
+.tabs,.letter-nav{display:flex;gap:.3rem;overflow-x:auto;margin-bottom:.5rem;padding-bottom:2px;scrollbar-width:none;-ms-overflow-style:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;touch-action:pan-x;}
+.tabs::-webkit-scrollbar,.letter-nav::-webkit-scrollbar{display:none;}
+.letter-nav{align-items:center;padding:2px 1px 4px;margin-bottom:.55rem;}
 .tab{white-space:nowrap;border:1px solid var(--border);background:var(--card);color:var(--sub);border-radius:9px;padding:.34rem .6rem;font-size:.8rem;font-weight:600;cursor:pointer;touch-action:manipulation;}
 .tab.active{background:var(--accent);border-color:var(--accent);color:#fff;}
-.letter-nav{display:flex;align-items:center;gap:.3rem;margin-bottom:.55rem;overflow-x:auto;padding:2px 1px 4px;scrollbar-width:none;-ms-overflow-style:none;}
-.letter-nav::-webkit-scrollbar{display:none;}
 .letter-btn{flex:0 0 auto;min-width:2.1rem;height:2.1rem;padding:0 .45rem;border:1px solid var(--border);background:var(--card);color:var(--sub);border-radius:9px;font:inherit;font-size:.86rem;font-weight:700;cursor:pointer;touch-action:manipulation;}
 .letter-btn:hover,.letter-btn:focus-visible{border-color:var(--accent);color:var(--accent);outline:none;}
 .letter-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
@@ -36,18 +36,20 @@ h1{font-size:1.25rem;margin:.15rem 0 .2rem;}
 .stage-card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 1px 3px rgb(0 0 0/.06);padding:10px;max-width:480px;margin:0 auto;}
 .title{text-align:center;font-size:.82rem;color:var(--sub);margin-bottom:.3rem;font-weight:600;}
 .stage-forms{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.4rem;margin-bottom:.55rem;}
-.stage-form{border:1px solid var(--border);background:var(--bg);color:var(--ink);border-radius:11px;padding:.35rem .25rem .28rem;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:.2rem;min-width:0;}
+.stage-form{border:1px solid var(--border);background:var(--bg);color:var(--ink);border-radius:11px;padding:.35rem .25rem .28rem;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:.2rem;min-width:0;touch-action:manipulation;}
 .stage-form.active{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset;background:#ecfdf5;}
 .stage-form.missing{opacity:.4;cursor:default;}
 .stage-form.done{border-color:var(--accent);}
-.stage-form-svg{display:block;width:100%;height:112px;background:transparent;border-radius:8px;touch-action:auto;}
+.stage-form-svg{display:block;width:100%;height:112px;background:transparent;border-radius:8px;touch-action:manipulation;pointer-events:none;}
 .stage-form-svg path{fill:currentColor;}
 .stage-form-label{font-size:.64rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);}
 .stage-form.active .stage-form-label{color:var(--accent-dark);}
 [data-theme="dark"] .stage-form.active{background:#10312b;}
 .stage{position:relative;}
-svg{display:block;width:100%;height:auto;touch-action:none;border-radius:10px;background:repeating-linear-gradient(0deg,transparent,transparent 49.5%,#f0eeec 49.5%,#f0eeec 50.5%),repeating-linear-gradient(90deg,transparent,transparent 49.5%,#f0eeec 49.5%,#f0eeec 50.5%);-webkit-user-select:none;user-select:none;}
-svg.shake{animation:shk .32s;}
+/* pan-y — страница скроллится; none только во время рисования */
+#svg{display:block;width:100%;height:auto;touch-action:pan-y;border-radius:10px;background:repeating-linear-gradient(0deg,transparent,transparent 49.5%,#f0eeec 49.5%,#f0eeec 50.5%),repeating-linear-gradient(90deg,transparent,transparent 49.5%,#f0eeec 49.5%,#f0eeec 50.5%);-webkit-user-select:none;user-select:none;}
+#svg.is-drawing,#svg.mode-practice{touch-action:none;}
+#svg.shake{animation:shk .32s;}
 @keyframes shk{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
 .contour{fill:var(--fill);stroke:var(--contour);stroke-width:1.5;}
 .contour.hide{display:none;}
@@ -73,27 +75,41 @@ svg.shake{animation:shk .32s;}
 .status.good{color:var(--good);}
 .toggle{font-size:.78rem;color:var(--sub);display:flex;align-items:center;gap:.35rem;cursor:pointer;user-select:none;}
 .hint{font-size:.75rem;color:var(--muted);margin:.5rem 0 0;line-height:1.5;}
+.mobile-tip{display:none;}
 @media (max-width:640px){
-  body{padding:10px;}
+  body{padding:8px 10px 16px;}
   .wrap{max-width:none;}
+  body.is-embed .kicker,body.is-embed h1,body.is-embed .lead{display:none;}
   .lead{font-size:.8rem;}
-  .tabs{margin-left:-2px;margin-right:-2px;}
-  .tab{padding:.48rem .7rem;}
-  .modes,.forms{position:sticky;top:0;z-index:4;background:var(--bg);padding:.25rem 0;}
-  .stage-card{padding:8px;border-radius:14px;max-width:320px;}
-  .stage-forms{gap:.28rem;margin-bottom:.45rem;}
+  .tabs{margin:0 -2px .45rem;gap:.28rem;}
+  .tab{padding:.5rem .72rem;font-size:.78rem;}
+  /* дублирует stage-forms — на телефоне прячем */
+  .forms{display:none;}
+  .modes{position:sticky;top:0;z-index:5;gap:.35rem;margin:0 0 .45rem;padding:.35rem 0;background:var(--bg);}
+  .mode{padding:.55rem .4rem;border-radius:980px;font-size:.82rem;}
+  .stage-card{padding:8px;border-radius:14px;max-width:none;width:100%;}
+  .stage-forms{gap:.28rem;margin-bottom:.4rem;}
   .stage-form{padding:.28rem .18rem .24rem;}
-  .stage-form-svg{height:86px;}
+  .stage-form-svg{height:56px;}
   .stage-form-label{font-size:.58rem;}
+  /* ниже холст — страница снова нормально скроллится */
+  #svg{max-height:min(46dvh,360px);width:auto;max-width:100%;margin:0 auto;}
+  #animBar,#practBar{margin-top:.15rem;padding-top:.15rem;}
   .row{align-items:flex-start;flex-direction:column;}
-  .controls .btn{min-width:calc(50% - .25rem);}
+  .controls{margin-top:.35rem;}
+  .controls .btn{min-width:calc(50% - .25rem);min-height:44px;}
+  .mobile-tip{display:block;margin:.35rem 0 .15rem;text-align:center;font-size:.68rem;font-weight:500;color:var(--muted);}
+  .hint{margin-top:.35rem;}
 }
 @media (max-width:380px){
-  .stage-card{max-width:300px;}
-  .stage-form-svg{height:82px;}
+  .stage-form-svg{height:50px;}
+  #svg{max-height:min(42dvh,320px);}
 }
-</style></head>
-<body><div class="wrap">
+</style>
+<script>try{if(window.parent&&window.parent!==window)document.documentElement.classList.add('is-embed');}catch(e){}</script>
+</head>
+<body class=""><script>try{if(document.documentElement.classList.contains('is-embed'))document.body.classList.add('is-embed');}catch(e){}</script>
+<div class="wrap">
 <div class="kicker">Тодо Бичик · тренажёр письма</div>
 <h1>Смотри и пиши знаки</h1>
 <p class="lead">Выберите раздел и знак. Ниже сразу видны все три формы — нажмите нужную, затем «Смотреть» или «Писать».</p>
@@ -107,6 +123,7 @@ svg.shake{animation:shk .32s;}
 <div class="stage-card">
   <div class="title" id="title"></div>
   <div class="stage-forms" id="stageForms" aria-label="Все формы выбранной буквы"></div>
+  <p class="mobile-tip" id="mobileTip">Прокрутка — свайп · в «Писать» рисуйте на поле</p>
   <div class="stage">
     <svg id="svg" viewBox="0 0 360 760" xmlns="http://www.w3.org/2000/svg">
       <g id="glyphRoot">
@@ -307,7 +324,14 @@ function buildStageForms(){stageFormsEl.innerHTML='';const d=glyph();FORMS.forEa
 
 // ---- refresh per mode ----
 function setMode(m){mode=m;$('mAnim').classList.toggle('active',m==='animate');$('mPract').classList.toggle('active',m==='practice');
-  animBar.style.display=m==='animate'?'':'none';practBar.style.display=m==='practice'?'':'none';refresh();}
+  animBar.style.display=m==='animate'?'':'none';practBar.style.display=m==='practice'?'':'none';
+  svg.classList.toggle('mode-practice',m==='practice');
+  svg.classList.remove('is-drawing');
+  const tip=$('mobileTip');
+  if(tip)tip.textContent=m==='practice'
+    ?'Рисуйте на поле · чтобы листать страницу — свайп вне поля'
+    :'Прокрутка страницы — обычный свайп';
+  refresh();}
 function refresh(){
   stopAnim();clearG(gDone);clearG(gHint);clearG(gAnim);clearG(gLive);clearG(gCue);
   banner.className='banner';statusEl.textContent='';statusEl.className='status';
@@ -357,14 +381,17 @@ let drawId=null;
 const ptrOpts={passive:false};
 function sp(e){const r=svg.getBoundingClientRect();return mapPtr((e.clientX-r.left)/r.width*360,(e.clientY-r.top)/r.height*760);}
 function finishDraw(){
-  if(!drawing)return;drawing=false;drawId=null;clearG(gLive);
+  if(!drawing)return;drawing=false;drawId=null;svg.classList.remove('is-drawing');clearG(gLive);
   if(mode!=='practice'||sIdx>=strokes().length)return;
   const target=strokes()[sIdx],res=compare(pts,target.points);
   if(res.ok){misses=0;clearG(gHint);sIdx++;
     if(sIdx>=strokes().length){renderPractice();finishGlyph();}
     else{statusEl.className='status good';statusEl.textContent='Верно!';renderPractice();}
   }else{misses++;flash(res.reason);if(misses>=3)showHint();}}
-svg.addEventListener('pointerdown',e=>{if(mode!=='practice'||sIdx>=strokes().length)return;e.preventDefault();
+svg.addEventListener('pointerdown',e=>{if(mode!=='practice'||sIdx>=strokes().length)return;
+  if(e.pointerType==='touch'&&e.isPrimary===false)return;
+  e.preventDefault();
+  svg.classList.add('is-drawing');
   if(e.pointerType==='touch'){try{svg.setPointerCapture(e.pointerId);}catch(err){}}
   drawId=e.pointerId;drawing=true;pts=[sp(e)];},ptrOpts);
 svg.addEventListener('pointermove',e=>{if(!drawing||e.pointerId!==drawId)return;e.preventDefault();pts.push(sp(e));let pl=gLive.firstChild;
