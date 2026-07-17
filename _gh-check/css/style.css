@@ -2639,7 +2639,27 @@ mark.hl {
     display: flex; flex-wrap: wrap; gap: 0.55rem; align-items: center; margin-top: 1rem;
 }
 .wr-action-primary { width: auto; padding: 0.65rem 1rem; }
-.wr-action-link { padding: 0.3rem 0.15rem; }
+.wr-action-link {
+    font: inherit; font-size: 0.82rem; font-weight: 600;
+    padding: 0.55rem 0.95rem;
+    border: 1px solid var(--accent);
+    border-radius: var(--radius-pill);
+    background: var(--accent-glow);
+    color: var(--accent);
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    touch-action: manipulation;
+    transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+.wr-action-link:hover, .wr-action-link:focus-visible {
+    background: var(--accent);
+    color: #fff;
+    outline: none;
+    box-shadow: var(--shadow-cta);
+    transform: scale(1.02);
+}
+[data-theme="dark"] .wr-action-link:hover,
+[data-theme="dark"] .wr-action-link:focus-visible { color: #fff; }
 
 /* Три опоры в hero */
 .wr-pillars {
