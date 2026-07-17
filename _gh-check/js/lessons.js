@@ -10,7 +10,7 @@
         <div class="about-wrap">
             <div class="home-progress" id="home-progress"></div>
 
-            <div class="about-hero">
+            <div class="about-hero" id="about-hero">
                 <div>
                     <div class="about-kicker">«Ясное письмо» · Тодо Бичик</div>
                     <h2 class="about-title">Тодо Бичик — «Ясное письмо»: история создания и культурное наследие</h2>
@@ -136,7 +136,7 @@
             <div class="wr-glyph-item" role="button" tabindex="0" onclick="${open}"
                  onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();${open};}"
                  aria-label="Открыть знак «${escapeHtml(c.cyrillic)}»">
-                <span class="wr-glyph-g">${glyph}</span>
+                <span class="wr-glyph-g${todoNumClass(c)}">${glyph}</span>
                 <span class="wr-glyph-c">${escapeHtml(c.cyrillic)}</span>
                 ${hint ? `<span class="wr-glyph-hint">${escapeHtml(hint)}</span>` : ''}
             </div>`;
@@ -161,7 +161,7 @@
         const c = charByLatin(lat);
         if (!c) return '';
         const glyph = trimSpine(c[form || 'initial'] || c.medial || c.initial || c.final || '');
-        return `<span class="wr-syll-glyph">${escapeHtml(glyph)}</span>`;
+        return `<span class="wr-syll-glyph${todoNumClass(c)}">${escapeHtml(glyph)}</span>`;
     }
 
     function wrNCard(kicker, title, todo, modern, note, tone) {
@@ -850,6 +850,10 @@
     // opt.plain — без раскраски вообще: буквы обычным цветом текста (одним
     // сплошным run'ом), используется для варианта «обычный шрифт».
     const CW_COLOR_N = 10;
+    function todoNumWrap(ch, isNum) {
+        const esc = escapeHtml(ch);
+        return isNum ? `<span class="todo-num">${esc}</span>` : esc;
+    }
     function composeColorPlan(placedLetters, opt) {
         const inline = opt && opt.inline;
         const plain = !!(opt && opt.plain);
@@ -884,7 +888,8 @@
                 }
                 const c = color % CW_COLOR_N;
                 for (let li = u.s; li <= u.e && li < seg.length; li++) colorByIndex[seg[li].idx] = c;
-                for (const ch of u.form) chars.push({ ch, color: c });
+                const isNum = u.s < seg.length && isTodoNumber(seg[u.s].lt);
+                for (const ch of u.form) chars.push({ ch, color: c, isNum });
                 color++;
             });
             // снимаем висящие краевые штрихи спины-подчёркивания (как trimSpine), но
@@ -898,15 +903,18 @@
             let html;
             if (plain) {
                 // Без раскраски: один сплошной run обычным цветом текста.
-                html = `<span class="ww-plain">${escapeHtml(chars.map(x => x.ch).join(''))}</span>`;
+                html = `<span class="ww-plain">${chars.map(x => todoNumWrap(x.ch, x.isNum)).join('')}</span>`;
             } else {
                 html = ''; let k = 0;
                 while (k < chars.length) {
-                    const c = chars[k].color; let run = '';
-                    while (k < chars.length && chars[k].color === c) { run += chars[k].ch; k++; }
+                    const c = chars[k].color; let runHtml = '';
+                    while (k < chars.length && chars[k].color === c) {
+                        runHtml += todoNumWrap(chars[k].ch, chars[k].isNum);
+                        k++;
+                    }
                     html += inline
-                        ? `<span style="color:${inline[c % inline.length]}">${escapeHtml(run)}</span>`
-                        : `<span class="cl${c}">${escapeHtml(run)}</span>`;
+                        ? `<span style="color:${inline[c % inline.length]}">${runHtml}</span>`
+                        : `<span class="cl${c}">${runHtml}</span>`;
                 }
             }
             wordHtmls.push(html);
@@ -1046,7 +1054,7 @@
                 const isUsed = used.has(iid);
                 const glyph = lt.initial != null ? lt.initial : (lt.medial != null ? lt.medial : (lt.final || ''));
                 return `<div class="cw-tile ${isUsed ? 'cw-used' : ''}" onclick="composeTap('${iid}')">
-                            <div class="cw-tile-glyph">${trimSpine(glyph)}</div>
+                            <div class="cw-tile-glyph${todoNumClass(lt)}">${trimSpine(glyph)}</div>
                             <div class="cw-tile-cyr">${escapeHtml(t.label || composeLabel(lt))}</div>
                         </div>`;
             }).join('');
@@ -1272,8 +1280,9 @@
             if (!lt) return '';
             const glyph = lt.initial != null ? lt.initial : (lt.medial != null ? lt.medial : (lt.final || ''));
             const ins = escapeHtml(d.ins);
+            const numCls = d.idx >= 66 && d.idx <= 75 ? ' todo-num' : '';
             return `<button class="ww-key ww-key-sign" onclick="wwInsert('${ins}')" title="${escapeHtml(d.title)}">
-                        <span class="ww-key-glyph">${escapeHtml(trimSpine(glyph))}</span>
+                        <span class="ww-key-glyph${numCls}">${escapeHtml(trimSpine(glyph))}</span>
                         <span class="ww-key-cap">${escapeHtml(d.cap)}</span>
                     </button>`;
         }).join('');
@@ -1732,8 +1741,8 @@
     function renderSummary() {
         // Большая сводная таблица по четырём категориям алфавита.
         const groups = SUMMARY_CATS;
-        const glyph = val => (val !== null && val !== undefined && val !== '')
-            ? `<span class="sum-glyph" aria-hidden="true">${trimSpine(val)}</span>`
+        const glyph = (val, isNum) => (val !== null && val !== undefined && val !== '')
+            ? `<span class="sum-glyph${isNum ? ' todo-num' : ''}" aria-hidden="true">${trimSpine(val)}</span>`
             : `<span class="sum-missing" aria-hidden="true">—</span>`;
         const bodyRows = groups.map(g => {
             const items = charsByCategory[g.cat] || [];
@@ -1759,9 +1768,9 @@
                         <td class="sum-id">${id}</td>
                         <td class="sum-cyr">${cyr}</td>
                         <td class="sum-lat">${lat}</td>
-                        <td>${glyph(c.initial)}</td>
-                        <td>${glyph(c.medial)}</td>
-                        <td>${glyph(c.final)}</td>
+                        <td>${glyph(c.initial, c.category === 'numbers')}</td>
+                        <td>${glyph(c.medial, c.category === 'numbers')}</td>
+                        <td>${glyph(c.final, c.category === 'numbers')}</td>
                     </tr>`;
             }).join('');
             return head + rows;
@@ -1854,8 +1863,9 @@
         const cyrH = tok ? highlightText(cyrLabel, tok) : escapeHtml(cyrLabel);
         const latH = tok ? highlightText(latLabel, tok) : escapeHtml(latLabel);
         function formBox(label, val) {
+            const numCls = todoNumClass(c);
             if (val !== null && val !== undefined)
-                return `<div class="form-box"><div class="form-box-label">${label}</div><div class="form-box-char" aria-hidden="true">${trimSpine(val)}</div></div>`;
+                return `<div class="form-box"><div class="form-box-label">${label}</div><div class="form-box-char${numCls}" aria-hidden="true">${trimSpine(val)}</div></div>`;
             return `<div class="form-box"><div class="form-box-label">${label}</div><div class="form-box-missing" aria-hidden="true">—</div></div>`;
         }
         return `
@@ -2129,6 +2139,7 @@
         ov.querySelector('.expr-lb-close').addEventListener('click', closeExprCard);
         ov.querySelector('.expr-lb-prev').addEventListener('click', function () { exprCardStep(-1); });
         ov.querySelector('.expr-lb-next').addEventListener('click', function () { exprCardStep(1); });
+        if (typeof bindSwipeNav === 'function') bindSwipeNav(ov, exprCardStep);
     }
 
     function exprLbKeydown(e) {
@@ -2247,6 +2258,7 @@
         ov.querySelector('#riddle-lb-reveal').addEventListener('click', toggleRiddleLbAnswer);
         ov.querySelector('#riddle-lb-zoom-minus').addEventListener('click', function () { riddleZoom(-1); });
         ov.querySelector('#riddle-lb-zoom-plus').addEventListener('click', function () { riddleZoom(1); });
+        if (typeof bindSwipeNav === 'function') bindSwipeNav(ov, riddleCardStep);
         applyRiddleZoom();
     }
 

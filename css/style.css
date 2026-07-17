@@ -1216,6 +1216,20 @@ mark.hl {
 }
 .modal-switch-btn:hover:not(:disabled) { color: var(--accent); border-color: var(--accent); background: var(--accent-glow); }
 .modal-switch-btn:disabled { opacity: 0.35; cursor: default; }
+.modal-swipe-hint { display: none; }
+.modal { touch-action: pan-y; }
+.expr-lb-overlay { touch-action: pan-y; }
+@media (max-width: 720px) {
+    .modal-swipe-hint {
+        display: block;
+        margin: 0.55rem 0 0;
+        text-align: center;
+        font-size: 0.72rem;
+        font-weight: 500;
+        color: var(--text-muted);
+        letter-spacing: 0.01em;
+    }
+}
 
 /* На телефоне ужимаем блоки форм, чтобы три формы (начало/середина/конец) помещались
    в один ряд, а не вытягивали модалку в длинную «простыню» с прокруткой. */

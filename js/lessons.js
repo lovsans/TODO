@@ -2139,6 +2139,7 @@
         ov.querySelector('.expr-lb-close').addEventListener('click', closeExprCard);
         ov.querySelector('.expr-lb-prev').addEventListener('click', function () { exprCardStep(-1); });
         ov.querySelector('.expr-lb-next').addEventListener('click', function () { exprCardStep(1); });
+        if (typeof bindSwipeNav === 'function') bindSwipeNav(ov, exprCardStep);
     }
 
     function exprLbKeydown(e) {
@@ -2257,6 +2258,7 @@
         ov.querySelector('#riddle-lb-reveal').addEventListener('click', toggleRiddleLbAnswer);
         ov.querySelector('#riddle-lb-zoom-minus').addEventListener('click', function () { riddleZoom(-1); });
         ov.querySelector('#riddle-lb-zoom-plus').addEventListener('click', function () { riddleZoom(1); });
+        if (typeof bindSwipeNav === 'function') bindSwipeNav(ov, riddleCardStep);
         applyRiddleZoom();
     }
 

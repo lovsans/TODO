@@ -360,6 +360,16 @@
         if (e.key === 'ArrowLeft') modalPrev(); else modalNext();
     });
 
+    // Телефон: свайп по карточке буквы — Пред. / След.
+    (function initModalSwipe() {
+        const modal = document.querySelector('#modal-overlay .modal');
+        if (!modal || typeof bindSwipeNav !== 'function') return;
+        bindSwipeNav(modal, function (d) {
+            if (d > 0) modalNext();
+            else modalPrev();
+        });
+    })();
+
     function renderModalContent(idx) {
         const c = charData[idx];
         if (!c) return;

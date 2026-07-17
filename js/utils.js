@@ -10,6 +10,33 @@
         };
     }
 
+    // Горизонтальный свайп на элементе → onStep(+1 / −1). Вертикальный жест не трогаем.
+    function bindSwipeNav(el, onStep, opts) {
+        if (!el || typeof onStep !== 'function' || el.dataset.swipeNav === '1') return;
+        opts = opts || {};
+        const threshold = opts.threshold != null ? opts.threshold : 50;
+        let x0 = null, y0 = null;
+        el.addEventListener('touchstart', function (e) {
+            if (!e.changedTouches || !e.changedTouches.length) return;
+            if (e.touches && e.touches.length > 1) { x0 = y0 = null; return; }
+            const t = e.changedTouches[0];
+            x0 = t.clientX;
+            y0 = t.clientY;
+        }, { passive: true });
+        el.addEventListener('touchend', function (e) {
+            if (x0 == null || !e.changedTouches || !e.changedTouches.length) return;
+            const t = e.changedTouches[0];
+            const dx = t.clientX - x0;
+            const dy = t.clientY - y0;
+            x0 = y0 = null;
+            if (Math.abs(dx) < threshold) return;
+            if (Math.abs(dx) <= Math.abs(dy)) return;
+            onStep(dx < 0 ? 1 : -1);
+        }, { passive: true });
+        el.addEventListener('touchcancel', function () { x0 = y0 = null; }, { passive: true });
+        el.dataset.swipeNav = '1';
+    }
+
     function shuffleArr(a) {
         const r = a.slice();
         for (let i = r.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [r[i], r[j]] = [r[j], r[i]]; }
