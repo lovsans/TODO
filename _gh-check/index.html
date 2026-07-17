@@ -31,6 +31,16 @@
         })();
     </script>
     <title>Ойратский алфавит — Тодо Бичик</title>
+    <meta name="description" content="Интерактивный атлас ойратского алфавита Тодо Бичик">
+    <meta name="theme-color" content="#0f766e" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Тодо Бичик">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="apple-touch-icon" href="img/icons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="img/icons/icon-192.png">
     <script src="js/font-data.js"></script>
     <script src="js/barintodo-data.js"></script>
     <link rel="stylesheet" href="css/fonts.css">
@@ -134,5 +144,14 @@
     <script src="js/copybook.js" defer></script>
     <script src="js/writer.js" defer></script>
     <script src="js/main.js" defer></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function () {
+                navigator.serviceWorker.register('./sw.js').catch(function (err) {
+                    console.warn('SW register failed', err);
+                });
+            });
+        }
+    </script>
 </body>
 </html>
