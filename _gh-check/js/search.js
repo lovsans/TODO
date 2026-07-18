@@ -79,18 +79,19 @@
     }
 
     function setSearchBarOpen(open) {
-        const bar = document.getElementById('search-bar');
+        const tools = document.getElementById('top-tools');
         const btn = document.getElementById('search-toggle');
-        if (!bar || !btn) return;
-        bar.classList.toggle('is-open', !!open);
+        if (!tools || !btn) return;
+        tools.classList.toggle('search-open', !!open);
         btn.setAttribute('aria-expanded', open ? 'true' : 'false');
         btn.setAttribute('aria-label', open ? 'Свернуть поиск' : 'Открыть поиск');
         btn.title = open ? 'Свернуть поиск' : 'Поиск';
+        if (open && typeof setProgressBarOpen === 'function') setProgressBarOpen(false);
     }
 
     function toggleSearchBar() {
-        const bar = document.getElementById('search-bar');
-        const open = !(bar && bar.classList.contains('is-open'));
+        const tools = document.getElementById('top-tools');
+        const open = !(tools && tools.classList.contains('search-open'));
         setSearchBarOpen(open);
         if (open) {
             const inp = document.getElementById('search-input');

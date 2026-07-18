@@ -459,6 +459,66 @@
         if (a >= 2 && a <= 4 && (b < 10 || b >= 20)) return 'дня';
         return 'дней';
     }
+    const PROGRESS_SCOPES = [
+        ['practice_vowels', 'Гласные'],
+        ['practice_long_vowels', 'Долгие гласные'],
+        ['practice_diphthongs', 'Дифтонги'],
+        ['practice_consonants', 'Согласные'],
+        ['practice_galik', 'Галики'],
+        ['practice_syllables', 'Слоги'],
+        ['practice_numbers', 'Цифры']
+    ];
+
+    function overallPracticeProgress() {
+        let learned = 0, total = 0;
+        PROGRESS_SCOPES.forEach(([sc]) => {
+            const p = progressForScope(sc);
+            learned += p.learned;
+            total += p.total;
+        });
+        const pct = total ? Math.round(learned / total * 100) : 0;
+        return { learned, total, pct };
+    }
+
+    function progressToggleMarkup(s) {
+        const n = (s && s.streak) || 0;
+        const streak = n > 0 ? `🔥 ${n} ${pluralDay(n)}` : '🔥 Серия';
+        const { learned, total, pct } = overallPracticeProgress();
+        const stats = total
+            ? `<span class="progress-toggle-stats">${learned}&nbsp;/&nbsp;${total} <span class="progress-toggle-pct">(${pct}%)</span></span>`
+            : '';
+        return `<span class="progress-toggle-streak">${streak}</span>` +
+            (stats ? `<span class="progress-toggle-sep" aria-hidden="true">·</span>${stats}` : '');
+    }
+
+    function progressToggleTitle(s) {
+        const n = (s && s.streak) || 0;
+        const streak = n > 0 ? `Серия: ${n} ${pluralDay(n)}` : 'Серия занятий';
+        const { learned, total, pct } = overallPracticeProgress();
+        return total
+            ? `${streak} · выучено ${learned} / ${total} (${pct}%)`
+            : streak;
+    }
+
+    function setProgressBarOpen(open) {
+        const tools = document.getElementById('top-tools');
+        const btn = document.getElementById('progress-toggle');
+        if (!tools || !btn) return;
+        tools.classList.toggle('progress-open', !!open);
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        const title = progressToggleTitle(loadStreak());
+        btn.setAttribute('aria-label', open ? 'Свернуть серию занятий' : title);
+        btn.title = open ? 'Свернуть' : title;
+        if (open && typeof setSearchBarOpen === 'function') setSearchBarOpen(false);
+    }
+
+    function toggleProgressBar() {
+        const tools = document.getElementById('top-tools');
+        const open = !(tools && tools.classList.contains('progress-open'));
+        setProgressBarOpen(open);
+        if (open) updateHomeProgress();
+    }
+
     function renderStreak() {
         const s = loadStreak(), n = s.streak || 0;
         const html = n > 0
@@ -477,28 +537,26 @@
         const learned = pool.filter(isLearned).length;
         return { learned, total: pool.length };
     }
+    function openPracticeFromProgress(scope) {
+        if (typeof setProgressBarOpen === 'function') setProgressBarOpen(false);
+        if (scope && typeof showSection === 'function') showSection(scope);
+    }
+
     function renderProgressOverview() {
         const s = loadStreak(), n = s.streak || 0;
-        const rows = [
-            ['practice_vowels', 'Гласные'],
-            ['practice_long_vowels', 'Долгие гласные'],
-            ['practice_diphthongs', 'Дифтонги'],
-            ['practice_consonants', 'Согласные'],
-            ['practice_galik', 'Галики'],
-            ['practice_syllables', 'Слоги'],
-            ['practice_numbers', 'Цифры']
-        ];
         let learnedAll = 0, totalAll = 0;
-        const bars = rows.map(([sc, label]) => {
+        const bars = PROGRESS_SCOPES.map(([sc, label]) => {
             const { learned, total } = progressForScope(sc);
             learnedAll += learned; totalAll += total;
             const pct = total ? Math.round(learned / total * 100) : 0;
             return `
-                <div class="hp-row">
-                    <span class="hp-row-label">${label}</span>
-                    <span class="hp-bar"><span class="hp-bar-fill" style="width:${pct}%"></span></span>
+                <button type="button" class="hp-row" onclick="openPracticeFromProgress('${sc}')"
+                        aria-label="Открыть тренировку: ${escapeHtml(label)}">
+                    <span class="hp-row-label">${escapeHtml(label)}</span>
+                    <span class="hp-bar" aria-hidden="true"><span class="hp-bar-fill" style="width:${pct}%"></span></span>
                     <span class="hp-row-count">${learned} / ${total}</span>
-                </div>`;
+                    <span class="hp-row-go" aria-hidden="true">→</span>
+                </button>`;
         }).join('');
         const pctAll = totalAll ? Math.round(learnedAll / totalAll * 100) : 0;
         const streakText = n > 0
@@ -506,8 +564,8 @@
             : `Серия занятий: <b>0</b> <span class="hp-best">· начните сегодня</span>`;
         const started = totalAll > 0 && learnedAll > 0;
         const intro = started
-            ? `<div class="hp-overall">Выучено букв и знаков: <b>${learnedAll} / ${totalAll}</b> (${pctAll}%)</div>`
-            : `<div class="hp-empty">Прогресс появится, когда вы начнёте тренировки. Знак считается выученным, когда каждая его форма (начальная/серединная/конечная) отвечена верно хотя бы один раз.</div>`;
+            ? `<div class="hp-overall">Выучено букв и знаков: <b>${learnedAll} / ${totalAll}</b> (${pctAll}%). Нажмите строку, чтобы открыть тренировку.</div>`
+            : `<div class="hp-empty">Выберите тренировку ниже — знак считается выученным, когда каждая его форма отвечена верно хотя бы один раз.</div>`;
         const cont = getContinueAction();
         return `
             <div class="hp-card">
@@ -515,7 +573,8 @@
                     <span class="hp-streak">${streakText}</span>
                     ${started ? intro : ''}
                 </div>
-                ${started ? `<div class="hp-rows">${bars}</div>` : intro}
+                ${started ? '' : intro}
+                <div class="hp-rows">${bars}</div>
                 <button type="button" class="hp-cta" onclick="continueLearning()">
                     ${escapeHtml(cont.label)}
                 </button>
@@ -524,6 +583,15 @@
     function updateHomeProgress() {
         const el = document.getElementById('home-progress');
         if (el) el.innerHTML = renderProgressOverview();
+        const label = document.getElementById('progress-toggle-label');
+        const s = loadStreak();
+        if (label) label.innerHTML = progressToggleMarkup(s);
+        const btn = document.getElementById('progress-toggle');
+        if (btn && !document.getElementById('top-tools')?.classList.contains('progress-open')) {
+            const title = progressToggleTitle(s);
+            btn.title = title;
+            btn.setAttribute('aria-label', title);
+        }
     }
 
     // ===== «Продолжить»: следующий урок Пути или последняя тренировка =====
@@ -566,6 +634,7 @@
     }
 
     function continueLearning() {
+        if (typeof setProgressBarOpen === 'function') setProgressBarOpen(false);
         const a = getContinueAction();
         if (a.kind === 'path' && a.lesson) {
             if (a.lesson.kind === 'quiz' && typeof pathNodeClick === 'function') {

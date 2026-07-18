@@ -93,12 +93,17 @@
     </header>
 
     <main class="container" id="main-content" tabindex="-1">
-        <div class="search-bar" id="search-bar">
+        <div class="top-tools" id="top-tools">
+            <button type="button" class="progress-toggle" id="progress-toggle" onclick="toggleProgressBar()"
+                    aria-expanded="false" aria-controls="home-progress" title="Серия занятий" aria-label="Открыть серию занятий">
+                <span class="progress-toggle-label" id="progress-toggle-label"><span class="progress-toggle-streak">🔥 Серия</span></span>
+            </button>
             <button type="button" class="search-toggle" id="search-toggle" onclick="toggleSearchBar()"
                     aria-expanded="false" aria-controls="search-panel" title="Поиск" aria-label="Открыть поиск">
                 <span class="search-toggle-icon search-toggle-icon-open" aria-hidden="true">⌕</span>
                 <span class="search-toggle-icon search-toggle-icon-close" aria-hidden="true">×</span>
             </button>
+            <div class="progress-panel" id="home-progress"></div>
             <div class="search-panel" id="search-panel">
                 <div class="search-input-wrap">
                     <span class="search-icon" aria-hidden="true">⌕</span>

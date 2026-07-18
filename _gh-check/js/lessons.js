@@ -8,8 +8,6 @@
     function renderAbout() {
         return `
         <div class="about-wrap">
-            <div class="home-progress" id="home-progress"></div>
-
             <div class="about-hero" id="about-hero">
                 <div>
                     <div class="about-kicker">«Ясное письмо» · Тодо Бичик</div>
