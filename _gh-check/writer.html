@@ -18,9 +18,19 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:'IBM Plex Sans',
 .kicker{font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-dark);font-weight:600;}
 h1{font-size:1.25rem;margin:.15rem 0 .2rem;}
 .lead{color:var(--sub);font-size:.84rem;margin:0 0 .6rem;}
-.tabs,.letter-nav{display:flex;gap:.3rem;overflow-x:auto;margin-bottom:.5rem;padding-bottom:2px;scrollbar-width:none;-ms-overflow-style:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;touch-action:pan-x;}
+.tabs,.letter-nav{display:flex;gap:.3rem;overflow-x:auto;padding-bottom:2px;scrollbar-width:none;-ms-overflow-style:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;touch-action:pan-x;}
+.tabs{margin-bottom:.5rem;}
 .tabs::-webkit-scrollbar,.letter-nav::-webkit-scrollbar{display:none;}
-.letter-nav{align-items:center;padding:2px 1px 4px;margin-bottom:.55rem;}
+.letter-nav-row{display:flex;align-items:center;gap:.35rem;margin-bottom:.55rem;}
+.letter-nav{flex:1 1 auto;min-width:0;align-items:center;padding:2px 1px 4px;margin-bottom:0;}
+.letter-step{
+  flex:0 0 auto;width:2.1rem;height:2.1rem;padding:0;
+  border:1px solid var(--border);background:var(--card);color:var(--sub);
+  border-radius:9px;font-size:1.05rem;font-weight:700;line-height:1;cursor:pointer;
+  touch-action:manipulation;display:inline-flex;align-items:center;justify-content:center;
+}
+.letter-step:hover,.letter-step:focus-visible{border-color:var(--accent);color:var(--accent);outline:none;}
+.letter-step:disabled{opacity:.35;cursor:default;}
 .tab{white-space:nowrap;border:1px solid var(--border);background:var(--card);color:var(--sub);border-radius:9px;padding:.34rem .6rem;font-size:.8rem;font-weight:600;cursor:pointer;touch-action:manipulation;}
 .tab.active{background:var(--accent);border-color:var(--accent);color:#fff;}
 .letter-btn{flex:0 0 auto;min-width:2.1rem;height:2.1rem;padding:0 .45rem;border:1px solid var(--border);background:var(--card);color:var(--sub);border-radius:9px;font:inherit;font-size:.86rem;font-weight:700;cursor:pointer;touch-action:manipulation;}
@@ -98,6 +108,8 @@ h1{font-size:1.25rem;margin:.15rem 0 .2rem;}
   .row{align-items:flex-start;flex-direction:column;}
   .controls{margin-top:.35rem;}
   .controls .btn{min-width:calc(50% - .25rem);min-height:44px;}
+  .letter-nav-row{gap:.28rem;margin-bottom:.45rem;}
+  .letter-step{width:2.35rem;height:2.35rem;border-radius:980px;font-size:1.1rem;}
   .mobile-tip{display:block;margin:.35rem 0 .15rem;text-align:center;font-size:.68rem;font-weight:500;color:var(--muted);}
   .hint{margin-top:.35rem;}
 }
@@ -114,7 +126,11 @@ h1{font-size:1.25rem;margin:.15rem 0 .2rem;}
 <h1>Смотри и пиши знаки</h1>
 <p class="lead">Выберите раздел и знак. Ниже сразу видны все три формы — нажмите нужную, затем «Смотреть» или «Писать».</p>
 <div class="tabs" id="tabs"></div>
-<div class="letter-nav" id="letterNav" aria-label="Знаки выбранного раздела"></div>
+<div class="letter-nav-row">
+  <button type="button" class="letter-step" id="letterPrev" aria-label="Предыдущая форма или знак" title="Предыдущая форма / знак">←</button>
+  <div class="letter-nav" id="letterNav" aria-label="Знаки выбранного раздела"></div>
+  <button type="button" class="letter-step" id="letterNext" aria-label="Следующая форма или знак" title="Следующая форма / знак">→</button>
+</div>
 <div class="modes">
   <button class="mode active" id="mAnim">▶ Смотреть</button>
   <button class="mode" id="mPract">✎ Писать</button>
@@ -295,11 +311,62 @@ function animate(list,g,onDone){
 
 // ---- builders ----
 function catLetters(){return DATA.filter(d=>d.cat===curCat);}
+function availableForms(id){return FORMS.map(([f])=>f).filter(f=>hasModel(id,f));}
+function lastForm(id){const af=availableForms(id);return af.length?af[af.length-1]:firstForm(id);}
+function scrollActiveLetterIntoView(){
+  const active=letterNav.querySelector('.letter-btn.active');
+  if(!active||!active.scrollIntoView)return;
+  try{active.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'});}
+  catch(e){try{active.scrollIntoView(false);}catch(err){}}
+}
+function updateLetterStepBtns(){
+  const letters=catLetters();
+  const li=letters.findIndex(d=>d.id===curId);
+  const forms=availableForms(curId);
+  const fi=forms.indexOf(curForm);
+  const atFirst=li<=0&&fi<=0;
+  const atLast=li<0||(li>=letters.length-1&&(fi<0||fi>=forms.length-1));
+  const prev=$('letterPrev'),next=$('letterNext');
+  if(prev)prev.disabled=atFirst;
+  if(next)next.disabled=atLast;
+}
+/** dir +1/−1: сначала соседняя форма буквы, на краю — соседний знак. */
+function stepLetter(dir){
+  const letters=catLetters();
+  const li=letters.findIndex(d=>d.id===curId);
+  if(li<0)return;
+  const forms=availableForms(curId);
+  let fi=forms.indexOf(curForm);
+  if(fi<0)fi=0;
+
+  if(dir>0){
+    if(fi<forms.length-1){
+      curForm=forms[fi+1];
+      buildForms();refresh();updateLetterStepBtns();
+      return;
+    }
+    if(li>=letters.length-1)return;
+    curId=letters[li+1].id;
+    curForm=firstForm(curId);
+  }else{
+    if(fi>0){
+      curForm=forms[fi-1];
+      buildForms();refresh();updateLetterStepBtns();
+      return;
+    }
+    if(li<=0)return;
+    curId=letters[li-1].id;
+    curForm=lastForm(curId);
+  }
+  buildLetterPick();buildForms();refresh();
+  scrollActiveLetterIntoView();
+}
 function selectLetter(id){curId=id;if(!hasModel(curId,curForm))curForm=firstForm(curId);buildLetterPick();buildForms();refresh();}
 function buildLetterPick(){letterNav.innerHTML='';catLetters().forEach(d=>{const b=document.createElement('button');
   b.type='button';b.className='letter-btn'+(d.id===curId?' active':'');b.textContent=d.cy;
   b.setAttribute('aria-pressed',d.id===curId?'true':'false');
-  b.onclick=()=>selectLetter(d.id);letterNav.appendChild(b);});}
+  b.onclick=()=>selectLetter(d.id);letterNav.appendChild(b);});
+  updateLetterStepBtns();}
 function buildTabs(){tabs.innerHTML='';CATS.forEach(cat=>{const t=document.createElement('button');
   t.className='tab'+(cat===curCat?' active':'');t.textContent=cat;
   t.onclick=()=>{curCat=cat;const first=DATA.find(d=>d.cat===cat);if(!first)return;curId=first.id;curForm=firstForm(curId);buildTabs();buildLetterPick();buildForms();refresh();};
@@ -307,7 +374,7 @@ function buildTabs(){tabs.innerHTML='';CATS.forEach(cat=>{const t=document.creat
 function buildForms(){formsEl.innerHTML='';FORMS.forEach(([k,lbl])=>{const ok=hasModel(curId,k);const b=document.createElement('button');
   b.className='fbtn'+(k===curForm?' active':'');b.disabled=!ok;
   b.textContent=lbl+(completed.has(curId+'|'+k)?' ✓':'');
-  if(ok)b.onclick=()=>{curForm=k;buildForms();refresh();};formsEl.appendChild(b);});}
+  if(ok)b.onclick=()=>{curForm=k;buildForms();refresh();updateLetterStepBtns();};formsEl.appendChild(b);});}
 function buildStageForms(){stageFormsEl.innerHTML='';const d=glyph();FORMS.forEach(([k,lbl])=>{const ok=hasModel(curId,k),path=formPath(d,k),done=completed.has(curId+'|'+k);
   const b=document.createElement('button');b.type='button';
   b.className='stage-form'+(k===curForm?' active':'')+(ok?'':' missing')+(done?' done':'');
@@ -329,8 +396,8 @@ function setMode(m){mode=m;$('mAnim').classList.toggle('active',m==='animate');$
   svg.classList.remove('is-drawing');
   const tip=$('mobileTip');
   if(tip)tip.textContent=m==='practice'
-    ?'Рисуйте на поле · чтобы листать страницу — свайп вне поля'
-    :'Прокрутка страницы — обычный свайп';
+    ?'Рисуйте на поле · свайп вне поля — форма, потом знак'
+    :'Свайп / стрелки — форма, затем следующий знак';
   refresh();}
 function refresh(){
   stopAnim();clearG(gDone);clearG(gHint);clearG(gAnim);clearG(gLive);clearG(gCue);
@@ -414,6 +481,45 @@ $('smT').onchange=()=>{useSmooth=$('smT').checked;refresh();};
 $('ctP').onchange=()=>contour.classList.toggle('hide',!$('ctP').checked);
 $('cueT').onchange=renderPractice;
 $('undo').onclick=undo;$('clear').onclick=clearPractice;$('hintBtn').onclick=showHint;
+$('letterPrev').onclick=()=>stepLetter(-1);
+$('letterNext').onclick=()=>stepLetter(1);
+
+// Стрелки клавиатуры — соседний знак (не мешаем, если фокус в поле ввода).
+document.addEventListener('keydown',e=>{
+  if(e.key!=='ArrowLeft'&&e.key!=='ArrowRight')return;
+  const t=e.target;
+  if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.isContentEditable))return;
+  if(mode==='practice'&&drawing)return;
+  e.preventDefault();
+  stepLetter(e.key==='ArrowRight'?1:-1);
+});
+
+// Свайп по карточке знака: влево/вправо — соседний знак.
+// В режиме «Писать» жесты на самом SVG не трогаем (там рисование).
+(function bindLetterSwipe(){
+  const card=document.querySelector('.stage-card');
+  if(!card||card.dataset.swipeNav==='1')return;
+  let x0=null,y0=null,skip=false;
+  const thr=50;
+  card.addEventListener('touchstart',function(e){
+    if(!e.changedTouches||!e.changedTouches.length)return;
+    if(e.touches&&e.touches.length>1){x0=y0=null;return;}
+    const t=e.changedTouches[0];
+    const el=e.target;
+    skip=(mode==='practice'&&el&&(el===svg||(svg.contains&&svg.contains(el))));
+    x0=t.clientX;y0=t.clientY;
+  },{passive:true});
+  card.addEventListener('touchend',function(e){
+    if(skip||x0==null||!e.changedTouches||!e.changedTouches.length){x0=y0=null;skip=false;return;}
+    const t=e.changedTouches[0];
+    const dx=t.clientX-x0,dy=t.clientY-y0;
+    x0=y0=null;skip=false;
+    if(Math.abs(dx)<thr||Math.abs(dx)<=Math.abs(dy))return;
+    stepLetter(dx<0?1:-1);
+  },{passive:true});
+  card.addEventListener('touchcancel',function(){x0=y0=null;skip=false;},{passive:true});
+  card.dataset.swipeNav='1';
+})();
 
 // ---- go ----
 buildSmooth();buildTabs();buildLetterPick();buildForms();setMode('animate');

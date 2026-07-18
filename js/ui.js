@@ -72,15 +72,21 @@
         if (!chips) return;
         chips.setAttribute('aria-labelledby', 'nav-group-tab-' + i);
         const group = navGroups[i];
-        let keep = null;
-        if (preferCat && group.cats.includes(preferCat)) keep = preferCat;
-        else {
-            const activeBtn = document.querySelector('.nav-item.active');
-            const activeCat = activeBtn ? activeBtn.getAttribute('data-cat') : null;
-            if (activeCat && group.cats.includes(activeCat)) keep = activeCat;
+        if (!group || !group.cats.length) return;
+
+        // Из showSection — только подсветить нужный чип, раздел уже открыт.
+        if (preferCat && group.cats.includes(preferCat)) {
+            chips.innerHTML = renderNavChips(i, preferCat);
+            scrollActiveNavIntoView();
+            return;
         }
-        chips.innerHTML = renderNavChips(i, keep);
+
+        // Клик по группе («Начало», «Алфавит»…) → первая вкладка этой группы.
+        // Без прокрутки страницы: пользователь уже у навигации.
+        const first = group.cats[0];
+        chips.innerHTML = renderNavChips(i, first);
         scrollActiveNavIntoView();
+        if (typeof showSection === 'function') showSection(first, { skipScroll: true });
     }
 
     // На узком экране подтянуть активный чип/вкладку по горизонтали, не трогая скролл страницы.

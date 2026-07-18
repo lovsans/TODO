@@ -154,7 +154,14 @@
 
     function practiceName(c) {
         const o = practiceOverride[c.latin];
-        return (o && o.name) ? o.name : c.cyrillic;
+        let name = (o && o.name) ? o.name : c.cyrillic;
+        if (!name) return '';
+        // На плитках: «з, җ» → «з», «к2_узк» → «к2» — иначе длинные подписи разъезжают сетку 2×2.
+        if (!(o && o.name)) {
+            name = String(name).split(',')[0].trim();
+            name = name.split('_')[0].trim();
+        }
+        return name;
     }
 
     function getPracticePool(scope) {
