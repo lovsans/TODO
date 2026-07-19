@@ -56,8 +56,34 @@ h1{font-size:1.25rem;margin:.15rem 0 .2rem;}
 .stage-form.active .stage-form-label{color:var(--accent-dark);}
 [data-theme="dark"] .stage-form.active{background:#10312b;}
 .stage{position:relative;}
+.stage-zoom-bar{
+  display:flex;align-items:center;justify-content:flex-end;gap:.35rem;
+  margin:0 0 .4rem;
+}
+.zoom-btn{
+  width:2.1rem;height:2.1rem;padding:0;border:1px solid var(--border);border-radius:9px;
+  background:var(--card);color:var(--sub);font-size:1.15rem;font-weight:700;line-height:1;
+  cursor:pointer;touch-action:manipulation;
+  display:inline-flex;align-items:center;justify-content:center;
+}
+.zoom-btn:hover,.zoom-btn:focus-visible{border-color:var(--accent);color:var(--accent);outline:none;}
+.zoom-btn:disabled{opacity:.35;cursor:default;}
+.zoom-val{
+  min-width:3.2rem;text-align:center;font-size:.78rem;font-weight:700;
+  color:var(--sub);font-variant-numeric:tabular-nums;
+}
+.stage-viewport{
+  position:relative;
+  overflow:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;
+  border-radius:10px;max-height:min(70dvh,640px);
+}
 /* pan-y — страница скроллится; none только во время рисования */
-#svg{display:block;width:100%;height:auto;touch-action:pan-y;border-radius:10px;background:repeating-linear-gradient(0deg,transparent,transparent 49.5%,#f0eeec 49.5%,#f0eeec 50.5%),repeating-linear-gradient(90deg,transparent,transparent 49.5%,#f0eeec 49.5%,#f0eeec 50.5%);-webkit-user-select:none;user-select:none;}
+#svg{
+  display:block;width:calc(100% * var(--writer-zoom, 1));height:auto;max-width:none;
+  margin:0 auto;touch-action:pan-y;border-radius:10px;
+  background:repeating-linear-gradient(0deg,transparent,transparent 49.5%,#f0eeec 49.5%,#f0eeec 50.5%),repeating-linear-gradient(90deg,transparent,transparent 49.5%,#f0eeec 49.5%,#f0eeec 50.5%);
+  -webkit-user-select:none;user-select:none;
+}
 #svg.is-drawing,#svg.mode-practice{touch-action:none;}
 #svg.shake{animation:shk .32s;}
 @keyframes shk{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
@@ -102,8 +128,11 @@ h1{font-size:1.25rem;margin:.15rem 0 .2rem;}
   .stage-form{padding:.28rem .18rem .24rem;}
   .stage-form-svg{height:56px;}
   .stage-form-label{font-size:.58rem;}
-  /* ниже холст — страница снова нормально скроллится */
-  #svg{max-height:min(46dvh,360px);width:auto;max-width:100%;margin:0 auto;}
+  .stage-zoom-bar{margin-bottom:.3rem;}
+  .zoom-btn{width:2.35rem;height:2.35rem;border-radius:980px;font-size:1.2rem;}
+  .stage-viewport{max-height:min(52dvh,420px);}
+  /* ниже холст — страница снова нормально скроллится; масштаб — через --writer-zoom */
+  #svg{max-height:none;width:calc(100% * var(--writer-zoom, 1));margin:0 auto;}
   #animBar,#practBar{margin-top:.15rem;padding-top:.15rem;}
   .row{align-items:flex-start;flex-direction:column;}
   .controls{margin-top:.35rem;}
@@ -115,7 +144,7 @@ h1{font-size:1.25rem;margin:.15rem 0 .2rem;}
 }
 @media (max-width:380px){
   .stage-form-svg{height:50px;}
-  #svg{max-height:min(42dvh,320px);}
+  .stage-viewport{max-height:min(48dvh,380px);}
 }
 </style>
 <script>try{if(window.parent&&window.parent!==window)document.documentElement.classList.add('is-embed');}catch(e){}</script>
@@ -141,13 +170,20 @@ h1{font-size:1.25rem;margin:.15rem 0 .2rem;}
   <div class="stage-forms" id="stageForms" aria-label="Все формы выбранной буквы"></div>
   <p class="mobile-tip" id="mobileTip">Прокрутка — свайп · в «Писать» рисуйте на поле</p>
   <div class="stage">
-    <svg id="svg" viewBox="0 0 360 760" xmlns="http://www.w3.org/2000/svg">
-      <g id="glyphRoot">
-        <path id="contour" class="contour" d=""></path>
-        <g id="done"></g><g id="hint"></g><g id="anim"></g><g id="live"></g><g id="cue"></g>
-      </g>
-    </svg>
-    <div class="banner" id="banner"><div class="pill" id="pill">Готово ✓</div></div>
+    <div class="stage-zoom-bar" role="group" aria-label="Масштаб знака">
+      <button type="button" class="zoom-btn" id="zoomOut" title="Уменьшить" aria-label="Уменьшить знак">−</button>
+      <span class="zoom-val" id="zoomVal" aria-live="polite">100%</span>
+      <button type="button" class="zoom-btn" id="zoomIn" title="Увеличить" aria-label="Увеличить знак">+</button>
+    </div>
+    <div class="stage-viewport">
+      <svg id="svg" viewBox="0 0 360 760" xmlns="http://www.w3.org/2000/svg">
+        <g id="glyphRoot">
+          <path id="contour" class="contour" d=""></path>
+          <g id="done"></g><g id="hint"></g><g id="anim"></g><g id="live"></g><g id="cue"></g>
+        </g>
+      </svg>
+      <div class="banner" id="banner"><div class="pill" id="pill">Готово ✓</div></div>
+    </div>
   </div>
 
   <!-- animate controls -->
@@ -230,6 +266,34 @@ const completed=new Set();   // "id|form" the user wrote correctly
 // practice
 let sIdx=0, misses=0, drawing=false, pts=[];
 let rafId=null, animToken=0;
+
+// ---- zoom ----
+const ZOOM_KEY='todo-writer-zoom';
+const ZOOM_STEPS=[0.4,0.5,0.6,0.7,0.85,1,1.15,1.35,1.55,1.8,2.1,2.4,2.8,3.2];
+let zoomIdx=5;
+function loadZoomIdx(){
+  try{
+    const v=parseFloat(localStorage.getItem(ZOOM_KEY));
+    if(!Number.isFinite(v))return 5;
+    let best=5,bd=Infinity;
+    ZOOM_STEPS.forEach((z,i)=>{const d=Math.abs(z-v);if(d<bd){bd=d;best=i;}});
+    return best;
+  }catch(e){return 5;}
+}
+function applyZoom(){
+  const z=ZOOM_STEPS[zoomIdx];
+  document.documentElement.style.setProperty('--writer-zoom',String(z));
+  const val=$('zoomVal'),out=$('zoomOut'),inn=$('zoomIn');
+  if(val)val.textContent=Math.round(z*100)+'%';
+  if(out)out.disabled=zoomIdx<=0;
+  if(inn)inn.disabled=zoomIdx>=ZOOM_STEPS.length-1;
+  try{localStorage.setItem(ZOOM_KEY,String(z));}catch(e){}
+}
+function bumpZoom(dir){
+  const n=zoomIdx+dir;
+  if(n<0||n>=ZOOM_STEPS.length)return;
+  zoomIdx=n;applyZoom();
+}
 
 // ---- geometry ----
 const dist=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1]);
@@ -385,7 +449,7 @@ function buildStageForms(){stageFormsEl.innerHTML='';const d=glyph();FORMS.forEa
   mini.appendChild(miniG);
   const cap=document.createElement('span');cap.className='stage-form-label';cap.textContent=lbl+(done?' ✓':'');
   b.appendChild(mini);b.appendChild(cap);
-  if(ok)b.onclick=()=>{curForm=k;buildForms();refresh();};
+  if(ok)b.onclick=()=>{curForm=k;buildForms();refresh();updateLetterStepBtns();};
   stageFormsEl.appendChild(b);
 });}
 
@@ -483,6 +547,8 @@ $('cueT').onchange=renderPractice;
 $('undo').onclick=undo;$('clear').onclick=clearPractice;$('hintBtn').onclick=showHint;
 $('letterPrev').onclick=()=>stepLetter(-1);
 $('letterNext').onclick=()=>stepLetter(1);
+$('zoomOut').onclick=()=>bumpZoom(-1);
+$('zoomIn').onclick=()=>bumpZoom(1);
 
 // Стрелки клавиатуры — соседний знак (не мешаем, если фокус в поле ввода).
 document.addEventListener('keydown',e=>{
@@ -522,5 +588,6 @@ document.addEventListener('keydown',e=>{
 })();
 
 // ---- go ----
+zoomIdx=loadZoomIdx();applyZoom();
 buildSmooth();buildTabs();buildLetterPick();buildForms();setMode('animate');
 </script><script>(function(){function h(){try{parent.postMessage({__todoWriterHeight:Math.max(document.documentElement.scrollHeight,document.body.scrollHeight)},'*');}catch(e){}}window.addEventListener('load',h);window.addEventListener('resize',h);if(window.ResizeObserver){new ResizeObserver(h).observe(document.documentElement);}else if(window.MutationObserver){new MutationObserver(h).observe(document.documentElement,{subtree:true,childList:true,attributes:true});setInterval(h,500);}h();})();</script></body></html>
