@@ -1539,7 +1539,7 @@ mark.hl {
     min-height: 180px; display: flex; align-items: center; justify-content: center;
     text-align: center; line-height: 1;
     background: var(--accent-glow); border: 1px solid var(--accent); border-radius: var(--radius-lg);
-    padding: 1.5rem; color: var(--accent); margin: 0 auto 1rem; width: 120px;
+    padding: 1.5rem; color: var(--todo-ink); margin: 0 auto 1rem; width: 120px;
 }
 [data-theme="dark"] .practice-char {
     background: rgba(45, 212, 191, 0.06);
