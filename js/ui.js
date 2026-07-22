@@ -530,6 +530,7 @@
         if (cat === 'write_word') wwInit();
         if (cat === 'path') renderPathRoot();
         if (cat === 'harmony') setupHarmony();
+        if (typeof updateCourseRail === 'function') updateCourseRail();
         if (!opts.skipScroll) {
             const scrollTarget = cat === 'about'
                 ? (document.getElementById('about-hero') || sec)

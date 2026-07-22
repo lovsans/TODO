@@ -163,6 +163,7 @@
                     <span>Серия слогов</span>
                     <label class="pc-toggle"><input type="checkbox" id="syl-showall__${scope}" ${syllableShowAll ? 'checked' : ''} onchange="toggleSyllableShowAll('${scope}')"> показывать все серии сразу</label>
                 </div>
+                <p class="ui-hint">Идите по одной серии: следующая откроется с ${Math.round(SYLLABLE_UNLOCK_RATIO * 100)}% предыдущей. При 100% переход к следующей серии произойдёт сам.</p>
                 <div class="syl-chips${syllableShowAll ? ' syl-chips-disabled' : ''}">${chips}</div>
             </div>`;
     }
@@ -222,6 +223,7 @@
                     <label class="pc-toggle"><input type="checkbox" id="only-unlearned__${scope}" onchange="toggleOnlyUnlearned('${scope}')"> Только невыученные</label>
                     <div class="practice-streak" id="practice-streak__${scope}"></div>
                 </div>
+                <p class="ui-hint">Знак считается выученным, когда верно отвечены все его формы (начало · середина · конец).</p>
                 <div id="practice-feedback__${scope}" class="practice-feedback"></div>
                 <div class="practice-char-display">
                     <div id="practice-char__${scope}" class="practice-char"></div>
@@ -246,6 +248,7 @@
                         <button type="button" class="pp-reset" onclick="resetProgress('${scope}')">Сбросить прогресс</button>
                         <input type="file" id="import-file__${scope}" accept="application/json,.json" style="display:none" onchange="handleImportFile(this,'${scope}')">
                     </div>
+                    <p class="ui-hint">Прогресс хранится в этом браузере. Экспорт сохранит файл на случай смены устройства или очистки данных.</p>
                 </div>
             </div>`;
     }
@@ -604,7 +607,8 @@
         const started = totalAll > 0 && learnedAll > 0;
         const intro = started
             ? `<div class="hp-overall">Выучено букв и знаков: <b>${learnedAll} / ${totalAll}</b> (${pctAll}%). Нажмите строку, чтобы открыть тренировку.</div>`
-            : `<div class="hp-empty">Выберите тренировку ниже — знак считается выученным, когда каждая его форма отвечена верно хотя бы один раз.</div>`;
+            : `<div class="hp-empty">С чего начать: кнопка ниже ведёт в Путь или последнюю тренировку. Знак выучен, когда верно отвечены все его формы. Прогресс хранится в этом браузере.</div>`;
+        const tips = `<p class="hp-tips">Подсказка: в слогах серии открываются с ${Math.round(SYLLABLE_UNLOCK_RATIO * 100)}%; при 100% переход дальше автоматический.</p>`;
         const cont = getContinueAction();
         return `
             <div class="hp-card">
@@ -614,6 +618,7 @@
                 </div>
                 ${started ? '' : intro}
                 <div class="hp-rows">${bars}</div>
+                ${tips}
                 <button type="button" class="hp-cta" onclick="continueLearning()">
                     ${escapeHtml(cont.label)}
                 </button>
@@ -676,12 +681,11 @@
         if (typeof setProgressBarOpen === 'function') setProgressBarOpen(false);
         const a = getContinueAction();
         if (a.kind === 'path' && a.lesson) {
-            if (a.lesson.kind === 'quiz' && typeof pathNodeClick === 'function') {
+            if (typeof pathNodeClick === 'function') {
                 showSection('path');
                 pathNodeClick(a.lesson.id);
                 return;
             }
-            if (a.lesson.cat) { showSection(a.lesson.cat); return; }
             showSection('path');
             return;
         }
