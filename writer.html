@@ -44,16 +44,6 @@ h1{font-size:1.25rem;margin:.15rem 0 .2rem;}
 .fbtn:disabled{opacity:.32;cursor:default;}
 .stage-card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 1px 3px rgb(0 0 0/.06);padding:10px;max-width:480px;margin:0 auto;}
 .title{text-align:center;font-size:.82rem;color:var(--sub);margin-bottom:.3rem;font-weight:600;}
-.stage-forms{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.4rem;margin-bottom:.55rem;}
-.stage-form{border:1px solid var(--border);background:var(--bg);color:var(--ink);border-radius:11px;padding:.35rem .25rem .28rem;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:.2rem;min-width:0;touch-action:manipulation;}
-.stage-form.active{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset;background:#ecfdf5;}
-.stage-form.missing{opacity:.4;cursor:default;}
-.stage-form.done{border-color:var(--accent);}
-.stage-form-svg{display:block;width:100%;height:112px;background:transparent;border-radius:8px;touch-action:manipulation;pointer-events:none;}
-.stage-form-svg path{fill:currentColor;}
-.stage-form-label{font-size:.64rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);}
-.stage-form.active .stage-form-label{color:var(--accent-dark);}
-[data-theme="dark"] .stage-form.active{background:#10312b;}
 .stage{position:relative;}
 .stage-zoom-bar{
   display:flex;align-items:center;justify-content:flex-end;gap:.35rem;
@@ -134,16 +124,15 @@ html.writer-shrunk #svg{
 .hint{font-size:.75rem;color:var(--muted);margin:.5rem 0 0;line-height:1.5;}
 .mobile-tip{display:none;}
 
-/* Встройка: без дублей; фиксированная высота холста — глиф всегда целиком */
+/* Встройка: без дублей заголовка; формы — компактные кнопки (без плиток) */
 html.is-embed .kicker,
 html.is-embed h1,
 html.is-embed .lead,
-html.is-embed .forms,
 html.is-embed .hint{display:none;}
 html.is-embed body{padding:8px 10px 12px;}
-html.is-embed .stage-form-svg{height:52px;}
-html.is-embed .stage-forms{gap:.28rem;margin-bottom:.35rem;}
-html.is-embed .stage-viewport{height:620px;}
+html.is-embed .forms{margin-bottom:.4rem;}
+html.is-embed .fbtn{padding:.32rem;font-size:.78rem;}
+html.is-embed .stage-viewport{height:680px;}
 
 @media (max-width:640px){
   body{padding:8px 10px 16px;}
@@ -152,20 +141,14 @@ html.is-embed .stage-viewport{height:620px;}
   .lead{font-size:.8rem;}
   .tabs{margin:0 -2px .45rem;gap:.28rem;}
   .tab{padding:.5rem .72rem;font-size:.78rem;}
-  .forms{display:none;}
   .modes{position:sticky;top:0;z-index:5;gap:.35rem;margin:0 0 .45rem;padding:.35rem 0;background:var(--bg);}
   html.is-embed .modes{position:static;padding:0;}
   .mode{padding:.55rem .4rem;border-radius:980px;font-size:.82rem;}
   .stage-card{padding:8px;border-radius:14px;max-width:none;width:100%;}
-  .stage-forms{gap:.28rem;margin-bottom:.4rem;}
-  .stage-form{padding:.28rem .18rem .24rem;}
-  .stage-form-svg{height:56px;}
-  .stage-form-label{font-size:.58rem;}
   .stage-zoom-bar{margin-bottom:.3rem;}
   .zoom-btn{width:2.35rem;height:2.35rem;border-radius:980px;font-size:1.2rem;}
-  .stage-viewport{height:520px;}
-  html.is-embed .stage-viewport{height:520px;}
-  html.is-embed .stage-form-svg{height:48px;}
+  .stage-viewport{height:560px;}
+  html.is-embed .stage-viewport{height:580px;}
   #animBar,#practBar{margin-top:.15rem;padding-top:.15rem;}
   .row{align-items:flex-start;flex-direction:column;}
   .controls{margin-top:.35rem;}
@@ -177,9 +160,8 @@ html.is-embed .stage-viewport{height:620px;}
   .hint{margin-top:.35rem;}
 }
 @media (max-width:380px){
-  .stage-form-svg{height:50px;}
-  .stage-viewport{height:460px;}
-  html.is-embed .stage-viewport{height:460px;}
+  .stage-viewport{height:500px;}
+  html.is-embed .stage-viewport{height:520px;}
 }
 </style>
 <script>try{if(window.parent&&window.parent!==window)document.documentElement.classList.add('is-embed');}catch(e){}</script>
@@ -188,7 +170,7 @@ html.is-embed .stage-viewport{height:620px;}
 <div class="wrap">
 <div class="kicker">Тодо Бичик · тренажёр письма</div>
 <h1>Смотри и пиши знаки</h1>
-<p class="lead">Выберите раздел и знак. Ниже сразу видны все три формы — нажмите нужную, затем «Смотреть» или «Писать».</p>
+<p class="lead">Выберите раздел и знак, форму (нач. / сер. / кон.), затем «Смотреть» или «Писать».</p>
 <div class="tabs" id="tabs"></div>
 <div class="letter-nav-row">
   <button type="button" class="letter-step" id="letterPrev" aria-label="Предыдущая форма или знак" title="Предыдущая форма / знак">←</button>
@@ -202,7 +184,6 @@ html.is-embed .stage-viewport{height:620px;}
 <div class="forms" id="forms"></div>
 <div class="stage-card">
   <div class="title" id="title"></div>
-  <div class="stage-forms" id="stageForms" aria-label="Все формы выбранной буквы"></div>
   <p class="mobile-tip" id="mobileTip">Прокрутка — свайп · в «Писать» рисуйте на поле</p>
   <div class="stage">
     <div class="stage-zoom-bar" role="group" aria-label="Масштаб знака">
@@ -283,13 +264,12 @@ const ROT_CX=180,ROT_CY=380,NUM_ROT='rotate(-90 '+ROT_CX+' '+ROT_CY+')';
 function isNumCat(){return curCat==='Числа';}
 function applyNumRot(){if(isNumCat())glyphRoot.setAttribute('transform',NUM_ROT);else glyphRoot.removeAttribute('transform');}
 function mapPtr(x,y){if(!isNumCat())return[x,y];return[ROT_CX-(y-ROT_CY),ROT_CY+(x-ROT_CX)];}
-const tabs=$('tabs'),letterNav=$('letterNav'),formsEl=$('forms'),stageFormsEl=$('stageForms'),titleEl=$('title'),banner=$('banner'),pill=$('pill');
+const tabs=$('tabs'),letterNav=$('letterNav'),formsEl=$('forms'),titleEl=$('title'),banner=$('banner'),pill=$('pill');
 const animBar=$('animBar'),practBar=$('practBar'),progEl=$('prog'),statusEl=$('status'),hintText=$('hintText');
 function clearG(g){while(g.firstChild)g.removeChild(g.firstChild);}
 function glyph(){return DATA.find(d=>d.id===curId);}
 function formLabel(f){return (FORMS.find(x=>x[0]===f)||[,f])[1];}
 function strokes(){return (MODEL[curId]&&MODEL[curId][curForm])||[];}
-function formPath(d,f){return d&&d.forms&&d.forms[f]?d.forms[f]:'';}
 
 // ---- state ----
 let curCat=CATS[0];
@@ -476,19 +456,6 @@ function buildForms(){formsEl.innerHTML='';FORMS.forEach(([k,lbl])=>{const ok=ha
   b.className='fbtn'+(k===curForm?' active':'');b.disabled=!ok;
   b.textContent=lbl+(completed.has(curId+'|'+k)?' ✓':'');
   if(ok)b.onclick=()=>{curForm=k;buildForms();refresh();updateLetterStepBtns();};formsEl.appendChild(b);});}
-function buildStageForms(){stageFormsEl.innerHTML='';const d=glyph();FORMS.forEach(([k,lbl])=>{const ok=hasModel(curId,k),path=formPath(d,k),done=completed.has(curId+'|'+k);
-  const b=document.createElement('button');b.type='button';
-  b.className='stage-form'+(k===curForm?' active':'')+(ok?'':' missing')+(done?' done':'');
-  b.disabled=!ok;b.setAttribute('aria-label',d.cy+' · '+lbl);
-  const mini=document.createElementNS(NS,'svg');mini.setAttribute('viewBox','0 0 360 760');mini.setAttribute('class','stage-form-svg');mini.setAttribute('aria-hidden','true');
-  const miniG=el('g',isNumCat()?{transform:NUM_ROT}:{});
-  if(path)miniG.appendChild(el('path',{d:path}));
-  mini.appendChild(miniG);
-  const cap=document.createElement('span');cap.className='stage-form-label';cap.textContent=lbl+(done?' ✓':'');
-  b.appendChild(mini);b.appendChild(cap);
-  if(ok)b.onclick=()=>{curForm=k;buildForms();refresh();updateLetterStepBtns();};
-  stageFormsEl.appendChild(b);
-});}
 
 // ---- refresh per mode ----
 function setMode(m){mode=m;$('mAnim').classList.toggle('active',m==='animate');$('mPract').classList.toggle('active',m==='practice');
@@ -507,7 +474,6 @@ function refresh(){
   contour.classList.toggle('hide', mode==='animate' ? !$('ctA').checked : !$('ctP').checked);
   contour.setAttribute('d',glyph().forms[curForm]||'');
   titleEl.textContent=glyph().cy+' · '+formLabel(curForm);
-  buildStageForms();
   if(mode==='animate'){hintText.textContent='Стрелка показывает направление штриха. Цвет = порядок (1,2,3…).';animate(strokes(),gAnim);}
   else{sIdx=0;misses=0;hintText.textContent='Пиши штрихи по порядку, в направлении письма. После 3 промахов покажу подсказку.';renderPractice();}
 }
@@ -522,7 +488,7 @@ function renderPractice(){
     gCue.appendChild(el('circle',{class:'cue',cx:st.points[0][0],cy:st.points[0][1],r:7}));}
 }
 function finishGlyph(){
-  completed.add(curId+'|'+curForm);buildForms();buildStageForms();
+  completed.add(curId+'|'+curForm);buildForms();
   clearG(gCue);pill.textContent='Готово ✓';banner.className='banner show';
   statusEl.textContent='Все штрихи верны!';statusEl.className='status good';
   animate(strokes(),gDone);  // celebratory replay over the done layer
