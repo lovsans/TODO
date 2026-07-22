@@ -993,7 +993,7 @@ mark.hl {
 .writer-host {
     margin: 0 0 0.5rem;
     border-radius: var(--radius-lg);
-    overflow: visible;
+    overflow: hidden;
     background: transparent;
 }
 .writer-frame {
@@ -1002,9 +1002,16 @@ mark.hl {
     border: 0;
     border-radius: var(--radius-lg);
     background: var(--bg-secondary);
-    height: min(70dvh, 480px);
-    /* пока тренажёр не прислал высоту — не ломаем скролл страницы */
-    min-height: 320px;
+    height: min(92dvh, 900px);
+    min-height: 560px;
+}
+.section-info-writer {
+    margin-bottom: 0.85rem;
+    padding: 0.75rem 1rem;
+    font-size: 0.92rem;
+}
+#section-direction .section-end-nav {
+    margin-top: 0.75rem;
 }
 
 .char-grid {
@@ -2296,8 +2303,8 @@ mark.hl {
     }
     .writer-host { margin-bottom: 0.25rem; }
     .writer-frame {
-        height: min(62dvh, 440px);
-        min-height: 280px;
+        height: min(88dvh, 820px);
+        min-height: 480px;
         border-radius: 16px;
     }
     .char-card {

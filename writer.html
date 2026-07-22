@@ -8,7 +8,6 @@
 <style>
 :root{--bg:#fafaf9;--card:#fff;--ink:#1c1917;--sub:#57534e;--muted:#a8a29e;--accent:#0d9488;--accent-dark:#0f766e;--border:#e7e5e4;--contour:#d6d3d1;--fill:#f3f1ef;--good:#0d9488;--bad:#dc2626;}
 [data-theme="dark"]{--bg:#0c0a09;--card:#1c1917;--ink:#fafaf9;--sub:#a8a29e;--muted:#78716c;--accent:#14b8a6;--accent-dark:#5eead4;--border:#44403c;--contour:#57534e;--fill:#211e1b;--good:#2dd4bf;--bad:#f87171;}
-[data-theme="dark"] svg{background:repeating-linear-gradient(0deg,transparent,transparent 49.5%,#2a2724 49.5%,#2a2724 50.5%),repeating-linear-gradient(90deg,transparent,transparent 49.5%,#2a2724 49.5%,#2a2724 50.5%);}
 [data-theme="dark"] .fbtn.active{background:#10312b;}
 [data-theme="dark"] #live polyline{stroke:#d6d3d1;}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
@@ -72,17 +71,39 @@ h1{font-size:1.25rem;margin:.15rem 0 .2rem;}
   min-width:3.2rem;text-align:center;font-size:.78rem;font-weight:700;
   color:var(--sub);font-variant-numeric:tabular-nums;
 }
+/* Холст: весь глиф + стрелки влезают целиком (без внутренней прокрутки).
+   Снаружи страница может быть чуть длиннее — это нормально. */
 .stage-viewport{
   position:relative;
-  overflow:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;
-  border-radius:10px;max-height:min(70dvh,640px);
-}
-/* pan-y — страница скроллится; none только во время рисования */
-#svg{
-  display:block;width:calc(100% * var(--writer-zoom, 1));height:auto;max-width:none;
-  margin:0 auto;touch-action:pan-y;border-radius:10px;
+  overflow:hidden;
+  border-radius:10px;
+  height:600px;
+  display:flex;align-items:center;justify-content:center;
   background:repeating-linear-gradient(0deg,transparent,transparent 49.5%,#f0eeec 49.5%,#f0eeec 50.5%),repeating-linear-gradient(90deg,transparent,transparent 49.5%,#f0eeec 49.5%,#f0eeec 50.5%);
+}
+[data-theme="dark"] .stage-viewport{
+  background:repeating-linear-gradient(0deg,transparent,transparent 49.5%,#2a2724 49.5%,#2a2724 50.5%),repeating-linear-gradient(90deg,transparent,transparent 49.5%,#2a2724 49.5%,#2a2724 50.5%);
+}
+#svg{
+  display:block;width:auto;height:100%;max-width:100%;
+  margin:0 auto;touch-action:pan-y;border-radius:10px;background:transparent;
   -webkit-user-select:none;user-select:none;
+}
+/* Зум > 100%: можно приблизить деталь — тогда появляется прокрутка холста */
+html.writer-zoomed .stage-viewport{
+  overflow:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;
+  display:block;
+}
+html.writer-zoomed #svg{
+  width:calc(100% * var(--writer-zoom, 1));height:auto;max-width:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 49.5%,#f0eeec 49.5%,#f0eeec 50.5%),repeating-linear-gradient(90deg,transparent,transparent 49.5%,#f0eeec 49.5%,#f0eeec 50.5%);
+}
+html.writer-zoomed[data-theme="dark"] #svg{
+  background:repeating-linear-gradient(0deg,transparent,transparent 49.5%,#2a2724 49.5%,#2a2724 50.5%),repeating-linear-gradient(90deg,transparent,transparent 49.5%,#2a2724 49.5%,#2a2724 50.5%);
+}
+html.writer-shrunk #svg{
+  height:calc(100% * var(--writer-zoom, 1));
+  width:auto;max-width:100%;
 }
 #svg.is-drawing,#svg.mode-practice{touch-action:none;}
 #svg.shake{animation:shk .32s;}
@@ -112,6 +133,18 @@ h1{font-size:1.25rem;margin:.15rem 0 .2rem;}
 .toggle{font-size:.78rem;color:var(--sub);display:flex;align-items:center;gap:.35rem;cursor:pointer;user-select:none;}
 .hint{font-size:.75rem;color:var(--muted);margin:.5rem 0 0;line-height:1.5;}
 .mobile-tip{display:none;}
+
+/* Встройка: без дублей; фиксированная высота холста — глиф всегда целиком */
+html.is-embed .kicker,
+html.is-embed h1,
+html.is-embed .lead,
+html.is-embed .forms,
+html.is-embed .hint{display:none;}
+html.is-embed body{padding:8px 10px 12px;}
+html.is-embed .stage-form-svg{height:52px;}
+html.is-embed .stage-forms{gap:.28rem;margin-bottom:.35rem;}
+html.is-embed .stage-viewport{height:620px;}
+
 @media (max-width:640px){
   body{padding:8px 10px 16px;}
   .wrap{max-width:none;}
@@ -119,9 +152,9 @@ h1{font-size:1.25rem;margin:.15rem 0 .2rem;}
   .lead{font-size:.8rem;}
   .tabs{margin:0 -2px .45rem;gap:.28rem;}
   .tab{padding:.5rem .72rem;font-size:.78rem;}
-  /* дублирует stage-forms — на телефоне прячем */
   .forms{display:none;}
   .modes{position:sticky;top:0;z-index:5;gap:.35rem;margin:0 0 .45rem;padding:.35rem 0;background:var(--bg);}
+  html.is-embed .modes{position:static;padding:0;}
   .mode{padding:.55rem .4rem;border-radius:980px;font-size:.82rem;}
   .stage-card{padding:8px;border-radius:14px;max-width:none;width:100%;}
   .stage-forms{gap:.28rem;margin-bottom:.4rem;}
@@ -130,9 +163,9 @@ h1{font-size:1.25rem;margin:.15rem 0 .2rem;}
   .stage-form-label{font-size:.58rem;}
   .stage-zoom-bar{margin-bottom:.3rem;}
   .zoom-btn{width:2.35rem;height:2.35rem;border-radius:980px;font-size:1.2rem;}
-  .stage-viewport{max-height:min(52dvh,420px);}
-  /* ниже холст — страница снова нормально скроллится; масштаб — через --writer-zoom */
-  #svg{max-height:none;width:calc(100% * var(--writer-zoom, 1));margin:0 auto;}
+  .stage-viewport{height:520px;}
+  html.is-embed .stage-viewport{height:520px;}
+  html.is-embed .stage-form-svg{height:48px;}
   #animBar,#practBar{margin-top:.15rem;padding-top:.15rem;}
   .row{align-items:flex-start;flex-direction:column;}
   .controls{margin-top:.35rem;}
@@ -140,11 +173,13 @@ h1{font-size:1.25rem;margin:.15rem 0 .2rem;}
   .letter-nav-row{gap:.28rem;margin-bottom:.45rem;}
   .letter-step{width:2.35rem;height:2.35rem;border-radius:980px;font-size:1.1rem;}
   .mobile-tip{display:block;margin:.35rem 0 .15rem;text-align:center;font-size:.68rem;font-weight:500;color:var(--muted);}
+  html.is-embed .mobile-tip{display:none;}
   .hint{margin-top:.35rem;}
 }
 @media (max-width:380px){
   .stage-form-svg{height:50px;}
-  .stage-viewport{max-height:min(48dvh,380px);}
+  .stage-viewport{height:460px;}
+  html.is-embed .stage-viewport{height:460px;}
 }
 </style>
 <script>try{if(window.parent&&window.parent!==window)document.documentElement.classList.add('is-embed');}catch(e){}</script>
@@ -176,7 +211,7 @@ h1{font-size:1.25rem;margin:.15rem 0 .2rem;}
       <button type="button" class="zoom-btn" id="zoomIn" title="Увеличить" aria-label="Увеличить знак">+</button>
     </div>
     <div class="stage-viewport">
-      <svg id="svg" viewBox="0 0 360 760" xmlns="http://www.w3.org/2000/svg">
+      <svg id="svg" viewBox="0 0 360 760" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
         <g id="glyphRoot">
           <path id="contour" class="contour" d=""></path>
           <g id="done"></g><g id="hint"></g><g id="anim"></g><g id="live"></g><g id="cue"></g>
@@ -283,6 +318,8 @@ function loadZoomIdx(){
 function applyZoom(){
   const z=ZOOM_STEPS[zoomIdx];
   document.documentElement.style.setProperty('--writer-zoom',String(z));
+  document.documentElement.classList.toggle('writer-zoomed', z > 1.001);
+  document.documentElement.classList.toggle('writer-shrunk', z < 0.999);
   const val=$('zoomVal'),out=$('zoomOut'),inn=$('zoomIn');
   if(val)val.textContent=Math.round(z*100)+'%';
   if(out)out.disabled=zoomIdx<=0;
@@ -588,6 +625,8 @@ document.addEventListener('keydown',e=>{
 })();
 
 // ---- go ----
-zoomIdx=loadZoomIdx();applyZoom();
+// Встройка: всегда 100%, чтобы глиф целиком был в холсте без прокрутки.
+zoomIdx=document.documentElement.classList.contains('is-embed')?5:loadZoomIdx();
+applyZoom();
 buildSmooth();buildTabs();buildLetterPick();buildForms();setMode('animate');
 </script><script>(function(){function h(){try{parent.postMessage({__todoWriterHeight:Math.max(document.documentElement.scrollHeight,document.body.scrollHeight)},'*');}catch(e){}}window.addEventListener('load',h);window.addEventListener('resize',h);if(window.ResizeObserver){new ResizeObserver(h).observe(document.documentElement);}else if(window.MutationObserver){new MutationObserver(h).observe(document.documentElement,{subtree:true,childList:true,attributes:true});setInterval(h,500);}h();})();</script></body></html>

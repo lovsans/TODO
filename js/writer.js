@@ -22,16 +22,33 @@
         frame.src = 'writer.html?theme=' + theme;
     }
 
-    // Сообщения от тренажёра. Обрабатываем два типа:
-    //   • __todoWriterHeight — авто-высота iframe, чтобы не было двойной прокрутки;
-    //   • __todoWriterReady  — тренажёр загрузился и готов принять тему: отдаём ему
-    //     актуальное значение data-theme. Это ресинхронизация на случай, если
-    //     переключение темы произошло во время загрузки iframe (см. mountWriter).
+    // Iframe растёт по контенту. Потолок выше — страница чуть длиннее снаружи,
+    // зато глиф целиком в холсте и iframe не обрезает его внутренней прокруткой.
+    function writerHeightCap() {
+        let soft = 1280;
+        try {
+            if (window.matchMedia('(max-width: 640px)').matches) soft = 1080;
+        } catch (e) {}
+        return soft;
+    }
+
+    function sizeWriterFrame(contentH) {
+        const frame = document.getElementById('writer-frame');
+        if (!frame) return;
+        let floor = 640;
+        try {
+            if (window.matchMedia('(max-width: 640px)').matches) floor = 520;
+        } catch (e) {}
+        const want = Math.ceil(contentH) + 20;
+        const maxH = writerHeightCap();
+        frame.style.height = Math.min(maxH, Math.max(floor, want)) + 'px';
+    }
+
+    // Сообщения от тренажёра.
     window.addEventListener('message', function (e) {
         const data = e && e.data;
         if (!data) return;
 
-        // Тренажёр сообщил, что готов — пересылаем ему текущую тему.
         if (data.__todoWriterReady) {
             const frame = document.getElementById('writer-frame');
             if (frame && frame.contentWindow) {
@@ -42,16 +59,18 @@
             return;
         }
 
-        // Авто-высота iframe.
         if (typeof data.__todoWriterHeight === 'number') {
-            const frame = document.getElementById('writer-frame');
-            if (frame) {
-                let floor = 560;
-                try {
-                    if (window.matchMedia('(max-width: 640px)').matches) floor = 380;
-                } catch (e) {}
-                // +16 — чуть воздуха снизу, чтобы sticky-кнопки не прилипали к краю
-                frame.style.height = Math.max(floor, Math.ceil(data.__todoWriterHeight) + 16) + 'px';
-            }
+            sizeWriterFrame(data.__todoWriterHeight);
         }
     });
+
+    function fitWriterFrame() {
+        const frame = document.getElementById('writer-frame');
+        if (!frame) return;
+        const cur = parseInt(frame.style.height, 10);
+        if (!Number.isFinite(cur)) return;
+        const maxH = writerHeightCap();
+        if (cur > maxH) frame.style.height = maxH + 'px';
+    }
+
+    window.addEventListener('resize', fitWriterFrame);
