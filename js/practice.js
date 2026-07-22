@@ -90,6 +90,35 @@
         if (i <= 0) return true;
         return syllableGroupStats(SYLLABLE_GROUPS[i - 1]).ratio >= SYLLABLE_UNLOCK_RATIO;
     }
+    // Следующая незавершённая серия после fromIdx; если дальше всё закрыто/готово —
+    // ищем любую открытую незавершённую (чтобы не застревать на 100%).
+    function findNextIncompleteSyllableGroup(fromIdx) {
+        for (let i = fromIdx + 1; i < SYLLABLE_GROUPS.length; i++) {
+            if (!isSyllableGroupUnlocked(i)) break;
+            if (syllableGroupStats(SYLLABLE_GROUPS[i]).ratio < 1) return i;
+        }
+        for (let i = 0; i < SYLLABLE_GROUPS.length; i++) {
+            if (i === fromIdx) continue;
+            if (isSyllableGroupUnlocked(i) && syllableGroupStats(SYLLABLE_GROUPS[i]).ratio < 1) return i;
+        }
+        return -1;
+    }
+    // Если текущая серия на 100% — переключаемся на следующую незавершённую.
+    // syllableReviewComplete: пользователь сам открыл уже готовую серию — не уводим.
+    let syllableAdvanceNotice = null;
+    let syllableReviewComplete = false;
+    function advanceSyllableSeriesIfComplete() {
+        if (syllableShowAll || syllableReviewComplete) return null;
+        const cur = SYLLABLE_GROUPS[syllableGroupIdx];
+        if (!cur || syllableGroupStats(cur).ratio < 1) return null;
+        const next = findNextIncompleteSyllableGroup(syllableGroupIdx);
+        if (next < 0) return null;
+        const from = cur.title;
+        const to = SYLLABLE_GROUPS[next].title;
+        syllableGroupIdx = next;
+        saveSyllableGroupIdx();
+        return { from, to };
+    }
     // Пул вопросов с учётом выбранной серии слогов; для остальных блоков — без изменений.
     function getScopedPool(scope) {
         const base = getPracticePool(scope);
@@ -100,6 +129,9 @@
     function selectSyllableGroup(i, scope) {
         if (!isSyllableGroupUnlocked(i)) return;
         syllableGroupIdx = i; saveSyllableGroupIdx();
+        // Готовую серию оставляем, только если её выбрали вручную (повтор).
+        syllableReviewComplete = syllableGroupStats(SYLLABLE_GROUPS[i]).ratio >= 1;
+        syllableAdvanceNotice = null;
         setupPractice(scope);
     }
     function toggleSyllableShowAll(scope) {
@@ -706,12 +738,39 @@
         fb.textContent = ''; fb.className = 'practice-feedback';
         const choiceBox = document.getElementById('practice-choices__' + scope);
 
-        const pool = getTrainingPool(scope);
+        // Серия слогов на 100% → автоматически к следующей незавершённой.
+        if (scope === 'practice_syllables') {
+            const moved = advanceSyllableSeriesIfComplete();
+            if (moved) {
+                syllableAdvanceNotice = `Серия «${moved.from}» — 100%. Дальше: «${moved.to}».`;
+            }
+        }
+
+        let pool = getTrainingPool(scope);
+        // Если пул пуст из‑за 100% серии — ещё раз попробуем перейти вперёд.
+        if (!pool.length && scope === 'practice_syllables' && !syllableShowAll) {
+            const moved = advanceSyllableSeriesIfComplete();
+            if (moved) {
+                syllableAdvanceNotice = `Серия «${moved.from}» — 100%. Дальше: «${moved.to}».`;
+                pool = getTrainingPool(scope);
+            }
+        }
+
+        if (syllableAdvanceNotice && scope === 'practice_syllables') {
+            fb.className = 'practice-feedback correct';
+            fb.textContent = syllableAdvanceNotice;
+            syllableAdvanceNotice = null;
+        }
+
         if (!pool.length) {                                   // включён режим «только невыученные», а всё выучено
             st.letter = null;
             const ch = document.getElementById('practice-char__' + scope);
             if (ch) { ch.textContent = '✓'; ch.classList.remove('todo-num'); }
-            if (prompt) prompt.textContent = 'Всё выучено! Снимите «Только невыученные», чтобы повторять.';
+            if (prompt) {
+                prompt.textContent = scope === 'practice_syllables' && !syllableShowAll
+                    ? 'Все открытые серии слогов выучены! Снимите «Только невыученные», чтобы повторять, или включите «показывать все серии».'
+                    : 'Всё выучено! Снимите «Только невыученные», чтобы повторять.';
+            }
             if (choiceBox) choiceBox.innerHTML = '';
             updateProgressUI(scope); renderStreak();
             return;
