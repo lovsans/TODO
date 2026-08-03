@@ -9,6 +9,7 @@
     const PATH_UNITS = [
         { title: 'Знакомство с письмом', lessons: [
             { id: 'abo', kind: 'link', title: 'О письме', sub: 'История и метод занятий', cat: 'about' },
+            { id: 'aus', kind: 'link', title: 'О нас', sub: 'Проект и А. В. Бадмаев', cat: 'about_us' },
             { id: 'wr', kind: 'link', title: 'Правила письма', sub: 'Направление, штрихи, позиции букв', cat: 'writing_rules' },
             { id: 'dir', kind: 'link', title: 'Направление письма', sub: 'Тренажёр штрихов', cat: 'direction' }
         ]},

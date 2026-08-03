@@ -1,5 +1,5 @@
 /* Тодо Бичик — service worker (офлайн-кэш). */
-const CACHE = 'todo-bichig-v23';
+const CACHE = 'todo-bichig-v25';
 
 const PRECACHE = [
   './',
@@ -50,6 +50,7 @@ const PRECACHE = [
   './img/icons/apple-touch-icon.png',
   './img/zaya-pandita.webp',
   './img/zaya-pandita.jpg',
+  './img/badmaev.jpg',
   './img/vowels-strokes.webp',
   './img/vowels-strokes.jpg',
   './img/consonants-strokes-1.webp',

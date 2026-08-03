@@ -6,8 +6,8 @@
     --bg-secondary: #e8e8ed;
     --bg-card: #ffffff;
     --text-primary: #1d1d1f;
-    --text-secondary: #6e6e73;
-    --text-muted: #86868b;
+    --text-secondary: #3a3a3c;
+    --text-muted: #636366;
     --accent: #0f766e;
     --accent-light: #d8f3ef;
     --accent-dark: #0d9488;
@@ -53,8 +53,8 @@
     --bg-secondary: #1c1c1e;
     --bg-card: #1c1c1e;
     --text-primary: #f5f5f7;
-    --text-secondary: #a1a1a6;
-    --text-muted: #6e6e73;
+    --text-secondary: #d1d1d6;
+    --text-muted: #98989d;
     --accent: #2dd4bf;
     --accent-light: #134e4a;
     --accent-dark: #5eead4;
@@ -75,8 +75,8 @@
     --bg-secondary: #e8e8ed;
     --bg-card: #ffffff;
     --text-primary: #1d1d1f;
-    --text-secondary: #6e6e73;
-    --text-muted: #86868b;
+    --text-secondary: #3a3a3c;
+    --text-muted: #636366;
     --accent: #0f766e;
     --accent-light: #d8f3ef;
     --accent-dark: #0d9488;
@@ -1896,7 +1896,7 @@ mark.hl {
     line-height: 1.1; letter-spacing: -0.04em;
 }
 .about-lead {
-    font-size: 1.15rem; color: var(--text-secondary); margin-bottom: 1.15rem;
+    font-size: 1.15rem; color: var(--text-primary); margin-bottom: 1.15rem;
     letter-spacing: -0.015em; line-height: 1.5; max-width: 36em;
 }
 .about-oirat {
@@ -1906,9 +1906,15 @@ mark.hl {
     color: var(--todo-ink);
     white-space: nowrap;
 }
-.about-wrap p { color: var(--text-secondary); margin-bottom: 1rem; line-height: 1.7; }
+.about-wrap p { color: var(--text-primary); margin-bottom: 1rem; line-height: 1.7; }
 .about-wrap em { color: var(--accent); font-style: normal; font-weight: 600; }
 .about-h3 { font-size: 1.3rem; font-weight: 700; margin: 2rem 0 0.5rem; }
+.about-h3-sub {
+    font-size: 1.08rem;
+    font-weight: 650;
+    margin: 1.35rem 0 0.45rem;
+    color: var(--text-primary);
+}
 .about-method-intro { font-style: italic; }
 .about-howto {
     margin: 1rem 0 1.75rem;
@@ -1921,7 +1927,7 @@ mark.hl {
 .about-howto-list {
     margin: 0 0 1rem;
     padding-left: 1.15rem;
-    color: var(--text-secondary);
+    color: var(--text-primary);
     line-height: 1.55;
 }
 .about-howto-list li { margin-bottom: 0.55rem; }
@@ -1952,7 +1958,7 @@ mark.hl {
     border-radius: var(--radius); padding: 1rem 1.1rem;
 }
 .about-step span:last-child { color: var(--text-secondary); }
-.about-step-body { flex: 1; color: var(--text-secondary); }
+.about-step-body { flex: 1; color: var(--text-primary); }
 .about-step-body > p { margin: 0 0 0.45rem; }
 .about-step-lead { margin-bottom: 0.55rem !important; }
 .about-step-body .wr-glyph-item { margin-top: 0.15rem; }
@@ -1963,6 +1969,152 @@ mark.hl {
 }
 [data-theme="dark"] .about-step-n { color: #fff; }
 .about-source { font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid var(--border); padding-top: 1rem; margin-top: 1.5rem; font-style: italic; }
+.about-source a,
+.about-wiki-note a {
+    color: var(--accent-dark, var(--accent));
+    text-decoration: none;
+    border-bottom: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+}
+.about-source a:hover,
+.about-wiki-note a:hover {
+    border-bottom-color: var(--accent);
+}
+.about-wiki-note {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin: -0.35rem 0 1.1rem;
+    line-height: 1.55;
+}
+.about-pwa-details {
+    margin: 1.35rem 0 1.75rem;
+}
+.about-pwa-summary {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    cursor: pointer;
+    user-select: none;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.35;
+    padding: 0.35rem 0;
+}
+.about-pwa-summary::-webkit-details-marker { display: none; }
+.about-pwa-summary::after {
+    content: '';
+    flex-shrink: 0;
+    width: 0.55rem;
+    height: 0.55rem;
+    border-right: 2px solid var(--text-muted);
+    border-bottom: 2px solid var(--text-muted);
+    transform: rotate(45deg);
+    transition: transform 0.2s ease;
+    margin-top: -0.2rem;
+}
+.about-pwa-details[open] > .about-pwa-summary::after {
+    transform: rotate(-135deg);
+    margin-top: 0.15rem;
+}
+.about-pwa-summary:hover { color: var(--accent-dark, var(--accent)); }
+.about-pwa-summary:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 4px;
+}
+.about-pwa-details > .about-method-intro {
+    margin: 0.65rem 0 0.85rem;
+}
+.about-pwa {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    margin: 0;
+}
+.about-pwa-platform {
+    padding: 1.05rem 1.2rem 1.15rem;
+    background: var(--bg-card);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+}
+.about-pwa-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.35rem 1rem;
+    margin-bottom: 0.7rem;
+    padding-bottom: 0.55rem;
+    border-bottom: 1px solid var(--border);
+}
+.about-pwa-title {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+.about-pwa-browser {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+.about-pwa-steps {
+    margin: 0;
+    padding-left: 1.35rem;
+    color: var(--text-primary);
+    line-height: 1.55;
+}
+.about-pwa-steps li { margin-bottom: 0.4rem; }
+.about-pwa-steps li:last-child { margin-bottom: 0; }
+.about-pwa-hint {
+    color: var(--text-muted);
+    font-size: 0.92em;
+}
+.about-pwa-note {
+    margin: 0.7rem 0 0;
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+.about-support {
+    margin-top: 2.25rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+}
+.about-support .about-h3 { margin-top: 0; }
+.about-support-text {
+    color: var(--text-secondary);
+    margin: 0.35rem 0 0.9rem;
+    line-height: 1.6;
+}
+.about-support-btn {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+}
+.about-support-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-weight: 650;
+    color: var(--accent-dark, var(--accent));
+    text-decoration: none;
+    border-bottom: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+    padding-bottom: 1px;
+}
+.about-support-link:hover {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+}
+.about-support-link:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 2px;
+}
 
 /* Подзаголовок в шапке и увеличенный вариант глифа-заставки (целое слово «тодо») */
 .about-hero-sub { color: var(--text-secondary); font-size: 0.95rem; margin-top: 0.35rem; line-height: 1.5; max-width: 46ch; }
@@ -1986,6 +2138,45 @@ mark.hl {
     font-size: 0.85rem;
     color: var(--text-muted);
     font-style: italic;
+}
+.about-photo-frame {
+    position: relative;
+    display: inline-block;
+    max-width: 340px;
+    width: 100%;
+    min-height: 220px;
+    border-radius: var(--radius-lg, 14px);
+    overflow: hidden;
+    background: var(--bg-secondary, var(--bg-card));
+    border: 1px dashed var(--border);
+}
+.about-photo-img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-width: 340px;
+    position: relative;
+    z-index: 1;
+}
+.about-photo-placeholder {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    padding: 1.25rem;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.45;
+    font-style: normal;
+}
+.about-photo-placeholder small {
+    font-size: 0.78rem;
+    opacity: 0.85;
 }
 
 /* Маршрут переселения — декоративная схема без реальной карты: точки-остановки,
