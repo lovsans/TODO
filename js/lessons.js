@@ -684,11 +684,17 @@
         return html;
     }
     function renderWords() {
+        let wi = 0;
         return wordData.map(g => `
             <div class="word-group">
                 <div class="word-group-title">${g.group}</div>
                 <div class="word-grid">
-                    ${g.items.map(([oldw, modern, meaning]) => `
+                    ${g.items.map(([oldw, modern, meaning]) => {
+                        const idx = wi++;
+                        const audioBtn = (typeof wordAudioBtnHtml === 'function')
+                            ? wordAudioBtnHtml(idx, 'word-audio-btn')
+                            : '';
+                        return `
                         <div class="word-card" role="button" tabindex="0" aria-expanded="false"
                              aria-label="Слово ${escapeHtml(String(oldw))}. Показать современную форму"
                              onclick="revealWord(this)">
@@ -699,7 +705,9 @@
                                 <div class="word-meaning">${meaning}</div>
                             </div>
                             <div class="word-hint" aria-hidden="true">показать</div>
-                        </div>`).join('')}
+                            ${audioBtn ? `<div class="word-audio-row">${audioBtn}</div>` : ''}
+                        </div>`;
+                    }).join('')}
                 </div>
             </div>`).join('');
     }
@@ -1093,7 +1101,10 @@
                     <button class="cw-btn cw-btn-ghost" onclick="composeNext()">Следующее →</button>
                 </div>
                 <div class="cw-task">
-                    <div class="cw-meaning" id="cw-meaning">—</div>
+                    <div class="cw-meaning-row">
+                        <div class="cw-meaning" id="cw-meaning">—</div>
+                        <div class="cw-audio" id="cw-audio"></div>
+                    </div>
                     <div class="cw-translit" id="cw-translit"></div>
                 </div>
                 <div class="cw-stage">
@@ -1131,6 +1142,7 @@
     }
 
     function composeSetup(wi) {
+        if (typeof stopLetterAudio === 'function') stopLetterAudio();
         composeState.inited = true;
         if (typeof wi === 'number') composeState.wi = ((wi % composeWords.length) + composeWords.length) % composeWords.length;
         saveComposeWi();
@@ -1145,6 +1157,12 @@
         if (cnt) cnt.textContent = 'Слово ' + (composeState.wi + 1) + ' из ' + composeWords.length;
         const mean = document.getElementById('cw-meaning');
         if (mean) mean.textContent = w.meaning;
+        const audioWrap = document.getElementById('cw-audio');
+        if (audioWrap) {
+            audioWrap.innerHTML = (typeof composeAudioBtnHtml === 'function')
+                ? composeAudioBtnHtml(composeState.wi, 'cw-audio-btn')
+                : '';
+        }
         const tr = document.getElementById('cw-translit');
         if (tr) tr.innerHTML = 'Тодо: <b>' + escapeHtml(w.todo) + '</b>'
             + (w.latin ? ' · лат. <i>' + escapeHtml(w.latin) + '</i>' : '')
@@ -2024,18 +2042,22 @@
                 return `<div class="form-box"><div class="form-box-label">${label}</div><div class="form-box-char${numCls}" aria-hidden="true">${trimSpine(val)}</div></div>`;
             return `<div class="form-box"><div class="form-box-label">${label}</div><div class="form-box-missing" aria-hidden="true">—</div></div>`;
         }
+        const audioBtn = (typeof audioPlayBtnHtml === 'function')
+            ? audioPlayBtnHtml(c.idx, 'card-audio-btn')
+            : '';
         return `
             <div class="char-card" role="button" tabindex="0" aria-label="${escapeHtml(ariaLabel)}" onclick="openModal(${c.idx})">
-                <div class="card-top" aria-hidden="true">
-                    <span class="card-id">${idH}</span>
-                    <span class="card-cyr">${cyrH}</span>
-                    <span class="card-latin">${latH}</span>
+                <div class="card-top">
+                    <span class="card-id" aria-hidden="true">${idH}</span>
+                    <span class="card-cyr" aria-hidden="true">${cyrH}</span>
+                    <span class="card-latin" aria-hidden="true">${latH}</span>
                 </div>
                 <div class="card-display">
                     ${formBox('Начало', c.initial)}
                     ${formBox('Середина', c.medial)}
                     ${formBox('Конец', c.final)}
                 </div>
+                ${audioBtn ? `<div class="card-audio-row">${audioBtn}</div>` : ''}
                 ${hl && hl.note ? `<div class="card-note">${hl.note}</div>` : ''}
             </div>`;
     }
@@ -2104,11 +2126,15 @@
         // 'TodoPozdneyev'. Карточка показывает весь текст и растёт под него; клик
         // открывает её крупно (openExprCard), а чипы внизу скрывают/показывают
         // строки (калмыцкая форма / латиница / перевод) на самой карточке.
-        return `<div class="rd-grid">${readingData.expr.map((p, i) =>
-            `<div class="rd-cell rd-cell-expr" role="button" tabindex="0"
+        return `<div class="rd-grid">${readingData.expr.map((p, i) => {
+            const audioBtn = (typeof exprAudioBtnHtml === 'function')
+                ? exprAudioBtnHtml(i, 'rd-expr-audio-btn')
+                : '';
+            return `<div class="rd-cell rd-cell-expr" role="button" tabindex="0"
                   aria-label="Открыть крупно: ${escapeHtml(p.ru || p.tr)}"
                   onclick="openExprCard(${i})"
                   onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openExprCard(${i});}">
+                ${audioBtn ? `<div class="rd-expr-audio" onclick="event.stopPropagation()" onkeydown="event.stopPropagation()">${audioBtn}</div>` : ''}
                 <div class="rd-todo rd-todo-pozd rd-line" aria-hidden="true">${escapeHtml(p.td)}</div>
                 ${rdKm(p.km)}${rdTr(p.tr)}${rdRu(p.ru)}
                 <div class="rd-cell-toggles" onclick="event.stopPropagation()" onkeydown="event.stopPropagation()">
@@ -2120,7 +2146,8 @@
                             onclick="exprToggleLine(this,'ru')">Рус.</button>
                 </div>
                 <span class="rd-zoom-hint" aria-hidden="true">⤢</span>
-            </div>`).join('')}</div>`;
+            </div>`;
+        }).join('')}</div>`;
     }
 
     function renderReadingRiddles() {
@@ -2129,12 +2156,20 @@
         // У каждой загадки есть современная калмыцкая форма (km) — показываем и её.
         // Карточка кликабельна целиком (открывает крупный лайтбокс), кроме кнопки
         // «Показать отгадку» и самой отгадки — на них клик не всплывает наверх.
-        return `<div class="rd-riddle-grid">${readingData.riddles.map((r, i) => `
+        return `<div class="rd-riddle-grid">${readingData.riddles.map((r, i) => {
+            const qAudio = (typeof riddleAudioBtnHtml === 'function')
+                ? riddleAudioBtnHtml(i, 'q', 'rd-riddle-audio-btn')
+                : '';
+            const aAudio = (typeof riddleAudioBtnHtml === 'function')
+                ? riddleAudioBtnHtml(i, 'a', 'rd-riddle-audio-btn')
+                : '';
+            return `
             <div class="rd-riddle" role="button" tabindex="0"
                  aria-label="Открыть крупно загадку №${i + 1}"
                  onclick="openRiddleCard(${i})"
                  onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openRiddleCard(${i});}">
                 <div class="rd-riddle-num" aria-hidden="true">№${i + 1}</div>
+                ${qAudio ? `<div class="rd-riddle-audio rd-riddle-audio-q" onclick="event.stopPropagation()" onkeydown="event.stopPropagation()">${qAudio}</div>` : ''}
                 <div class="rd-riddle-q">
                     <div class="rd-todo rd-todo-pozd rd-prose" aria-hidden="true">${rdTodoWords(r.q.td)}</div>
                     ${rdKm(r.q.km)}${rdTr(r.q.tr)}${rdRu(r.ru)}
@@ -2143,12 +2178,14 @@
                         onclick="event.stopPropagation();readingRevealAnswer(this)">Показать отгадку</button>
                 <div class="rd-riddle-a" hidden onclick="event.stopPropagation()">
                     <div class="rd-riddle-a-inner">
+                        ${aAudio ? `<div class="rd-riddle-audio rd-riddle-audio-a">${aAudio}</div>` : ''}
                         <div class="rd-todo rd-todo-pozd rd-line" aria-hidden="true">${escapeHtml(r.a.td)}</div>
                         ${rdKm(r.a.km)}${rdTr(r.a.tr)}${rdRu(r.a.ru)}
                     </div>
                 </div>
                 <span class="rd-zoom-hint" aria-hidden="true">⤢</span>
-            </div>`).join('')}</div>`;
+            </div>`;
+        }).join('')}</div>`;
     }
 
     function renderReadingProverbs() {
@@ -2283,6 +2320,7 @@
             '<div class="expr-lb-card">' +
               '<div class="expr-lb-todo rd-todo-pozd" id="expr-lb-todo" aria-hidden="true"></div>' +
               '<div class="expr-lb-meta">' +
+                '<div class="expr-lb-audio" id="expr-lb-audio"></div>' +
                 '<div class="expr-lb-km" id="expr-lb-km"></div>' +
                 '<div class="expr-lb-ru" id="expr-lb-ru"></div>' +
                 '<div class="expr-lb-tr" id="expr-lb-tr"></div>' +
@@ -2305,6 +2343,7 @@
     }
 
     function renderExprCard() {
+        if (typeof stopLetterAudio === 'function') stopLetterAudio();
         const list = exprList();
         const p = list[exprLbIndex];
         if (!p) return;
@@ -2313,11 +2352,17 @@
         const ru = document.getElementById('expr-lb-ru');
         const tr = document.getElementById('expr-lb-tr');
         const cnt = document.getElementById('expr-lb-count');
+        const audio = document.getElementById('expr-lb-audio');
         if (td) td.textContent = p.td || '';
         if (km) km.textContent = p.km || '';
         if (ru) ru.textContent = p.ru || '';
         if (tr) tr.textContent = p.tr || '';
         if (cnt) cnt.textContent = (exprLbIndex + 1) + ' / ' + list.length;
+        if (audio) {
+            audio.innerHTML = (typeof exprAudioBtnHtml === 'function')
+                ? exprAudioBtnHtml(exprLbIndex, 'expr-lb-audio-btn')
+                : '';
+        }
     }
 
     // Открыть карточку выражения крупно (вызывается из onclick сетки).
@@ -2345,6 +2390,7 @@
     }
 
     function closeExprCard() {
+        if (typeof stopLetterAudio === 'function') stopLetterAudio();
         const ov = document.getElementById('expr-lb');
         if (ov) ov.classList.remove('active');
         document.body.style.overflow = '';
@@ -2391,12 +2437,14 @@
               '</div>' +
               '<div class="expr-lb-todo riddle-lb-todo rd-todo-pozd" id="riddle-lb-todo" aria-hidden="true"></div>' +
               '<div class="expr-lb-meta">' +
+                '<div class="expr-lb-audio" id="riddle-lb-q-audio"></div>' +
                 '<div class="expr-lb-km" id="riddle-lb-km"></div>' +
                 '<div class="expr-lb-tr riddle-lb-tr" id="riddle-lb-tr"></div>' +
                 '<div class="expr-lb-ru riddle-lb-ru" id="riddle-lb-ru"></div>' +
               '</div>' +
               '<button type="button" class="rd-reveal-btn" id="riddle-lb-reveal" aria-expanded="false">Показать отгадку</button>' +
               '<div class="riddle-lb-answer" id="riddle-lb-answer" hidden>' +
+                '<div class="expr-lb-audio" id="riddle-lb-a-audio"></div>' +
                 '<div class="expr-lb-todo riddle-lb-todo-a rd-todo-pozd" id="riddle-lb-a-todo" aria-hidden="true"></div>' +
                 '<div class="expr-lb-meta">' +
                   '<div class="expr-lb-km" id="riddle-lb-a-km"></div>' +
@@ -2462,6 +2510,7 @@
     }
 
     function renderRiddleCard() {
+        if (typeof stopLetterAudio === 'function') stopLetterAudio();
         const list = riddleList();
         const r = list[riddleLbIndex];
         if (!r) return;
@@ -2470,20 +2519,32 @@
         const qTr = document.getElementById('riddle-lb-tr');
         const qRu = document.getElementById('riddle-lb-ru');
         const cnt = document.getElementById('riddle-lb-count');
+        const qAudio = document.getElementById('riddle-lb-q-audio');
         if (qTodo) qTodo.innerHTML = rdTodoWords(r.q.td);
         if (qKm) qKm.textContent = r.q.km || '';
         if (qTr) qTr.textContent = r.q.tr || '';
         if (qRu) qRu.textContent = r.ru || '';
         if (cnt) cnt.textContent = 'Загадка ' + (riddleLbIndex + 1) + ' / ' + list.length;
+        if (qAudio) {
+            qAudio.innerHTML = (typeof riddleAudioBtnHtml === 'function')
+                ? riddleAudioBtnHtml(riddleLbIndex, 'q', 'expr-lb-audio-btn')
+                : '';
+        }
 
         const aTodo = document.getElementById('riddle-lb-a-todo');
         const aKm = document.getElementById('riddle-lb-a-km');
         const aTr = document.getElementById('riddle-lb-a-tr');
         const aRu = document.getElementById('riddle-lb-a-ru');
+        const aAudio = document.getElementById('riddle-lb-a-audio');
         if (aTodo) aTodo.innerHTML = rdTodoWords(r.a.td);
         if (aKm) aKm.textContent = r.a.km || '';
         if (aTr) aTr.textContent = r.a.tr || '';
         if (aRu) aRu.textContent = r.a.ru || '';
+        if (aAudio) {
+            aAudio.innerHTML = (typeof riddleAudioBtnHtml === 'function')
+                ? riddleAudioBtnHtml(riddleLbIndex, 'a', 'expr-lb-audio-btn')
+                : '';
+        }
 
         // При каждом открытии/переключении загадки отгадка снова скрыта.
         riddleLbAnswerShown = false;
@@ -2518,6 +2579,7 @@
     }
 
     function closeRiddleCard() {
+        if (typeof stopLetterAudio === 'function') stopLetterAudio();
         const ov = document.getElementById('riddle-lb');
         if (ov) ov.classList.remove('active');
         document.body.style.overflow = '';

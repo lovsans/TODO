@@ -227,6 +227,7 @@
                 <div id="practice-feedback__${scope}" class="practice-feedback"></div>
                 <div class="practice-char-display">
                     <div id="practice-char__${scope}" class="practice-char"></div>
+                    <div class="practice-audio-wrap" id="practice-audio__${scope}"></div>
                     <div class="practice-prompt" id="practice-prompt__${scope}">Как читается эта буква?</div>
                 </div>
                 <div class="practice-choices" id="practice-choices__${scope}"></div>
@@ -729,6 +730,7 @@
 
     function setupPractice(scope) {
         saveLastPractice(scope);
+        if (typeof stopLetterAudio === 'function') stopLetterAudio();
         const st = getPState(scope);
         if (st.timer) { clearTimeout(st.timer); st.timer = null; }
         st.answered = false;
@@ -770,6 +772,8 @@
             st.letter = null;
             const ch = document.getElementById('practice-char__' + scope);
             if (ch) { ch.textContent = '✓'; ch.classList.remove('todo-num'); }
+            const audioWrap = document.getElementById('practice-audio__' + scope);
+            if (audioWrap) audioWrap.innerHTML = '';
             if (prompt) {
                 prompt.textContent = scope === 'practice_syllables' && !syllableShowAll
                     ? 'Все открытые серии слогов выучены! Снимите «Только невыученные», чтобы повторять, или включите «показывать все серии».'
@@ -793,6 +797,12 @@
         if (chEl) {
             chEl.textContent = trimSpine(letter[fkey]);
             chEl.classList.toggle('todo-num', isTodoNumber(letter));
+        }
+        const audioWrap = document.getElementById('practice-audio__' + scope);
+        if (audioWrap) {
+            audioWrap.innerHTML = (typeof audioPlayBtnHtml === 'function')
+                ? audioPlayBtnHtml(letter.idx, 'practice-audio-btn')
+                : '';
         }
         const noun = letter.category === 'syllables' ? 'слог' : 'знак';
         const seriesHint = (scope === 'practice_syllables' && !syllableShowAll) ? ` Серия: ${SYLLABLE_GROUPS[syllableGroupIdx].title}.` : '';

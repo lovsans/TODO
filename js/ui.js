@@ -379,8 +379,16 @@
     function renderModalContent(idx) {
         const c = charData[idx];
         if (!c) return;
+        if (typeof stopLetterAudio === 'function') stopLetterAudio();
         const cyr = c.cyrillic !== null ? String(c.cyrillic) : '—';
-        document.getElementById('modal-title').textContent = (c.id !== null ? '№' + c.id + ' — ' : '') + cyr;
+        const titleEl = document.getElementById('modal-title');
+        const titleText = (c.id !== null ? '№' + c.id + ' — ' : '') + cyr;
+        if (typeof audioPlayBtnHtml === 'function' && letterHasAudio(c)) {
+            titleEl.innerHTML = `<span class="modal-title-text">${escapeHtml(titleText)}</span>` +
+                audioPlayBtnHtml(c.idx, 'modal-audio-btn');
+        } else {
+            titleEl.textContent = titleText;
+        }
         const f = document.getElementById('modal-forms');
         function mf(label, val) {
             const numCls = todoNumClass(c);
@@ -411,6 +419,7 @@
 
     function closeModal(opts) {
         opts = opts || {};
+        if (typeof stopLetterAudio === 'function') stopLetterAudio();
         const wasOpen = document.getElementById('modal-overlay').classList.contains('active');
         modalStack = [];
         modalNavMode = null;
