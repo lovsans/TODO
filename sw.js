@@ -1,5 +1,5 @@
 /* Тодо Бичик — service worker (офлайн-кэш). */
-const CACHE = 'todo-bichig-v51';
+const CACHE = 'todo-bichig-v52';
 
 const PRECACHE = [
   './',
