@@ -32,6 +32,9 @@ npx --yes serve .
 audio/vowels/…  consonants/…  galik/…  elements/…  numbers/…  punctuation/…
 audio/words/…  audio/compose/…  audio/reading/expr/…  audio/reading/riddles/…  audio/syllables/…
 ```
+
+Файлы `.m4a` не входят в первый офлайн-кэш оболочки: скачиваются при нажатии ▶ и после этого доступны офлайн.
+
 ## Структура
 
 - `index.html` — главное приложение
