@@ -412,7 +412,7 @@
             `<span class="audio-play-icon" aria-hidden="true">▶</span></button>`;
     }
 
-    const RIDDLE_AUDIO_COUNT = 9;
+    const RIDDLE_AUDIO_COUNT = 8;
 
     function riddleAudioUrl(ri, part) {
         const n = Number(ri);
