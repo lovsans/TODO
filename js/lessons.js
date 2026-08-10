@@ -806,6 +806,15 @@
     function composeForm(letter, pos, total, prev, next) {
         // Возвращает строку формы для шрифта в зависимости от позиции в слове.
         if (!letter) return '';
+        // Откидная «а» (idx 55) и конечная «и²» (idx 56) — только конечные глифы.
+        if (letter.idx === 55 || letter.idx === 56) {
+            return letter.final != null ? letter.final : (letter.medial || letter.initial || '');
+        }
+        // «я» на конце → и + а_откид: у «и» берём конечный глиф «И», даже если она
+        // не последняя в цепочке (последней идёт откидная «а»).
+        if (letter.idx === 2 && next && next.idx === 55) {
+            return letter.final != null ? letter.final : (letter.medial || letter.initial || '');
+        }
         // Круглая согласная «б»: перед круглыми гласными (о,у,ө,ү и их долгими/дифтонгами)
         // берётся широкая форма б1, иначе — узкая б2.
         if (letter.idx === 25 || letter.idx === 26) {
@@ -1276,10 +1285,9 @@
     }
 
     function wwNormalizeCyr(str) {
-        // В тодо нет отдельных букв «я» и «ю» — это йот + гласная (йа, йу).
-        return String(str)
-            .replace(/[яЯ]/g, 'йа')
-            .replace(/[юЮ]/g, 'йу');
+        // «ю» в тодо — йот + у. «я» оставляем как есть: позиция в слове
+        // задаёт разбор в wwParse (середина → иа, конец → и + а_откид, начало → йа).
+        return String(str).replace(/[юЮ]/g, 'йу');
     }
 
     function wwParse(str) {
@@ -1307,6 +1315,28 @@
                 ids.push(WW_DI[two]); i += 2; continue;
             }
             const one = s[i];
+            // «я»: в тодо нет отдельной буквы — разбор зависит от позиции в слове.
+            //   • начало (и одиночная «я») → йа
+            //   • середина → иа
+            //   • конец → и (+ и² после круглых б/п/г/к) + а_откид
+            if (one === 'я') {
+                const atStart = ids.length === 0;
+                const atEnd = i === s.length - 1;
+                if (atEnd && !atStart) {
+                    const prevId = ids[ids.length - 1];
+                    const afterRound = ROUND_CONS_IDX.has(prevId);
+                    ids.push(afterRound ? 56 : 2);
+                    ids.push(55);
+                } else if (atStart) {
+                    ids.push(44); // й
+                    ids.push(0);  // а
+                } else {
+                    ids.push(2); // и
+                    ids.push(0); // а
+                }
+                i += 1;
+                continue;
+            }
             // Буква «ы» отдельного знака в Тодо Бичик не имеет: в словах с твердорядными
             // гласными она передаёт дифтонг «ийи» (idx 16), но только после согласных
             // д, т, л, н — например, хальмгудын ⇄ xalimaguudiyin, һолын ⇄ γoliyin.
