@@ -149,11 +149,27 @@
             <p class="about-wiki-note">Подробнее об учёном: <a href="https://ru.wikipedia.org/wiki/%D0%91%D0%B0%D0%B4%D0%BC%D0%B0%D0%B5%D0%B2,_%D0%90%D0%BD%D0%B4%D1%80%D0%B5%D0%B9_%D0%92%D0%B0%D1%81%D0%B8%D0%BB%D1%8C%D0%B5%D0%B2%D0%B8%D1%87" target="_blank" rel="noopener noreferrer">статья в Википедии</a></p>
 
             <p class="about-source">А. В. Бадмаев. «Практический самоучитель старокалмыцкой письменности». — Элиста, 1971.</p>
+        </div>`;
+    }
 
-            <aside class="about-support" aria-label="Поддержка проекта">
-                <h3 class="about-h3">Поддержать проект</h3>
-                <p class="about-support-text">Если сайт оказался полезным — можно помочь ему дальше развиваться.</p>
-                <a class="course-go about-support-btn" href="https://pay.cloudtips.ru/p/680d2fce" target="_blank" rel="noopener noreferrer">Поддержать проект</a>
+    function renderSupport() {
+        return `
+        <div class="about-wrap">
+            <div class="about-hero">
+                <div>
+                    <div class="about-kicker">Добровольная помощь</div>
+                    <h2 class="about-title">Поддержать проект</h2>
+                </div>
+            </div>
+            <p class="about-lead">Тодо Бичик на этом сайте бесплатный: без подписок, рекламы и скрытых ограничений. Если материал оказался полезным — можно оставить посильную поддержку.</p>
+
+            <p>Сайт делается вручную: карточки знаков, озвучка, тренажёры письма, маршрут «Путь», тексты и правки. Поддержка помогает оплачивать хостинг и домен, готовить новые уроки и аудио, чинить ошибки и держать проект живым.</p>
+
+            <p>Сумма любая — важнее сам жест. Даже небольшая помощь значит, что письмо и самоучитель кому-то нужны, и это даёт силы продолжать.</p>
+
+            <aside class="about-support about-support--page" aria-label="Поддержка проекта">
+                <a class="course-go about-support-btn" href="https://pay.cloudtips.ru/p/680d2fce" target="_blank" rel="noopener noreferrer">Поддержать на CloudTips</a>
+                <p class="about-support-note">Оплата откроется на защищённой странице CloudTips. Спасибо, что рядом.</p>
             </aside>
         </div>`;
     }
@@ -584,12 +600,6 @@
                 <div class="wr-hero-main">
                     <div class="about-kicker">Практическое руководство</div>
                     <h2 class="about-title">Правила письма Тодо Бичик</h2>
-                    <p class="about-lead">Короткий маршрут от направления письма к частым ошибкам. Открывайте правила по порядку или по оглавлению.</p>
-                    <ul class="wr-pillars">
-                        <li><strong>Сверху вниз</strong><span>внутри столбца</span></li>
-                        <li><strong>Слева направо</strong><span>столбец за столбцом</span></li>
-                        <li><strong>Диакритика в конце</strong><span>когда слово уже готово</span></li>
-                    </ul>
                     <div class="wr-hero-actions">
                         <button type="button" class="practice-btn wr-action-primary" onclick="wrOpenRule(0)">Начать с первого правила</button>
                         <button type="button" class="wr-action-link" onclick="wrToggleRules(true)">Раскрыть всё</button>

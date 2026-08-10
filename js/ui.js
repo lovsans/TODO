@@ -115,6 +115,7 @@
     function renderSectionContent(cat) {
         if (cat === 'about') return renderAbout();
         if (cat === 'about_us') return renderAboutUs();
+        if (cat === 'support') return renderSupport();
         if (cat === 'path') return '<div id="path-root"></div>';
         if (cat === 'writing_rules') return renderWritingRules();
         if (cat === 'course') return renderCourse();

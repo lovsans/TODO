@@ -146,6 +146,8 @@ body {
     font-weight: 400;
     font-kerning: normal;
     font-optical-sizing: auto;
+    hyphens: none;
+    -webkit-hyphens: none;
     transition: background-color 0.35s ease, color 0.35s ease;
     min-height: 100vh;
     min-height: 100dvh;
@@ -243,24 +245,7 @@ body::before {
     }
 }
 
-/* baseline-ui: читаемость заголовков/абзацев и табличные цифры в данных */
-h1, h2, h3,
-.section-title,
-.about-title,
-.course-stage-title,
-.rule-title,
-.modal-title {
-    text-wrap: balance;
-}
-.section-info,
-.about-lead,
-.about-wrap p,
-.rule-body,
-.course-stage-text,
-.search-empty p,
-.hp-empty {
-    text-wrap: pretty;
-}
+/* baseline-ui: табличные цифры в данных */
 .card-id,
 .practice-score,
 .practice-count,
@@ -2108,8 +2093,8 @@ mark.hl {
     letter-spacing: var(--tracking-body);
     max-width: var(--measure);
     overflow-wrap: break-word;
-    hyphens: auto;
-    -webkit-hyphens: auto;
+    hyphens: none;
+    -webkit-hyphens: none;
 }
 .about-wrap em { color: var(--accent); font-style: normal; font-weight: 600; }
 .about-h3 {
@@ -2296,6 +2281,11 @@ mark.hl {
     padding-top: 1.5rem;
     border-top: 1px solid var(--border);
 }
+.about-support--page {
+    margin-top: 0.5rem;
+    padding-top: 0;
+    border-top: none;
+}
 .about-support .about-h3 { margin-top: 0; }
 .about-support-text {
     color: var(--text-secondary);
@@ -2306,6 +2296,13 @@ mark.hl {
     display: inline-flex;
     align-items: center;
     text-decoration: none;
+}
+.about-support-note {
+    margin: 0.85rem 0 0;
+    font-size: var(--text-sm, 0.875rem);
+    color: var(--text-muted);
+    line-height: var(--leading-body, 1.55);
+    max-width: var(--measure, 65ch);
 }
 .about-support-link {
     display: inline-flex;
@@ -3438,7 +3435,7 @@ mark.hl {
 .wr-acc[open] .wr-acc-chev { transform: rotate(180deg); color: var(--accent); }
 .wr-acc-body {
     padding: 0 1.2rem 1.25rem 4.1rem; color: var(--text-secondary); line-height: 1.7; font-size: 0.94rem;
-    overflow-wrap: break-word; text-wrap: pretty;
+    overflow-wrap: break-word;
 }
 .wr-acc-body p { margin-bottom: 0.8rem; }
 .wr-acc-body p:last-child { margin-bottom: 0; }
@@ -3587,7 +3584,7 @@ mark.hl {
 .wr-glyph-item[aria-label*="нурһн"] .wr-glyph-c { color: var(--accent); font-weight: 700; }
 .wr-glyph-hint {
     font-size: 0.68rem; color: var(--text-muted); max-width: 7.5rem;
-    text-align: center; line-height: 1.35; text-wrap: balance; hyphens: none;
+    text-align: center; line-height: 1.35; hyphens: none;
 }
 
 /* Мини-уроки внутри правил письма. */
@@ -3678,7 +3675,7 @@ mark.hl {
 .wr-n-rule {
     background: var(--accent-glow); border: 1px solid var(--accent-light);
     border-radius: var(--radius); padding: 0.8rem 0.95rem;
-    font-size: 0.88rem; color: var(--text-primary); line-height: 1.55; text-wrap: pretty;
+    font-size: 0.88rem; color: var(--text-primary); line-height: 1.55;
 }
 .wr-n-rule br { display: none; }
 @media (min-width: 520px) {
