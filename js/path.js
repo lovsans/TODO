@@ -78,7 +78,7 @@
 
     // Если в старом прогрессе уже есть пройденные уроки «дальше» по новому порядку —
     // закрываем пробелы впереди, чтобы человек не застрял на новых вводных шагах.
-    (function pathMigrateLinearProgress() {
+    function pathMigrateLinearProgress() {
         const flat = pathFlat();
         let changed = false;
         for (let i = 0; i < flat.length; i++) {
@@ -90,7 +90,96 @@
             }
         }
         if (changed) savePathProgress();
-    })();
+        return changed;
+    }
+    pathMigrateLinearProgress();
+
+    function getPathProgressExport() { return pathProgress; }
+    function importPathProgress(obj) {
+        if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return false;
+        const next = {};
+        pathFlat().forEach(l => {
+            const v = obj[l.id];
+            if (!v || typeof v !== 'object' || !v.done) return;
+            const stars = Math.max(0, Math.min(3, parseInt(v.stars, 10) || 0));
+            next[l.id] = { done: true, stars };
+        });
+        pathProgress = next;
+        pathMigrateLinearProgress();
+        savePathProgress();
+        if (typeof renderPathRoot === 'function') renderPathRoot();
+        return true;
+    }
+
+    function pathOverallStats() {
+        const flat = pathFlat();
+        const done = flat.filter(l => pathIsDone(l.id)).length;
+        const total = flat.length;
+        const pct = total ? Math.round(done / total * 100) : 0;
+        const current = pathCurrentLesson();
+        const units = PATH_UNITS.map((u, ui) => {
+            const uDone = u.lessons.filter(l => pathIsDone(l.id)).length;
+            const uTotal = u.lessons.length;
+            return {
+                title: u.title,
+                done: uDone,
+                total: uTotal,
+                pct: uTotal ? Math.round(uDone / uTotal * 100) : 0,
+                complete: uDone === uTotal && uTotal > 0,
+                current: !!(current && current.unitIndex === ui)
+            };
+        });
+        return { done, total, pct, current, units };
+    }
+
+    function pathScaleStatus(st) {
+        st = st || pathOverallStats();
+        if (st.total && st.done >= st.total) return 'Все уроки пути пройдены';
+        if (st.current) {
+            return 'Сейчас: ' + st.current.title + ' · этап ' + (st.current.unitIndex + 1) + ' из ' + st.units.length;
+        }
+        return 'Начните с первого урока';
+    }
+
+    function pathScaleTrackHtml(st) {
+        st = st || pathOverallStats();
+        return '<span class="lp-scale-track" aria-hidden="true">' + st.units.map(u => {
+            const cls = u.complete ? ' is-done' : (u.current ? ' is-current' : (u.done ? ' is-partial' : ''));
+            return '<span class="lp-scale-seg' + cls + '"><span class="lp-scale-seg-fill" style="width:' + u.pct + '%"></span></span>';
+        }).join('') + '</span>';
+    }
+
+    // Шкала пути — только todo-path, без смешивания с выученными знаками (todo-practice).
+    function pathScaleMarkup(variant) {
+        const st = pathOverallStats();
+        const label = 'Прогресс пути: ' + st.done + ' из ' + st.total + ' уроков';
+        const track = pathScaleTrackHtml(st);
+        const now = pathScaleStatus(st);
+        if (variant === 'compact') {
+            return `<div class="lp-scale lp-scale-compact" role="meter" aria-valuemin="0" aria-valuemax="${st.total}" aria-valuenow="${st.done}" aria-label="${escapeHtml(label)}">
+                ${track}
+                <div class="lp-scale-compact-count">${st.done}&nbsp;/&nbsp;${st.total}</div>
+            </div>`;
+        }
+        if (variant === 'panel') {
+            return `<button type="button" class="hp-path" onclick="openPathFromProgress()" aria-label="${escapeHtml(label + '. ' + now)}">
+                <span class="hp-path-head">
+                    <span class="hp-path-kicker">Путь</span>
+                    <span class="hp-path-count">${st.done} / ${st.total}</span>
+                </span>
+                ${track}
+                <span class="hp-path-now">${escapeHtml(now)}</span>
+            </button>`;
+        }
+        return `<div class="lp-scale lp-scale-full" role="meter" aria-valuemin="0" aria-valuemax="${st.total}" aria-valuenow="${st.done}" aria-label="${escapeHtml(label)}">
+            <div class="lp-scale-head">
+                <div class="lp-scale-kicker">Прогресс пути</div>
+                <div class="lp-scale-count">${st.done} / ${st.total}</div>
+            </div>
+            ${track}
+            <div class="lp-scale-now">${escapeHtml(now)}</div>
+        </div>`;
+    }
 
     // Строго: урок открыт только если это первый или предыдущий уже пройден.
     function pathIsUnlocked(id) {
@@ -160,11 +249,13 @@
         }
         document.body.classList.add('course-lesson-active');
         rail.hidden = false;
+        const st = pathOverallStats();
         rail.innerHTML = `
             <div class="course-rail-inner">
                 <div class="course-rail-meta">
-                    <span class="course-rail-kicker">Урок пути</span>
+                    <span class="course-rail-kicker">Урок пути · ${st.done} / ${st.total}</span>
                     <span class="course-rail-title">${escapeHtml(l.title)}</span>
+                    ${pathScaleMarkup('compact')}
                 </div>
                 <div class="course-rail-actions">
                     <button type="button" class="course-rail-btn course-rail-btn-secondary" onclick="showSection('path')">К пути</button>
@@ -234,7 +325,10 @@
                     <div class="lp-unit-head">
                         <span class="lp-unit-kicker">Этап ${ui + 1}${uComplete ? ' · завершён' : isCurrentUnit ? ' · сейчас' : ''}</span>
                         <span class="lp-unit-title">${escapeHtml(u.title)}</span>
-                        <span class="lp-unit-count">${uDone} / ${u.lessons.length}</span>
+                        <span class="lp-unit-count">
+                            <span class="lp-unit-meter" aria-hidden="true"><span class="lp-unit-meter-fill" style="width:${u.lessons.length ? Math.round(uDone / u.lessons.length * 100) : 0}%"></span></span>
+                            ${uDone} / ${u.lessons.length}
+                        </span>
                     </div>
                     <div class="lp-nodes">${nodes}</div>
                 </div>`;
@@ -252,10 +346,7 @@
                 <div class="about-kicker">Структурированный курс</div>
                 <h2 class="about-title">Путь</h2>
                 <p class="about-lead">Один урок за раз — строго по порядку самоучителя. Следующий шаг откроется только после прохождения текущего.</p>
-                <div class="lp-overall">
-                    <div class="lp-overall-bar"><div class="lp-overall-fill" style="width:${flat.length ? Math.round(doneCount / flat.length * 100) : 0}%"></div></div>
-                    <div class="lp-overall-label">${doneCount} / ${flat.length} уроков пройдено</div>
-                </div>
+                ${pathScaleMarkup('full')}
                 ${jump}
                 ${unitsHtml}
             </div>`;
@@ -331,6 +422,7 @@
                     ${unit ? `<div class="lp-intro-unit">Этап ${l.unitIndex + 1} — ${escapeHtml(unit.title)}</div>` : ''}
                     ${l.sub ? `<p class="lp-intro-sub">${escapeHtml(l.sub)}</p>` : ''}
                     <p class="lp-intro-goal">${escapeHtml(pathLessonGoal(l))}</p>
+                    ${pathScaleMarkup('compact')}
                     <button type="button" class="lp-intro-start" onclick="pathBeginLesson('${l.id}')">Начать</button>
                 </div>
             </div>`;
@@ -346,6 +438,7 @@
                 <div class="lp-celebrate-mark" aria-hidden="true"><span class="lp-celebrate-check"></span></div>
                 <h2 class="lp-intro-title">Готово</h2>
                 <p class="lp-intro-sub">${escapeHtml(l.title)}</p>
+                ${pathScaleMarkup('compact')}
                 <div class="lp-result-actions">
                     ${primary}
                     <button type="button" class="lp-text-btn" onclick="pathBackToList()">К списку пути</button>
@@ -555,6 +648,7 @@
                 <div class="lp-result-stars" aria-label="${stars} из 3">${'★'.repeat(stars)}${'☆'.repeat(3 - stars)}</div>
                 <h2 class="lp-intro-title">${ok ? 'Отлично' : 'Ещё раз'}</h2>
                 <p class="lp-intro-sub">${escapeHtml(l.title)} · ${pathView.correct} из ${pathView.total}</p>
+                ${ok ? pathScaleMarkup('compact') : ''}
                 <div class="lp-result-actions">
                     ${primary}
                     ${ok

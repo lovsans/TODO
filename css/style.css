@@ -843,7 +843,7 @@ mark.hl {
 .hp-streak { font-size: 1.02rem; font-weight: 600; color: var(--text-primary); }
 .hp-streak b { color: var(--accent); }
 .hp-streak .hp-best { color: var(--text-muted); font-weight: 500; font-size: 0.85rem; }
-.hp-overall { font-size: 0.85rem; color: var(--text-muted); }
+.hp-overall { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.7rem; }
 .hp-overall b { color: var(--text-primary); font-variant-numeric: tabular-nums; }
 .hp-rows { display: grid; gap: 0.4rem; }
 .hp-row {
@@ -900,12 +900,69 @@ mark.hl {
 .hp-empty {
     font-size: var(--text-sm); color: var(--text-muted);
     line-height: var(--leading-body); max-width: var(--measure);
+    margin-bottom: 0.7rem;
 }
 .hp-tips {
     margin: 0.65rem 0 0.85rem;
     font-size: 0.78rem;
     line-height: 1.45;
     color: var(--text-muted);
+}
+.hp-path {
+    display: block;
+    width: 100%;
+    margin: 0 0 1.05rem;
+    padding: 0.85rem 0.9rem 0.95rem;
+    border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--hairline));
+    border-radius: 16px;
+    background: var(--accent-glow);
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.hp-path:hover,
+.hp-path:focus-visible {
+    border-color: transparent;
+    outline: none;
+    box-shadow: 0 0 0 3px var(--accent-glow);
+}
+.hp-path-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.6rem;
+    margin-bottom: 0.5rem;
+}
+.hp-path-kicker {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--accent);
+}
+.hp-path-count {
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+.hp-path .lp-scale-track { height: 8px; }
+.hp-path-now {
+    display: block;
+    margin-top: 0.45rem;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+}
+.hp-split-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 0 0 0.55rem;
 }
 @media (max-width: 600px) {
     .hp-row { grid-template-columns: 4.4rem 1fr auto auto; padding: 0.6rem 0.7rem; }
@@ -2925,9 +2982,11 @@ mark.hl {
         font-size: 14px;
         border-color: var(--hairline);
     }
-    .lp-overall-bar {
-        height: 10px;
-        border-color: var(--hairline);
+    .lp-scale-track {
+        height: 12px;
+    }
+    .lp-scale-compact .lp-scale-track {
+        height: 8px;
     }
     .lp-unit-head {
         border-bottom-color: var(--hairline);
@@ -3399,24 +3458,6 @@ mark.hl {
     border-color: transparent; outline: none;
 }
 
-/* Плашка «Запомни» */
-.wr-takeaway {
-    display: flex; gap: 0.75rem; align-items: flex-start;
-    margin: 1rem 0 0.25rem; padding: 0.85rem 1rem;
-    background: var(--accent-glow);
-    border: 1px solid color-mix(in srgb, var(--accent) 28%, transparent);
-    border-radius: var(--radius-lg);
-}
-.wr-takeaway-label {
-    flex-shrink: 0;
-    font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
-    color: #fff; background: var(--accent);
-    border-radius: var(--radius-pill); padding: 0.22rem 0.55rem; margin-top: 0.1rem;
-}
-.wr-takeaway-body {
-    font-size: 0.92rem; font-weight: 600; color: var(--text-primary);
-    line-height: 1.45; min-width: 0;
-}
 .wr-next-link { margin: 0.85rem 0 0.25rem !important; font-size: 0.9rem; }
 .wr-ref-block {
     margin-top: 1.15rem; padding-top: 0.85rem;
@@ -3510,6 +3551,27 @@ mark.hl {
 .wr-dir-caption {
     text-align: center; font-size: 0.82rem; color: var(--text-muted); font-style: italic;
     margin-top: -0.4rem; margin-bottom: 0.5rem; line-height: 1.45; max-width: 28rem; margin-inline: auto;
+}
+
+.wr-mnemonic {
+    margin: 1rem auto 1.25rem;
+    text-align: center;
+    max-width: min(100%, 640px);
+}
+.wr-mnemonic img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    background: #fff;
+}
+.wr-mnemonic figcaption {
+    margin-top: 0.55rem;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    font-style: italic;
+    line-height: 1.45;
 }
 
 /* нурһн — простая вертикальная линия (ось письма) */
@@ -3765,7 +3827,6 @@ mark.hl {
     }
     .wr-acc-kind { display: none; }
     .wr-acc-body { padding: 0 0.95rem 1.1rem; }
-    .wr-takeaway { flex-direction: column; gap: 0.45rem; padding: 0.8rem 0.9rem; }
     .wr-form-grid { grid-template-columns: 1fr; gap: 0.5rem; }
     .wr-mistake-grid { grid-template-columns: 1fr; gap: 12px; }
     .wr-mistake {
@@ -3786,10 +3847,77 @@ mark.hl {
 
 .lp-wrap { max-width: 640px; margin: 0 auto; }
 
-.lp-overall { margin: 1rem 0 2rem; }
-.lp-overall-bar { height: 8px; border-radius: var(--radius-pill); background: var(--bg-secondary); overflow: hidden; border: 1px solid var(--border); }
-.lp-overall-fill { height: 100%; background: var(--accent); border-radius: var(--radius-pill); transition: width 0.4s; }
-.lp-overall-label { text-align: center; font-size: 0.82rem; color: var(--text-muted); margin-top: 0.4rem; }
+.lp-scale-full {
+    margin: 1rem 0 1.35rem;
+    padding: 0.95rem 1.05rem 1.05rem;
+    border: 1px solid var(--hairline);
+    border-radius: 18px;
+    background: var(--bg-card);
+    box-shadow: var(--shadow);
+}
+.lp-scale-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin-bottom: 0.65rem;
+}
+.lp-scale-kicker {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--accent);
+}
+.lp-scale-count {
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--text-primary);
+}
+.lp-scale-track {
+    display: flex;
+    gap: 3px;
+    height: 10px;
+}
+.lp-scale-seg {
+    flex: 1;
+    min-width: 0;
+    border-radius: 4px;
+    background: var(--bg-secondary);
+    overflow: hidden;
+    border: 1px solid var(--hairline);
+}
+.lp-scale-seg-fill {
+    display: block;
+    height: 100%;
+    background: var(--accent);
+    border-radius: 3px;
+    transition: width 0.4s ease;
+}
+.lp-scale-seg.is-done { border-color: transparent; }
+.lp-scale-seg.is-current { box-shadow: 0 0 0 1px var(--accent); }
+.lp-scale-now {
+    margin-top: 0.5rem;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+}
+.lp-scale-compact {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    margin: 0.7rem 0 0;
+}
+.lp-intro-card .lp-scale-compact,
+.lp-celebrate .lp-scale-compact,
+.lp-result .lp-scale-compact { margin: 0.35rem auto 0.85rem; max-width: 22rem; }
+.lp-scale-compact .lp-scale-track { flex: 1; height: 7px; }
+.lp-scale-compact-count {
+    font-size: 0.72rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
+    flex-shrink: 0;
+}
 
 .lp-unit { margin-bottom: 2rem; }
 .lp-unit-head {
@@ -3797,7 +3925,29 @@ mark.hl {
     font-weight: 700; color: var(--text-primary); margin-bottom: 1rem;
     padding-bottom: 0.4rem; border-bottom: 1px solid var(--border);
 }
-.lp-unit-count { font-size: 0.8rem; font-weight: 400; color: var(--text-muted); }
+.lp-unit-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    font-weight: 400;
+    color: var(--text-muted);
+}
+.lp-unit-meter {
+    display: inline-block;
+    width: 2.5rem;
+    height: 5px;
+    border-radius: var(--radius-pill);
+    background: var(--bg-secondary);
+    overflow: hidden;
+    border: 1px solid var(--hairline);
+}
+.lp-unit-meter-fill {
+    display: block;
+    height: 100%;
+    background: var(--accent);
+    border-radius: var(--radius-pill);
+}
 
 .lp-nodes { display: flex; flex-direction: column; gap: 0.9rem; }
 .lp-row { display: flex; align-items: center; gap: 1rem; }
@@ -4007,6 +4157,7 @@ mark.hl {
     display: block; font-size: 0.98rem; font-weight: 600; color: var(--text-primary);
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
+.course-rail-meta .lp-scale-compact { margin-top: 0.45rem; }
 .course-rail-actions { display: flex; flex-wrap: wrap; gap: 0.45rem; }
 .course-rail-btn {
     font-family: var(--font-ui); font-size: 0.84rem; font-weight: 600;

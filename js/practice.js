@@ -584,6 +584,10 @@
         if (typeof setProgressBarOpen === 'function') setProgressBarOpen(false);
         if (scope && typeof showSection === 'function') showSection(scope);
     }
+    function openPathFromProgress() {
+        if (typeof setProgressBarOpen === 'function') setProgressBarOpen(false);
+        if (typeof showSection === 'function') showSection('path');
+    }
 
     function renderProgressOverview() {
         const s = loadStreak(), n = s.streak || 0;
@@ -602,22 +606,24 @@
                 </button>`;
         }).join('');
         const pctAll = totalAll ? Math.round(learnedAll / totalAll * 100) : 0;
+        const started = totalAll > 0 && learnedAll > 0;
         const streakText = n > 0
             ? `🔥 Серия занятий: <b>${n}</b> ${pluralDay(n)}` + (s.best > n ? ` <span class="hp-best">· рекорд ${s.best}</span>` : '')
             : `Серия занятий: <b>0</b> <span class="hp-best">· начните сегодня</span>`;
-        const started = totalAll > 0 && learnedAll > 0;
         const intro = started
             ? `<div class="hp-overall">Выучено букв и знаков: <b>${learnedAll} / ${totalAll}</b> (${pctAll}%). Нажмите строку, чтобы открыть тренировку.</div>`
-            : `<div class="hp-empty">С чего начать: кнопка ниже ведёт в Путь или последнюю тренировку. Знак выучен, когда верно отвечены все его формы. Прогресс хранится в этом браузере.</div>`;
+            : `<div class="hp-empty">Знак выучен, когда верно отвечены все его формы. Прогресс хранится в этом браузере.</div>`;
         const tips = `<p class="hp-tips">Подсказка: в слогах серии открываются с ${Math.round(SYLLABLE_UNLOCK_RATIO * 100)}%; при 100% переход дальше автоматический.</p>`;
         const cont = getContinueAction();
+        const pathBlock = typeof pathScaleMarkup === 'function' ? pathScaleMarkup('panel') : '';
         return `
             <div class="hp-card">
                 <div class="hp-top">
                     <span class="hp-streak">${streakText}</span>
-                    ${started ? intro : ''}
                 </div>
-                ${started ? '' : intro}
+                ${pathBlock}
+                <div class="hp-split-label">Тренировка знаков</div>
+                ${intro}
                 <div class="hp-rows">${bars}</div>
                 ${tips}
                 <button type="button" class="hp-cta" onclick="continueLearning()">
@@ -695,8 +701,15 @@
 
     // ===== Экспорт / импорт прогресса =====
     function exportProgress() {
-        const data = JSON.stringify({ app: 'todo-bichig', version: 1, exported: new Date().toISOString(),
-            progress: practiceProgress, streak: loadStreak() }, null, 2);
+        const payload = {
+            app: 'todo-bichig',
+            version: 2,
+            exported: new Date().toISOString(),
+            progress: practiceProgress,
+            streak: loadStreak()
+        };
+        if (typeof getPathProgressExport === 'function') payload.path = getPathProgressExport();
+        const data = JSON.stringify(payload, null, 2);
         const url = URL.createObjectURL(new Blob([data], { type: 'application/json' }));
         const a = document.createElement('a');
         a.href = url; a.download = 'todo-progress.json';
@@ -713,6 +726,9 @@
                 if (obj && typeof obj === 'object' && obj.progress && typeof obj.progress === 'object') {
                     practiceProgress = obj.progress; saveProgress();
                     if (obj.streak && typeof obj.streak === 'object') saveStreak(obj.streak);
+                    if (obj.path && typeof obj.path === 'object' && typeof importPathProgress === 'function') {
+                        importPathProgress(obj.path);
+                    }
                     PRACTICE_CATS.forEach(updateProgressUI);
                     renderStreak();
                     setupPractice(scope);
