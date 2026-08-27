@@ -3553,27 +3553,6 @@ mark.hl {
     margin-top: -0.4rem; margin-bottom: 0.5rem; line-height: 1.45; max-width: 28rem; margin-inline: auto;
 }
 
-.wr-mnemonic {
-    margin: 1rem auto 1.25rem;
-    text-align: center;
-    max-width: min(100%, 640px);
-}
-.wr-mnemonic img {
-    display: block;
-    width: 100%;
-    height: auto;
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--border);
-    background: #fff;
-}
-.wr-mnemonic figcaption {
-    margin-top: 0.55rem;
-    font-size: 0.82rem;
-    color: var(--text-muted);
-    font-style: italic;
-    line-height: 1.45;
-}
-
 /* нурһн — простая вертикальная линия (ось письма) */
 .wr-nurhun-line {
     display: inline-block;
