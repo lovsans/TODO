@@ -1284,39 +1284,6 @@
         return s || (lt.latin || '');
     }
 
-    // Другие кириллические написания той же буквы Тодо (э/е, ц/ч, з/җ…).
-    // На клавиатуре «Написать слово» второе написание показывается в скобках.
-    function wwKeyAliasList(idx, primary) {
-        const extra = [];
-        const seen = new Set();
-        function add(tok) {
-            tok = String(tok || '').trim();
-            if (!tok || tok === primary) return;
-            if (/[0-9¹²³_@.,:]/.test(tok)) return;
-            if (seen.has(tok)) return;
-            seen.add(tok);
-            extra.push(tok);
-        }
-        Object.keys(WW_SI).forEach(ch => {
-            if (WW_SI[ch] === idx) add(ch);
-        });
-        Object.keys(WW_TRI).forEach(tok => {
-            if (WW_TRI[tok] === idx) add(tok);
-        });
-        if (idx === 2) add('ь');
-        if (idx === 16) add('ы');
-        if (primary.indexOf('э') !== -1) add(primary.split('э').join('е'));
-        return extra;
-    }
-    function wwKeyLabel(idx, lt) {
-        const primary = WW_NICE_LABEL[idx] !== undefined
-            ? WW_NICE_LABEL[idx]
-            : composeLabel(lt);
-        const aliases = wwKeyAliasList(idx, primary);
-        const full = aliases.length ? primary + ' (' + aliases.join(', ') + ')' : primary;
-        return { primary, aliases, full };
-    }
-
     function wwNormalizeCyr(str) {
         // «ю» в тодо — йот + у. «я» оставляем как есть: позиция в слове
         // задаёт разбор в wwParse (середина → иа, конец → и + а_откид, начало → йа).
@@ -1480,12 +1447,9 @@
             const keys = g.idxs.map(idx => {
                 const lt = composeCharByIdx[idx];
                 if (!lt) return '';
-                const info = wwKeyLabel(idx, lt);
-                const ins = escapeHtml(WW_INSERT[idx] || info.primary);
-                const inner = info.aliases.length
-                    ? `<span class="ww-key-main">${escapeHtml(info.primary)}</span><span class="ww-key-alias">(${escapeHtml(info.aliases.join(', '))})</span>`
-                    : escapeHtml(info.primary);
-                return `<button class="ww-key${info.aliases.length ? ' ww-key-cyr' : ''}" onclick="wwInsert('${ins}')" title="${escapeHtml(info.full)}">${inner}</button>`;
+                const lab = escapeHtml(WW_NICE_LABEL[idx] || composeLabel(lt));
+                const ins = escapeHtml(WW_INSERT[idx] || composeLabel(lt));
+                return `<button class="ww-key" onclick="wwInsert('${ins}')" title="${lab}">${lab}</button>`;
             }).join('');
             return `<div class="ww-krow-label">${g.label}</div><div class="ww-krow">${keys}</div>`;
         }).join('');
