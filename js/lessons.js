@@ -1284,6 +1284,31 @@
         return s || (lt.latin || '');
     }
 
+    // Другие кириллические написания той же буквы Тодо (э/е, ц/ч, з/җ…).
+    // Под словом — отдельная строка только с буквами, которые встретились во вводе.
+    function wwCyrAliasList(idx, primary) {
+        const extra = [];
+        const seen = new Set();
+        function add(tok) {
+            tok = String(tok || '').trim();
+            if (!tok || tok === primary) return;
+            if (/[0-9¹²³_@.,:]/.test(tok)) return;
+            if (seen.has(tok)) return;
+            seen.add(tok);
+            extra.push(tok);
+        }
+        Object.keys(WW_SI).forEach(ch => {
+            if (WW_SI[ch] === idx) add(ch);
+        });
+        Object.keys(WW_TRI).forEach(tok => {
+            if (WW_TRI[tok] === idx) add(tok);
+        });
+        if (idx === 2) add('ь');
+        if (idx === 16) add('ы');
+        if (primary.indexOf('э') !== -1) add(primary.split('э').join('е'));
+        return extra;
+    }
+
     function wwNormalizeCyr(str) {
         // «ю» в тодо — йот + у. «я» оставляем как есть: позиция в слове
         // задаёт разбор в wwParse (середина → иа, конец → и + а_откид, начало → йа).
@@ -1511,6 +1536,7 @@
                     </div>
                     <div class="cw-assembled cw-empty" id="ww-out"></div>
                     <div class="ww-translit" id="ww-translit"></div>
+                    <div class="ww-alias" id="ww-alias"></div>
                 </div>
                 <div class="ww-controls">
                     <button class="cw-btn cw-btn-ghost" onclick="wwBackspace()">⌫ Стереть</button>
@@ -1538,18 +1564,30 @@
                 <div class="ww-keyboard">${keyboard}${galikRow}${finalRow}${signRow}</div>
             </div>`;
     }
+    function wwCyrPrimary(lt, pos, letters) {
+        if (!lt) return '';
+        if (WW_SIGN_TR[lt.idx] !== undefined) return '';
+        if (WW_NICE_LABEL[lt.idx] !== undefined) return WW_NICE_LABEL[lt.idx];
+        return composeLabel(lt, pos != null && letters ? { pos, letters } : undefined);
+    }
     function wwTranslitLabel(lt, pos, letters) {
         if (!lt) return '';
         if (WW_SIGN_TR[lt.idx] !== undefined) return WW_SIGN_TR[lt.idx];
-        if (WW_NICE_LABEL[lt.idx] !== undefined) return WW_NICE_LABEL[lt.idx];
-        return composeLabel(lt, pos != null && letters ? { pos, letters } : undefined);
+        return wwCyrPrimary(lt, pos, letters);
+    }
+    function wwCyrAliasMark(lt, pos, letters) {
+        const primary = wwCyrPrimary(lt, pos, letters);
+        if (!primary) return '';
+        const aliases = wwCyrAliasList(lt.idx, primary);
+        return aliases.length ? primary + '(' + aliases.join('') + ')' : '';
     }
 
     // Общий разбор поля ввода → массив слов в тодо-глифах + их транслитерация.
     // Используется и для показа на экране (wwRender), и для сохранения картинки.
     function wwBuild() {
         const inp = document.getElementById('ww-input');
-        const todoWords = [], translitWords = [];
+        const todoWords = [], translitWords = [], aliasMarks = [];
+        const seenAlias = new Set();
         if (inp) {
             // Пробелы разделяют слова: каждое слово собирается отдельно (своя
             // начальная…конечная форма) и отделяется зазором.
@@ -1558,9 +1596,15 @@
                 if (!letters.length) return;
                 todoWords.push(trimSpine(assembleWord(letters)));
                 translitWords.push(letters.map((lt, i) => wwTranslitLabel(lt, i, letters)).join(''));
+                letters.forEach((lt, i) => {
+                    const mark = wwCyrAliasMark(lt, i, letters);
+                    if (!mark || seenAlias.has(mark)) return;
+                    seenAlias.add(mark);
+                    aliasMarks.push(mark);
+                });
             });
         }
-        return { todoWords, translitWords };
+        return { todoWords, translitWords, aliasMarks };
     }
 
     function wwNormalizeInput() {
@@ -1580,12 +1624,14 @@
     function wwRender() {
         const out = document.getElementById('ww-out');
         if (!out) return;
-        const { translitWords } = wwBuild();
+        const { translitWords, aliasMarks } = wwBuild();
         const plan = composeColorPlan(wwFlatLetters(), wwColored ? null : { plain: true });
         out.innerHTML = plan.html;
         out.classList.toggle('cw-empty', plan.text.length === 0);
         const tr = document.getElementById('ww-translit');
         if (tr) tr.textContent = translitWords.join(' ');
+        const al = document.getElementById('ww-alias');
+        if (al) al.textContent = (aliasMarks || []).join(' · ');
     }
 
     // Меню выбора при сохранении картинки (цветными буквами / одним цветом).
