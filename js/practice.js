@@ -601,9 +601,9 @@
                 <button type="button" class="hp-row${doneCls}" onclick="openPracticeFromProgress('${sc}')"
                         aria-label="Открыть тренировку: ${escapeHtml(label)}${doneCls ? ' — пройдено' : ''}">
                     <span class="hp-row-label">${escapeHtml(label)}</span>
-                    <span class="hp-bar" aria-hidden="true"><span class="hp-bar-fill" style="width:${pct}%"></span></span>
                     <span class="hp-row-count">${learned} / ${total}</span>
                     <span class="hp-row-go" aria-hidden="true">→</span>
+                    <span class="hp-bar" aria-hidden="true"><span class="hp-bar-fill" style="width:${pct}%"></span></span>
                 </button>`;
         }).join('');
         const pctAll = totalAll ? Math.round(learnedAll / totalAll * 100) : 0;

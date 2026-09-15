@@ -1045,9 +1045,10 @@ mark.hl {
 .hp-rows { display: grid; gap: 0.4rem; }
 .hp-row {
     display: grid;
-    grid-template-columns: 5.5rem 1fr auto auto;
+    grid-template-columns: minmax(0, 1fr) auto auto;
     align-items: center;
-    gap: 0.55rem;
+    column-gap: 0.55rem;
+    row-gap: 0.4rem;
     width: 100%;
     margin: 0;
     padding: 0.55rem 0.65rem;
@@ -1073,9 +1074,23 @@ mark.hl {
 .hp-row:focus-visible .hp-row-label,
 .hp-row:hover .hp-row-go,
 .hp-row:focus-visible .hp-row-go { color: var(--accent); }
-.hp-row-label { font-size: 0.82rem; color: var(--text-secondary); font-weight: 600; }
-.hp-bar { height: 8px; background: var(--bg-card); border-radius: var(--radius-pill); overflow: hidden; }
-.hp-bar-fill { height: 100%; background: var(--accent); border-radius: var(--radius-pill); transition: width 0.5s ease; }
+.hp-row-label { font-size: 0.82rem; color: var(--text-secondary); font-weight: 600; min-width: 0; }
+.hp-bar {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    height: 10px;
+    min-width: 0;
+    background: var(--bg-card);
+    border-radius: var(--radius-pill);
+    overflow: hidden;
+}
+.hp-bar-fill {
+    display: block;
+    height: 100%;
+    background: var(--accent);
+    border-radius: var(--radius-pill);
+    transition: width 0.5s ease;
+}
 .hp-row-count { font-size: 0.78rem; color: var(--text-muted); font-variant-numeric: tabular-nums; min-width: 3.4em; text-align: right; }
 .hp-row-go {
     font-size: 0.95rem; font-weight: 600; color: var(--text-muted);
@@ -1169,7 +1184,7 @@ mark.hl {
     margin: 0 0 0.55rem;
 }
 @media (max-width: 600px) {
-    .hp-row { grid-template-columns: 4.4rem 1fr auto auto; padding: 0.6rem 0.7rem; }
+    .hp-row { padding: 0.6rem 0.7rem; }
     .hp-row-label { font-size: 0.78rem; }
 }
 
