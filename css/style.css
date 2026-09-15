@@ -1083,6 +1083,13 @@ mark.hl {
 }
 .hp-row:hover .hp-row-go,
 .hp-row:focus-visible .hp-row-go { transform: translateX(2px); }
+.hp-row.is-done {
+    border-color: color-mix(in srgb, var(--accent) 35%, var(--hairline));
+    background: var(--accent-glow);
+}
+.hp-row.is-done .hp-row-label { color: var(--accent); }
+.hp-row.is-done .hp-bar { background: color-mix(in srgb, var(--accent) 22%, var(--bg-card)); }
+.hp-row.is-done .hp-bar-fill { width: 100%; }
 .hp-cta {
     margin-top: 1.1rem; display: inline-flex; align-items: center;
     padding: 0.72rem 1.35rem;
@@ -4030,7 +4037,14 @@ mark.hl {
     border-radius: 3px;
     transition: width 0.4s ease;
 }
-.lp-scale-seg.is-done { border-color: transparent; }
+.lp-scale-seg.is-done {
+    background: var(--accent);
+    border-color: transparent;
+}
+.lp-scale-seg.is-done .lp-scale-seg-fill {
+    width: 100%;
+    background: var(--accent);
+}
 .lp-scale-seg.is-current { box-shadow: 0 0 0 1px var(--accent); }
 .lp-scale-now {
     margin-top: 0.5rem;
@@ -4203,7 +4217,15 @@ mark.hl {
     color: var(--accent); font-weight: 600; text-align: center;
 }
 
-.lp-unit.is-current .lp-unit-head { border-bottom-color: color-mix(in srgb, var(--accent) 40%, var(--border)); }
+.lp-unit.is-complete .lp-unit-kicker { color: var(--accent); }
+.lp-unit.is-complete .lp-unit-head {
+    border-bottom-color: color-mix(in srgb, var(--accent) 35%, var(--border));
+}
+.lp-unit.is-complete .lp-unit-meter {
+    background: color-mix(in srgb, var(--accent) 22%, var(--bg-secondary));
+    border-color: transparent;
+}
+.lp-unit.is-complete .lp-unit-meter-fill { width: 100%; }
 .lp-unit-kicker {
     display: block; width: 100%; font-size: 0.68rem; font-weight: 600;
     letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.2rem;

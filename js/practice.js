@@ -596,9 +596,10 @@
             const { learned, total } = progressForScope(sc);
             learnedAll += learned; totalAll += total;
             const pct = total ? Math.round(learned / total * 100) : 0;
+            const doneCls = (total && learned >= total) ? ' is-done' : '';
             return `
-                <button type="button" class="hp-row" onclick="openPracticeFromProgress('${sc}')"
-                        aria-label="Открыть тренировку: ${escapeHtml(label)}">
+                <button type="button" class="hp-row${doneCls}" onclick="openPracticeFromProgress('${sc}')"
+                        aria-label="Открыть тренировку: ${escapeHtml(label)}${doneCls ? ' — пройдено' : ''}">
                     <span class="hp-row-label">${escapeHtml(label)}</span>
                     <span class="hp-bar" aria-hidden="true"><span class="hp-bar-fill" style="width:${pct}%"></span></span>
                     <span class="hp-row-count">${learned} / ${total}</span>

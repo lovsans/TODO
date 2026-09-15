@@ -1,7 +1,7 @@
 /* Тодо Бичик — service worker (офлайн-кэш).
    Оболочка (HTML/CSS/JS/шрифты/картинки) — в PRECACHE.
    Озвучка (.m4a) — по запросу при ▶, затем в кэше. */
-const CACHE = 'todo-bichig-v112';
+const CACHE = 'todo-bichig-v113';
 
 const PRECACHE = [
   './',
