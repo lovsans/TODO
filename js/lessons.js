@@ -449,14 +449,13 @@
                             <div class="wr-strokes-grid-row">
                                 <picture>
                                     <source srcset="img/consonants-strokes-1.webp" type="image/webp">
-                                    <img src="img/consonants-strokes-1.jpg" alt="Девскр үзгүд: первая группа согласных с порядком штрихов" loading="lazy" decoding="async">
+                                    <img src="img/consonants-strokes-1.jpg" alt="Порядок штрихов согласных: первая группа знаков" loading="lazy" decoding="async">
                                 </picture>
                                 <picture>
                                     <source srcset="img/consonants-strokes-2.webp" type="image/webp">
-                                    <img src="img/consonants-strokes-2.jpg" alt="Девскр үзгүд: вторая группа согласных с порядком штрихов" loading="lazy" decoding="async">
+                                    <img src="img/consonants-strokes-2.jpg" alt="Порядок штрихов согласных: вторая группа знаков" loading="lazy" decoding="async">
                                 </picture>
                             </div>
-                            <figcaption>Девскр үзгүд — порядок штрихов (две группы знаков)</figcaption>
                         </figure>
                     </div>`
             },

@@ -3606,12 +3606,6 @@ mark.hl {
     background: #fff;
 }
 .wr-vowels-chart img { max-width: 760px; }
-.wr-strokes-grid figcaption {
-    margin-top: 0.55rem;
-    font-size: 0.82rem;
-    color: var(--text-muted);
-    font-style: italic;
-}
 
 /* Полоса кликабельных знаков — переиспользует существующий .about-glyphstrip,
    но добавляет курсор/подсказку интерактивности. */
