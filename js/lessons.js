@@ -82,7 +82,7 @@
 
             <p class="about-lead">Этот сайт — интерактивный самоучитель <strong>Тодо Бичик</strong>, ойратского «ясного письма». Им можно пользоваться с компьютера и с телефона; также вы можете установить его как PWA-приложение.</p>
 
-            <details class="about-pwa-details">
+            <details class="about-pwa-details" open>
                 <summary class="about-pwa-summary">Как установить приложение</summary>
                 <p class="about-method-intro">Откройте сайт в браузере и добавьте его на устройство — появится иконка, как у обычного приложения.</p>
                 <div class="about-pwa">
@@ -131,7 +131,7 @@
             <h3 class="about-h3">О проекте</h3>
             <p>Мы хотели, чтобы письмо было удобно учить самостоятельно — не только смотреть справочник форм, но и идти по понятной лестнице: от буквы и её начертаний к слогам, словам и текстам. Здесь есть карточки и тренировки, направление штрихов, пропись, набор своего текста и раздел <button type="button" class="about-inline-link" onclick="showSection('path')">Путь</button>, где уроки выстроены по порядку.</p>
             <p>Я, <strong>Ловсанг Дава Манджиев</strong>, как автор проекта, можно сказать, изучал Тодо Бичик заново и открывал для себя новые грани и богатство ойратского культурного наследия.</p>
-            <p>Хочется выразить огромную благодарность <strong>Арслану Оргаеву</strong> за его шрифт TodoPozdneyevTomo, прописи, перенабранные пособия и в целом за огромный вклад в культуру; <strong>Геннадию Корнееву</strong> — за помощь в историческом блоке и важные детали биографии Зая-пандиты; <strong>Виктору Манджиеву</strong> — за экспертную оценку, помощь в написании примечаний к буквам, предоставленные пособия и поддержку на всех этапах; <strong>Алдару Басангову</strong> — за помощь в написании букв; <strong>Елене Мутаевой</strong> — за помощь в озвучке. Благодарим также ЦРКЯ (Центр развития калмыцкого языка) и всех причастных, кто помогал в осуществлении и развитии этого проекта.</p>
+            <p>Хочется выразить огромную благодарность <strong>Арслану Оргаеву</strong> за его шрифт TodoPozdneyevTomo, прописи, перенабранные пособия и в целом за огромный вклад в культуру; <strong>Геннадию Корнееву</strong> — за помощь в историческом блоке и важные детали биографии Зая-пандиты; <strong>Виктору Манджиеву</strong> — за экспертную оценку, помощь в написании примечаний к буквам, предоставленные пособия и поддержку на всех этапах; <strong>Алдару Басангову</strong> — за помощь в написании букв; <strong>Роману Нимяеву</strong> — за помощь в отрисовке изображений; <strong>Елене Мутаевой</strong> (врио директора Центра развития калмыцкого языка) — за помощь в озвучке. Проект сделан сотрудниками «Центра развития калмыцкого языка».</p>
 
             <h3 class="about-h3">А. В. Бадмаев</h3>
             <figure class="about-portrait">
@@ -149,28 +149,6 @@
             <p class="about-wiki-note">Подробнее об учёном: <a href="https://ru.wikipedia.org/wiki/%D0%91%D0%B0%D0%B4%D0%BC%D0%B0%D0%B5%D0%B2,_%D0%90%D0%BD%D0%B4%D1%80%D0%B5%D0%B9_%D0%92%D0%B0%D1%81%D0%B8%D0%BB%D1%8C%D0%B5%D0%B2%D0%B8%D1%87" target="_blank" rel="noopener noreferrer">статья в Википедии</a></p>
 
             <p class="about-source">А. В. Бадмаев. «Практический самоучитель старокалмыцкой письменности». — Элиста, 1971.</p>
-        </div>`;
-    }
-
-    function renderSupport() {
-        return `
-        <div class="about-wrap">
-            <div class="about-hero">
-                <div>
-                    <div class="about-kicker">Добровольная помощь</div>
-                    <h2 class="about-title">Поддержать проект</h2>
-                </div>
-            </div>
-            <p class="about-lead">Тодо Бичик на этом сайте бесплатный: без подписок, рекламы и скрытых ограничений. Если материал оказался полезным — можно оставить посильную поддержку.</p>
-
-            <p>Сайт делается группой энтузиастов: карточки знаков, озвучка, тренажёры письма, маршрут «Путь», тексты и правки. Поддержка помогает готовить новые уроки и аудио, чинить ошибки и поддерживать проект.</p>
-
-            <p>Сумма любая — важнее сам жест. Даже небольшая помощь значит, что письмо и самоучитель кому-то нужны, и это даёт силы продолжать.</p>
-
-            <aside class="about-support about-support--page" aria-label="Поддержка проекта">
-                <a class="course-go about-support-btn" href="https://pay.cloudtips.ru/p/680d2fce" target="_blank" rel="noopener noreferrer">Поддержать на CloudTips</a>
-                <p class="about-support-note">Оплата откроется на защищённой странице CloudTips. Спасибо, что рядом.</p>
-            </aside>
         </div>`;
     }
 
@@ -599,7 +577,7 @@
             </div>
             ${toc}
             ${sections.map((s, i) => `
-                <details class="wr-acc" id="wr-acc-${i}"${i === 0 ? ' open' : ''}>
+                <details class="wr-acc" id="wr-acc-${i}" open>
                     <summary>
                         <span class="wr-acc-n">${i + 1}</span>
                         <span class="wr-acc-title">
@@ -1415,7 +1393,7 @@
     function applyGlyphColoredBtns() {
         const on = !!wwColored;
         const label = on ? '🎨 Цветные буквы' : '🖋 Обычный шрифт';
-        ['ww-color-toggle', 'cw-color-toggle'].forEach(id => {
+        ['ww-color-toggle', 'cw-color-toggle', 'harmony-color-toggle'].forEach(id => {
             const btn = document.getElementById(id);
             if (!btn) return;
             btn.classList.toggle('is-active', on);
@@ -1429,6 +1407,7 @@
         applyGlyphColoredBtns();
         wwRender();
         composeRender();
+        if (typeof harmonyRefreshColored === 'function') harmonyRefreshColored();
     }
     function wwToggleColored() { toggleGlyphColored(); }
 
@@ -1535,7 +1514,6 @@
                         <button class="cw-zoom-btn" onclick="wwZoom(1)" title="Больше" aria-label="Увеличить">+</button>
                     </div>
                     <div class="cw-assembled cw-empty" id="ww-out"></div>
-                    <div class="ww-translit" id="ww-translit"></div>
                     <div class="ww-alias" id="ww-alias"></div>
                 </div>
                 <div class="ww-controls">
@@ -1624,12 +1602,10 @@
     function wwRender() {
         const out = document.getElementById('ww-out');
         if (!out) return;
-        const { translitWords, aliasMarks } = wwBuild();
+        const { aliasMarks } = wwBuild();
         const plan = composeColorPlan(wwFlatLetters(), wwColored ? null : { plain: true });
         out.innerHTML = plan.html;
         out.classList.toggle('cw-empty', plan.text.length === 0);
-        const tr = document.getElementById('ww-translit');
-        if (tr) tr.textContent = translitWords.join(' ');
         const al = document.getElementById('ww-alias');
         if (al) al.textContent = (aliasMarks || []).join(' · ');
     }

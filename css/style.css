@@ -1971,6 +1971,16 @@ mark.hl {
 /* вертикальные глифы (как cw-assembled / ww-out) */
 .harmony-wrap.practice-container { max-width: 720px; }
 .harmony-stage { margin: 0.5rem 0 1.25rem; }
+.harmony-stage .cw-zoom { margin-bottom: 0; }
+.harmony-stage .ww-color-btn { margin-right: 0; }
+.harmony-ink {
+    display: flex; flex-direction: column; align-items: center; gap: 0.45rem;
+}
+.harmony-ink-swatches {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 6px;
+}
+.harmony-ink-swatches .glyph-swatch { width: 30px; height: 30px; font-size: 13px; }
+.ww-plain { color: var(--todo-ink); }
 .harmony-glyphs {
     margin: 0 auto;
     --cw-zoom: 1;
@@ -2376,54 +2386,6 @@ mark.hl {
     font-size: 0.88rem;
     color: var(--text-muted);
     line-height: 1.5;
-}
-
-.about-support {
-    margin-top: 2.25rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--border);
-}
-.about-support--page {
-    margin-top: 0.5rem;
-    padding-top: 0;
-    border-top: none;
-}
-.about-support .about-h3 { margin-top: 0; }
-.about-support-text {
-    color: var(--text-secondary);
-    margin: 0.35rem 0 0.9rem;
-    line-height: 1.6;
-}
-.about-support-btn {
-    display: inline-flex;
-    align-items: center;
-    text-decoration: none;
-}
-.about-support-note {
-    margin: 0.85rem 0 0;
-    font-size: var(--text-sm, 0.875rem);
-    color: var(--text-muted);
-    line-height: var(--leading-body, 1.55);
-    max-width: var(--measure, 65ch);
-}
-.about-support-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    font-weight: 600;
-    color: var(--accent-dark, var(--accent));
-    text-decoration: none;
-    border-bottom: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
-    padding-bottom: 1px;
-}
-.about-support-link:hover {
-    color: var(--accent);
-    border-bottom-color: var(--accent);
-}
-.about-support-link:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 3px;
-    border-radius: 2px;
 }
 
 /* Подзаголовок в шапке и увеличенный вариант глифа-заставки (целое слово «тодо») */

@@ -102,10 +102,14 @@
         return wwParse(item.before).length;
     }
 
+    function harmonyColorOpt() {
+        return (typeof wwColored !== 'undefined' && !wwColored) ? { plain: true } : null;
+    }
+
     function harmonyAssembledColored(todo) {
         const letters = harmonyLettersFromTodo(todo);
         if (!letters.length) return { html: '', text: '', letters: [], colorByIndex: {} };
-        const plan = composeColorPlan(letters);
+        const plan = composeColorPlan(letters, harmonyColorOpt());
         return {
             html: plan.html,
             text: trimSpine(assembleWord(letters)),
@@ -122,7 +126,8 @@
             const isSlot = i === slotIdx;
             const lbl = (hideSlot && isSlot) ? '?' : composeLabel(lt, { pos: i, letters });
             const slotCls = isSlot ? ' harmony-leg-slot' + (slotTone ? ' harmony-leg-slot-' + slotTone : '') : '';
-            h += `<span class="harmony-leg-chip cl${ci}${slotCls}">${escapeHtml(lbl)}</span>`;
+            const colorCls = (typeof wwColored === 'undefined' || wwColored) ? ` cl${ci}` : '';
+            h += `<span class="harmony-leg-chip${colorCls}${slotCls}">${escapeHtml(lbl)}</span>`;
         });
         h += '</div>';
         return h;
@@ -142,7 +147,7 @@
                 + `<span class="ww-key-cap">${escapeHtml(v)}</span>`
                 + `<span class="harmony-vowel-hint">нет в тодо</span></span>`;
         }
-        const plan = composeColorPlan(parsed.letters);
+        const plan = composeColorPlan(parsed.letters, harmonyColorOpt());
         return `<span class="ww-key-sign harmony-vowel-key">`
             + `<span class="ww-key-glyph harmony-vowel-glyph">${plan.html}</span>`
             + `<span class="ww-key-cap">${escapeHtml(v)}</span>`
@@ -355,6 +360,24 @@
                 <div id="harmony-prompt" class="harmony-prompt"></div>
                 <div class="harmony-stage cw-stage" id="harmony-stage">
                     <span class="cw-stage-label">Слово письмом тодо (сверху вниз)</span>
+                    <div class="cw-zoom">
+                        <button type="button" class="cw-btn cw-btn-ghost ww-color-btn" id="harmony-color-toggle"
+                                onclick="toggleGlyphColored()" aria-pressed="true"
+                                title="Переключить между цветными буквами и обычным шрифтом">🎨 Цветные буквы</button>
+                    </div>
+                    <div class="harmony-ink" aria-label="Цвет букв тодо">
+                        <span class="harmony-filters-label">Цвет букв тодо</span>
+                        <div class="harmony-ink-swatches" role="radiogroup" aria-label="Цвет букв тодо">
+                            <button type="button" class="glyph-swatch glyph-swatch-auto" data-color="default" role="radio" title="Как текст" aria-label="Как текст" onclick="harmonySetTodoInk('default')">А</button>
+                            <button type="button" class="glyph-swatch" data-color="teal" role="radio" title="Бирюзовый" aria-label="Бирюзовый" onclick="harmonySetTodoInk('teal')">♥</button>
+                            <button type="button" class="glyph-swatch" data-color="blue" role="radio" title="Синий" aria-label="Синий" onclick="harmonySetTodoInk('blue')">♥</button>
+                            <button type="button" class="glyph-swatch" data-color="rose" role="radio" title="Розовый" aria-label="Розовый" onclick="harmonySetTodoInk('rose')">♥</button>
+                            <button type="button" class="glyph-swatch" data-color="amber" role="radio" title="Янтарный" aria-label="Янтарный" onclick="harmonySetTodoInk('amber')">♥</button>
+                            <button type="button" class="glyph-swatch" data-color="green" role="radio" title="Зелёный" aria-label="Зелёный" onclick="harmonySetTodoInk('green')">♥</button>
+                            <button type="button" class="glyph-swatch" data-color="indigo" role="radio" title="Индиго" aria-label="Индиго" onclick="harmonySetTodoInk('indigo')">♥</button>
+                            <button type="button" class="glyph-swatch" data-color="slate" role="radio" title="Серый" aria-label="Серый" onclick="harmonySetTodoInk('slate')">♥</button>
+                        </div>
+                    </div>
                     <div id="harmony-glyphs" class="harmony-glyphs cw-assembled cw-empty"></div>
                     <div id="harmony-legend"></div>
                     <div id="harmony-word-meta" class="harmony-word-meta"></div>
@@ -563,7 +586,49 @@
         harmonyRenderQuestion();
     }
 
+    function harmonySetTodoInk(color) {
+        if (typeof setGlyphColor === 'function') setGlyphColor(color);
+        if (typeof wwColored !== 'undefined' && wwColored) {
+            wwColored = false;
+            try { localStorage.setItem('todo-ww-colored', '0'); } catch (e) {}
+            if (typeof applyGlyphColoredBtns === 'function') applyGlyphColoredBtns();
+            harmonyRefreshColored();
+        }
+    }
+
+    function harmonyRefreshColored() {
+        const wrap = document.querySelector('.harmony-wrap');
+        if (!wrap) return;
+        const item = harmonyState.item;
+        if (!item || harmonyState.phase === 'finished' || harmonyState.phase === 'idle') return;
+        if (!harmonyState.answered) {
+            harmonyRenderQuestion();
+            return;
+        }
+        harmonyRenderStage(item, { answered: true, showFullWord: true });
+        document.querySelectorAll('.harmony-choice-btn').forEach(btn => {
+            const ans = btn.getAttribute('data-answer') || '';
+            const num = btn.querySelector('.choice-num');
+            const numHtml = num ? num.outerHTML : '';
+            if (item.type === 'vowel') btn.innerHTML = numHtml + harmonyVowelChoiceInner(ans);
+            else if (item.type === 'i-contrast') btn.innerHTML = numHtml + harmonyWordChoiceInner(ans);
+        });
+        const review = document.querySelector('#harmony-feedback .harmony-review');
+        if (!review || item.type === 'row') return;
+        const selected = (document.querySelector('.harmony-choice-btn.is-wrong')
+            || document.querySelector('.harmony-choice-btn.is-correct'));
+        const sel = selected ? (selected.getAttribute('data-answer') || '') : '';
+        review.outerHTML = item.type === 'i-contrast'
+            ? harmonyWordContrastErrorHtml(item.correct, sel)
+            : harmonyErrorReviewHtml(item, sel);
+    }
+
     function setupHarmony() {
+        if (typeof loadWwColored === 'function') wwColored = loadWwColored();
+        if (typeof applyGlyphColoredBtns === 'function') applyGlyphColoredBtns();
+        if (typeof syncGlyphColorUi === 'function') {
+            syncGlyphColorUi(typeof loadGlyphColor === 'function' ? loadGlyphColor() : 'default');
+        }
         harmonyState.correct = 0;
         harmonyState.total = 0;
         harmonyState.answered = false;
