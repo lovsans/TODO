@@ -557,8 +557,8 @@ h1, .logo-name {
 .site-footer {
     margin-top: auto;
     border-top: 1px solid var(--hairline);
-    background: var(--glass);
-    padding: 1.1rem 1.5rem calc(1.1rem + env(safe-area-inset-bottom, 0px));
+    background: transparent;
+    padding: 0.7rem 1.5rem calc(0.7rem + env(safe-area-inset-bottom, 0px));
 }
 .site-footer-inner {
     max-width: 1080px;
@@ -566,61 +566,65 @@ h1, .logo-name {
 }
 .site-footer-tiles {
     display: grid;
-    grid-template-columns: 1.4fr 1.35fr 0.9fr 1.1fr;
-    gap: 0.65rem;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.4rem;
 }
 .site-footer-tile {
     margin: 0;
-    padding: 0.7rem 0.85rem 0.75rem;
+    padding: 0.4rem 0.5rem 0.42rem;
     background: transparent;
-    border: 1px solid var(--hairline);
-    border-radius: var(--radius);
+    border: 1px solid color-mix(in srgb, var(--hairline) 70%, transparent);
+    border-radius: 8px;
     box-shadow: none;
     min-width: 0;
 }
 .site-footer-label {
-    margin: 0 0 0.28rem;
-    font-size: 0.65rem;
+    margin: 0 0 0.12rem;
+    font-size: 0.58rem;
     font-weight: 400;
-    letter-spacing: 0.03em;
-    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    text-transform: none;
     color: var(--text-muted);
-    line-height: 1.3;
+    line-height: 1.25;
+    opacity: 0.85;
 }
 .site-footer-value {
     margin: 0;
-    font-size: 0.8rem;
+    font-size: 0.7rem;
     font-weight: 400;
-    color: var(--text-secondary);
-    line-height: 1.4;
+    color: var(--text-muted);
+    line-height: 1.35;
+}
+.site-footer-email {
+    -webkit-user-select: all;
+    user-select: all;
+    cursor: text;
 }
 @media (max-width: 900px) {
     .site-footer-tiles { grid-template-columns: 1fr 1fr; }
 }
 @media (max-width: 720px) {
-    .site-footer { padding: 0.9rem 14px calc(0.9rem + env(safe-area-inset-bottom, 0px)); }
-    .site-footer-tiles { gap: 0.5rem; }
-    .site-footer-tile { padding: 0.65rem 0.75rem 0.7rem; }
-    .site-footer-value { font-size: 0.74rem; }
-}
-@media (max-width: 480px) {
-    .site-footer-tiles { grid-template-columns: 1fr; }
+    .site-footer { padding: 0.6rem 14px calc(0.6rem + env(safe-area-inset-bottom, 0px)); }
+    .site-footer-tiles { gap: 0.35rem; }
+    .site-footer-tile { padding: 0.35rem 0.45rem; }
+    .site-footer-value { font-size: 0.66rem; }
 }
 .site-footer-links {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.35rem 1.1rem;
-    margin-top: 0.75rem;
-    padding-top: 0.7rem;
+    gap: 0.25rem 0.9rem;
+    margin-top: 0.5rem;
+    padding-top: 0.45rem;
     border-top: 1px solid var(--hairline);
 }
 .site-footer-links a {
-    font-size: 0.78rem;
+    font-size: 0.68rem;
     font-weight: 400;
     color: var(--text-muted);
     text-decoration: none;
+    opacity: 0.9;
 }
-.site-footer-links a:hover { color: var(--accent); }
+.site-footer-links a:hover { color: var(--accent); opacity: 1; }
 
 .cookie-banner {
     position: fixed;
@@ -641,7 +645,7 @@ h1, .logo-name {
     justify-content: space-between;
     gap: 1rem 1.25rem;
 }
-.cookie-banner-copy { min-width: 0; flex: 1 1 16rem; }
+.cookie-banner-copy { min-width: 0; flex: 1 1 auto; }
 .cookie-banner-title {
     margin: 0 0 0.2rem;
     font-size: 0.82rem;
@@ -685,11 +689,13 @@ h1, .logo-name {
 .cookie-banner-btn-necessary:hover { color: var(--text-primary); border-color: var(--border); }
 html.cookie-banner-open body { padding-bottom: 7.5rem; }
 @media (max-width: 720px) {
-    .cookie-banner { padding: 0.75rem 14px calc(0.75rem + env(safe-area-inset-bottom, 0px)); }
-    .cookie-banner-inner { flex-direction: column; align-items: stretch; }
+    .cookie-banner { padding: 0.65rem 14px calc(0.65rem + env(safe-area-inset-bottom, 0px)); }
+    .cookie-banner-inner { flex-direction: column; align-items: stretch; gap: 0.55rem; }
+    .cookie-banner-title { margin-bottom: 0.1rem; font-size: 0.75rem; }
+    .cookie-banner-text { font-size: 0.7rem; }
     .cookie-banner-actions { justify-content: stretch; }
-    .cookie-banner-btn { flex: 1 1 auto; }
-    html.cookie-banner-open body { padding-bottom: 10.5rem; }
+    .cookie-banner-btn { flex: 1 1 auto; padding: 0.4rem 0.55rem; font-size: 0.72rem; }
+    html.cookie-banner-open body { padding-bottom: 8.5rem; }
 }
 
 .legal-page .header-inner { padding-top: 0.85rem; padding-bottom: 0.85rem; }
