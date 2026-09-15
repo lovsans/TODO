@@ -172,6 +172,33 @@
         <div id="sections-container"></div>
     </main>
 
+    <footer class="site-footer">
+        <div class="site-footer-inner">
+            <div class="site-footer-tiles">
+                <div class="site-footer-tile site-footer-tile-org">
+                    <p class="site-footer-label">Учреждение</p>
+                    <p class="site-footer-value">БУ РК «Центр по развитию калмыцкого языка»</p>
+                </div>
+                <div class="site-footer-tile">
+                    <p class="site-footer-label">Юридический адрес</p>
+                    <p class="site-footer-value">358000, Республика Калмыкия, г. Элиста, ул. Леваневского, 20</p>
+                </div>
+                <div class="site-footer-tile">
+                    <p class="site-footer-label">ИНН / КПП</p>
+                    <p class="site-footer-value">0816035216 / 081601001</p>
+                </div>
+                <div class="site-footer-tile">
+                    <p class="site-footer-label">Директор</p>
+                    <p class="site-footer-value">Мутаева Елена Владимировна</p>
+                </div>
+            </div>
+            <nav class="site-footer-links" aria-label="Правовая информация">
+                <a href="privacy.html">Персональные данные</a>
+                <a href="privacy.html#storage">Локальное хранение</a>
+            </nav>
+        </div>
+    </footer>
+
     <div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this) closeModal()">
         <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1">
             <button class="modal-back" id="modal-back" onclick="modalBack()" style="display:none" aria-label="Назад к предыдущей букве">← Назад</button>
@@ -188,6 +215,7 @@
     </div>
 
 
+    <script src="js/cookies.js" defer></script>
     <script src="js/data.js" defer></script>
     <script src="js/harmony-data.js" defer></script>
     <script src="js/reading-data.js" defer></script>

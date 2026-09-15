@@ -1,11 +1,12 @@
 /* Тодо Бичик — service worker (офлайн-кэш).
    Оболочка (HTML/CSS/JS/шрифты/картинки) — в PRECACHE.
    Озвучка (.m4a) — по запросу при ▶, затем в кэше. */
-const CACHE = 'todo-bichig-v101';
+const CACHE = 'todo-bichig-v107';
 
 const PRECACHE = [
   './',
   './index.html',
+  './privacy.html',
   './writer.html',
   './manifest.webmanifest',
   './css/fonts.css',
@@ -27,6 +28,7 @@ const PRECACHE = [
   './fonts/ibm-plex-sans/latin-ext-500-normal.woff2',
   './fonts/ibm-plex-sans/latin-ext-600-normal.woff2',
   './fonts/ibm-plex-sans/latin-ext-700-normal.woff2',
+  './js/cookies.js',
   './js/font-data.js',
   './js/barintodo-data.js',
   './js/data.js',
