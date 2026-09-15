@@ -5,7 +5,7 @@
    Следующий урок открывается только когда пройден предыдущий.
    Прогресс: localStorage todo-path; ответы quiz → todo-practice. */
 
-    // Порядок как в courseStages (Бадмаев): знакомство → буквы → слоги → правила → слова → практика.
+    // Порядок как в courseStages: знакомство → буквы → правила чтения → слоги → слова → практика.
     const PATH_UNITS = [
         { title: 'Знакомство с письмом', lessons: [
             { id: 'abo', kind: 'link', title: 'О письме', sub: 'История и метод занятий', cat: 'about' },
@@ -37,13 +37,13 @@
             { id: 'pun', kind: 'quiz', title: 'Пунктуация', sub: 'бирга · точка · запятая…', idxs: [76,77,78,79] },
             { id: 'spc', kind: 'link', title: 'Специальные формы', sub: 'Вспомогательные начертания', cat: 'special' }
         ]},
-        { title: 'Слоги', lessons: [
-            { id: 'syl_atlas', kind: 'link', title: 'Силлабарий', sub: 'Слоги по сериям', cat: 'syllables' },
-            { id: 'syl', kind: 'link', title: 'Тренировка: слоги', sub: 'По одной серии за раз', cat: 'practice_syllables' }
-        ]},
         { title: 'Правила чтения', lessons: [
             { id: 'rr', kind: 'link', title: 'Правила чтения', sub: 'Ключевые закономерности', cat: 'rules' },
             { id: 'har', kind: 'link', title: 'Сингармонизм', sub: 'Задний и передний ряды гласных', cat: 'harmony' }
+        ]},
+        { title: 'Слоги', lessons: [
+            { id: 'syl_atlas', kind: 'link', title: 'Силлабарий', sub: 'Слоги по сериям', cat: 'syllables' },
+            { id: 'syl', kind: 'link', title: 'Тренировка: слоги', sub: 'По одной серии за раз', cat: 'practice_syllables' }
         ]},
         { title: 'Чтение слов', lessons: [
             { id: 'wrd', kind: 'link', title: 'Слова', sub: 'Старое написание ⇄ современный калмыцкий', cat: 'words' },
