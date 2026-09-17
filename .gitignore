@@ -1,3 +1,6 @@
 # Local textbook crops — do not commit
 img/nurhun-mnemonic.png
 img/*-mnemonic.*
+
+# Local snapshot, not for GitHub Pages
+_gh-check/

@@ -347,8 +347,8 @@
                 <div class="harmony-filters">
                     <span class="harmony-filters-label">Набор:</span>
                     <button type="button" class="harmony-chip active" data-filter="all" onclick="harmonySetFilter('all')">Все</button>
-                    <button type="button" class="harmony-chip" data-filter="soft" onclick="harmonySetFilter('soft')">Передний ряд</button>
-                    <button type="button" class="harmony-chip" data-filter="hard" onclick="harmonySetFilter('hard')">Задний ряд</button>
+                    <button type="button" class="harmony-chip" data-filter="soft" onclick="harmonySetFilter('soft')">Передний ряд (мягкие)</button>
+                    <button type="button" class="harmony-chip" data-filter="hard" onclick="harmonySetFilter('hard')">Задний ряд (твердые)</button>
                     <button type="button" class="harmony-chip" data-filter="i" onclick="harmonySetFilter('i')">Буква «и»</button>
                 </div>
                 <div class="harmony-progress">
@@ -364,19 +364,6 @@
                         <button type="button" class="cw-btn cw-btn-ghost ww-color-btn" id="harmony-color-toggle"
                                 onclick="toggleGlyphColored()" aria-pressed="true"
                                 title="Переключить между цветными буквами и обычным шрифтом">🎨 Цветные буквы</button>
-                    </div>
-                    <div class="harmony-ink" aria-label="Цвет букв тодо">
-                        <span class="harmony-filters-label">Цвет букв тодо</span>
-                        <div class="harmony-ink-swatches" role="radiogroup" aria-label="Цвет букв тодо">
-                            <button type="button" class="glyph-swatch glyph-swatch-auto" data-color="default" role="radio" title="Как текст" aria-label="Как текст" onclick="harmonySetTodoInk('default')">А</button>
-                            <button type="button" class="glyph-swatch" data-color="teal" role="radio" title="Бирюзовый" aria-label="Бирюзовый" onclick="harmonySetTodoInk('teal')">♥</button>
-                            <button type="button" class="glyph-swatch" data-color="blue" role="radio" title="Синий" aria-label="Синий" onclick="harmonySetTodoInk('blue')">♥</button>
-                            <button type="button" class="glyph-swatch" data-color="rose" role="radio" title="Розовый" aria-label="Розовый" onclick="harmonySetTodoInk('rose')">♥</button>
-                            <button type="button" class="glyph-swatch" data-color="amber" role="radio" title="Янтарный" aria-label="Янтарный" onclick="harmonySetTodoInk('amber')">♥</button>
-                            <button type="button" class="glyph-swatch" data-color="green" role="radio" title="Зелёный" aria-label="Зелёный" onclick="harmonySetTodoInk('green')">♥</button>
-                            <button type="button" class="glyph-swatch" data-color="indigo" role="radio" title="Индиго" aria-label="Индиго" onclick="harmonySetTodoInk('indigo')">♥</button>
-                            <button type="button" class="glyph-swatch" data-color="slate" role="radio" title="Серый" aria-label="Серый" onclick="harmonySetTodoInk('slate')">♥</button>
-                        </div>
                     </div>
                     <div id="harmony-glyphs" class="harmony-glyphs cw-assembled cw-empty"></div>
                     <div id="harmony-legend"></div>
@@ -403,13 +390,13 @@
     }
 
     function harmonyRowLabel(row) {
-        return row === 'hard' ? 'задний ряд' : 'передний ряд';
+        return row === 'hard' ? 'задний ряд (твердые)' : 'передний ряд (мягкие)';
     }
 
     function harmonyRowChoiceInner(row) {
         return row === 'hard'
-            ? '<div class="harmony-choice-stack"><strong>Задний ряд</strong><span class="harmony-choice-cyr">а · о · у</span></div>'
-            : '<div class="harmony-choice-stack"><strong>Передний ряд</strong><span class="harmony-choice-cyr">э · ө · ү</span></div>';
+            ? '<div class="harmony-choice-stack"><strong>Задний ряд (твердые)</strong><span class="harmony-choice-cyr">а · о · у</span></div>'
+            : '<div class="harmony-choice-stack"><strong>Передний ряд (мягкие)</strong><span class="harmony-choice-cyr">э · ө · ү</span></div>';
     }
 
     function harmonyRenderQuestion() {
@@ -584,16 +571,6 @@
         if (sc) sc.textContent = 'Верно: 0';
         harmonyShuffleQueue(weak);
         harmonyRenderQuestion();
-    }
-
-    function harmonySetTodoInk(color) {
-        if (typeof setGlyphColor === 'function') setGlyphColor(color);
-        if (typeof wwColored !== 'undefined' && wwColored) {
-            wwColored = false;
-            try { localStorage.setItem('todo-ww-colored', '0'); } catch (e) {}
-            if (typeof applyGlyphColoredBtns === 'function') applyGlyphColoredBtns();
-            harmonyRefreshColored();
-        }
     }
 
     function harmonyRefreshColored() {

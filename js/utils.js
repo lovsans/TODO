@@ -196,7 +196,7 @@
             btn.title = label;
             btn.setAttribute('aria-label', 'Выбрать цвет знаков тодо');
         }
-        document.querySelectorAll('#glyph-color-menu [data-color], .harmony-ink-swatches [data-color]').forEach(function (el) {
+        document.querySelectorAll('#glyph-color-menu [data-color]').forEach(function (el) {
             const on = el.getAttribute('data-color') === color;
             el.setAttribute('aria-checked', on ? 'true' : 'false');
             el.classList.toggle('is-selected', on);

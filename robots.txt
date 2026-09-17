@@ -1,9 +1,8 @@
 User-agent: *
 Allow: /
 
-Disallow: /writer.html
 Disallow: /writer-edit.html
 Disallow: /writer-strokes-edit.html
 Disallow: /_gh-check/
 
-Sitemap: https://lovsans.github.io/TODO/sitemap.xml
+Sitemap: https://todobichig.ru/sitemap.xml

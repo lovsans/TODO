@@ -2192,13 +2192,6 @@ mark.hl {
 .harmony-stage { margin: 0.5rem 0 1.25rem; }
 .harmony-stage .cw-zoom { margin-bottom: 0; }
 .harmony-stage .ww-color-btn { margin-right: 0; }
-.harmony-ink {
-    display: flex; flex-direction: column; align-items: center; gap: 0.45rem;
-}
-.harmony-ink-swatches {
-    display: flex; flex-wrap: wrap; justify-content: center; gap: 6px;
-}
-.harmony-ink-swatches .glyph-swatch { width: 30px; height: 30px; font-size: 13px; }
 .ww-plain { color: var(--todo-ink); }
 .harmony-glyphs {
     margin: 0 auto;
